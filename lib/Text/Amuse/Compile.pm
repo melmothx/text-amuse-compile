@@ -4,7 +4,14 @@ use 5.010001;
 use strict;
 use warnings FATAL => 'all';
 
+use File::Basename;
+use File::Temp;
+
 use Text::Amuse::Compile::Templates;
+use Text::Amuse;
+use Text::Amuse::Functions qw/muse_fast_scan_header/;
+use Cwd;
+
 
 =head1 NAME
 
@@ -22,16 +29,16 @@ our $VERSION = '0.01';
 =head1 SYNOPSIS
 
     use Text::Amuse::Compile;
-    my $compiler = Text::Amuse::Compile->new(file => $file);
-    $compiler->compile_all;
+    my $compiler = Text::Amuse::Compile->new;
+    $compiler->compile($file1, $file2, $file3)
 
 =head1 SUBROUTINES/METHODS
 
-=head2 new
+=head2 new(ttdir => '.', pdf => 1, ...);
 
-Constructor. 
+Constructor. It will accept the following options
 
-Options (by default all of them are activated);
+Format options (by default all of them are activated);
 
 =over 4
 
@@ -61,6 +68,16 @@ The bare HTML, non <head>
 
 =back
 
+Template directory:
+
+=over 4
+
+=item ttdir
+
+The directory where to look for templates, named as format.tt
+
+=back
+
 =cut
 
 sub new {
@@ -79,10 +96,8 @@ sub new {
 
     my %params = @args;
 
-    $self->{file} = delete $params{file}
-      or die "Missing file, don't know what to do\n";
-
-    $self->{ttdir} = delete $params{ttdir} || '';
+    $self->{templates} =
+      Text::Amuse::Compile::Templates->new(ttdir => delete($params{ttdir}));
 
     # options passed, null out and reparse the params
     if (%params) {
@@ -116,7 +131,55 @@ sub bare {
     return shift->{bare};
 }
 
+sub templates {
+    return shift->{templates};
+}
 
+=head1 ACCESSORS
+
+=head2 templates
+
+The L<Text::Amuse::Compile::Templates> object, which will provide the
+templates string references.
+
+=cut
+
+=head1 METHODS
+
+=head2 compile($file1, $file2, ...);
+
+=cut
+
+sub compile {
+    my ($self, @files) = @_;
+    foreach my $file (@files) {
+        # fork here before we change dir
+        my $pid = open(my $kid, "-|");
+        defined $pid or die "can't fork $!";
+        my @report;
+        if ($pid) {
+            while (<$kid>) {
+                push @report, $_;
+            }
+            close $kid or push @report, "Failure to compile $file $!\n";
+            # print getcwd . "\n";
+            print @report;
+        }
+        else {
+            open(STDERR, ">&STDOUT") or die "can't dup stdout: $!";
+            $self->_compile_file($file);
+            exit 0;
+        }
+    }
+}
+
+sub _compile_file {
+    # this is called from a fork, so print to STDOUT to report.
+    my ($self, $file) = @_;
+    chdir '/';
+    print getcwd . "\n";
+    my $doc = Text::Amuse->new(file => $file);
+}
 
 
 =head1 AUTHOR

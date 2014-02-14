@@ -8,10 +8,16 @@ use Text::Amuse::Compile;
 
 my $compile;
 
-$compile = Text::Amuse::Compile->new(
-                                     file => 1,
-                                     pdf  => 1,
-                                    );
+eval {
+    $compile = Text::Amuse::Compile->new(
+                                         file => 1,
+                                         pdf  => 1,
+                                        );
+};
+ok($@);
+
+$compile = Text::Amuse::Compile->new(pdf  => 1);
+
 ok($compile->pdf);
 foreach my $m (qw/pdfa4 pdflt epub html bare/) {
     ok(!$compile->$m, "$m is false");
@@ -19,12 +25,12 @@ foreach my $m (qw/pdfa4 pdflt epub html bare/) {
 
 ok(!$compile->epub);
 
-$compile = Text::Amuse::Compile->new(
-                                     file => 1,
-                                    );
+$compile = Text::Amuse::Compile->new;
 
 foreach my $m (qw/pdf pdfa4 pdflt epub html bare/) {
     ok ($compile->$m, "$m is true");
 }
+
+$compile->compile("hello", "bau", "blabla");
 
 done_testing;

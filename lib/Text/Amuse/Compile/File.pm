@@ -153,8 +153,10 @@ sub mark_as_open {
         die "Not a muse file!" unless $header && %$header;
         # TODO maybe use storable?
         $self->_write_file($lockfile, $$ . ' ' . localtime . "\n");
-        $self->purge;
         $self->_set_is_deleted($header->{DELETED});
+        if ($self->is_deleted) {
+            $self->purge_all;
+        }
         return 1;
     }
 }
@@ -167,7 +169,7 @@ sub mark_as_closed {
     $self->_write_file($self->complete_file, $$ . ' ' . localtime . "\n");
 }
 
-=head2 purge
+=head2 purge_all
 
 Remove all the output files related to basename
 
@@ -175,20 +177,25 @@ Remove all the output files related to basename
 
 Remove files left by previous latex compilation
 
+=head2 purge('.epub', ...)
+
+Remove the files associated with this file, by extension.
+
 =cut
 
 sub purged_extensions {
     my $self = shift;
     my @exts = (qw/.pdf .a4.pdf .lt.pdf
-                   .tex .log .aux .toc. .ok
+                   .tex .log .aux .toc .ok
                    .html .bare.html .epub/);
     return @exts;
 }
 
-sub _purge {
+sub purge {
     my ($self, @exts) = @_;
     my $basename = $self->name;
     foreach my $ext (@exts) {
+        die "wtf?" if ($ext eq '.muse');
         my $target = $basename . $ext;
         if (-f $target) {
             warn "Removing $target\n";
@@ -197,14 +204,14 @@ sub _purge {
     }
 }
 
-sub purge {
+sub purge_all {
     my $self = shift;
-    $self->_purge($self->purged_extensions);
+    $self->purge($self->purged_extensions);
 }
 
 sub purge_latex {
     my $self = shift;
-    $self->_purge(qw/.log .aux .toc .pdf/);
+    $self->purge(qw/.log .aux .toc .pdf/);
 }
 
 
@@ -263,6 +270,7 @@ meaningless, but exceptions could be raised.
 
 sub html {
     my $self = shift;
+    $self->purge('.html');
     $self->tt->process($self->templates->html,
                        {
                         doc => $self->document,
@@ -275,6 +283,7 @@ sub html {
 
 sub bare_html {
     my $self = shift;
+    $self->purge('.bare.html');
     $self->tt->process($self->templates->bare_html,
                        {
                         doc => $self->document,
@@ -285,6 +294,7 @@ sub bare_html {
 
 sub tex {
     my $self = shift;
+    $self->purge('.tex');
     $self->tt->process($self->templates->latex,
                        {
                         doc => $self->document,
@@ -347,7 +357,7 @@ sub pdf {
 
 sub epub {
     my $self = shift;
-
+    $self->purge('.epub');
     my $epubname = $self->name . '.epub';
     unlink $epubname if -f $epubname;
 

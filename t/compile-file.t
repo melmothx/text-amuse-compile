@@ -22,7 +22,7 @@ binmode STDERR, ':encoding(utf-8)';
 my $targetdir = File::Spec->catfile('t', 'testfile');
 chdir $targetdir or die $!;
 
-my $testnum = 27;
+my $testnum = 38;
 
 # check if there is xelatex installed
 my $xelatex = system(xelatex => '--version');
@@ -36,8 +36,8 @@ $xelatex = !$xelatex;
 
 my $tt = Text::Amuse::Compile::Templates->new;
 my $file = Text::Amuse::Compile::File->new(name => 'test',
-                                             suffix => '.muse',
-                                             templates => $tt);
+                                           suffix => '.muse',
+                                           templates => $tt);
 
 
 is($file->name, 'test');
@@ -72,9 +72,21 @@ ok ((-f 'test.bare.html'), 'bare html found');
 $file->epub;
 ok(( -f 'test.epub'), "epub found");
 
+$file = Text::Amuse::Compile::File->new(name => 'deleted',
+                                        suffix => '.muse',
+                                        templates => $tt);
+
+
+foreach my $ext ($file->purged_extensions) {
+    write_file($file->name . $ext, '1');
+    ok( -f "deleted$ext");
+}
+
+
+
 $file->mark_as_open;
 foreach my $ext ($file->purged_extensions) {
-    ok(! -f "test$ext", "test$ext purged");
+    ok(! -f "deleted$ext", "deleted$ext purged");
 }
-ok(! -f 'test.html');
+ok(! -f 'deleted.html');
 

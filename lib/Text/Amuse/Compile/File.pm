@@ -304,13 +304,14 @@ sub pdf {
                     print $line;
                 }
             }
-            close $kid or die "Compilation failed\n";
+            close $kid or warn "Compilation failed\n";
             my $exit_code = $? >> 8;
             if ($exit_code != 0) {
                 warn "XeLaTeX compilation failed with exit code $exit_code\n";
                 if (-f $self->name  . '.log') {
                     # if we have a .log file, this means something was
-                    # produced.
+                    # produced. Hence, remove the .pdf
+                    unlink $self->name . '.pdf';
                     die "Bailing out!";
                 }
                 else {

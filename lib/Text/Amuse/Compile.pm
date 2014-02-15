@@ -49,11 +49,11 @@ LaTeX output
 
 Plain PDF without any imposition
 
-=item pdfa4
+=item a4_pdf
 
 PDF imposed on A4 paper
 
-=item pdflt
+=item lt_pdf
 
 PDF imposed on Letter paper
 
@@ -90,8 +90,8 @@ sub new {
 
     my $self = {
                 pdf   => 1,
-                pdfa4 => 1,
-                pdflt => 1,
+                a4_pdf => 1,
+                lt_pdf => 1,
                 epub  => 1,
                 html  => 1,
                 tex   => 1,
@@ -105,7 +105,7 @@ sub new {
 
     # options passed, null out and reparse the params
     if (%params) {
-        foreach my $k (qw/pdf pdfa4 pdflt epub html bare_html tex/) {
+        foreach my $k (qw/pdf a4_pdf lt_pdf epub html bare_html tex/) {
             $self->{$k} = delete $params{$k};
         }
 
@@ -122,14 +122,14 @@ sub tex {
 sub pdf {
     return shift->{pdf};
 }
-sub pdfa4 {
-    return shift->{pdfa4};
+sub a4_pdf {
+    return shift->{a4_pdf};
 }
-sub pdflt {
-    return shift->{pdflt};
+sub lt_pdf {
+    return shift->{lt_pdf};
 }
 sub epub {
-    return shift->{pdflt};
+    return shift->{epub};
 }
 sub html {
     return shift->{html};

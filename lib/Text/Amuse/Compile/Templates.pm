@@ -308,7 +308,13 @@ sub latex {
 \setmainfont[Mapping=tex-text]{Charis SIL}
 \setsansfont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans}
 \setmonofont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans Mono}
+[% IF doc.language == 'serbian' %]
+\setmainlanguage{croatian}
+[% ELSIF doc.language == 'macedonian' %]
+\setmainlanguage{russian}
+[% ELSE %]
 \setmainlanguage{[% doc.language %]}
+[% END %]
 \usepackage{microtype} % you need an *updated* texlive 2012, but harmless
 \usepackage{graphicx}
 \usepackage{alltt}
@@ -346,16 +352,16 @@ sub latex {
 \newenvironment*{amusebiblio}{
   \leftskip=\parindent
   \parindent=-\parindent
-  \bigskip
+  \smallskip
   \indent
-}{\bigskip}
+}{\smallskip}
 
 \newenvironment*{amuseplay}{
   \leftskip=\parindent
   \parindent=-\parindent
-  \bigskip
+  \smallskip
   \indent
-}{\bigskip}
+}{\smallskip}
 
 \newcommand*{\Slash}{\slash\hspace{0pt}}
 
@@ -371,6 +377,9 @@ sub latex {
 \title{[% doc.header_as_latex.title %]}
 \date{[% doc.header_as_latex.date %]}
 \author{[% doc.header_as_latex.author %]}
+[% IF doc.header_as_latex.subtitle %]
+\subtitle{[% doc.header_as_latex.subtitle %]}
+[% END %]
 \begin{document}
 \maketitle
 

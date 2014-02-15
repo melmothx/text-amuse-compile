@@ -206,7 +206,6 @@ sub _compile_file {
         chdir $path or die "Cannot chdir into $path\n";
     };
 
-    # first and foremost, see if we can deal with it.
     my $filename = $name . $suffix;
 
     my %args = (
@@ -218,16 +217,32 @@ sub _compile_file {
     my $muse = Text::Amuse::Compile::File->new(%args);
     die "Couldn't acquire lock on $name$suffix!" unless $muse->mark_as_open;
 
-    eval {
-    # get the job done
-        $muse->html if $self->html;
-        $muse->bare_html if $self->bare_html;
-        $muse->tex if $self->tex;
-        $muse->pdf if $self->pdf;
-        $muse->epub if $self->epub;
-    };
+    if (! $muse->is_deleted) {
+        foreach my $method (qw/bare_html
+                               html
+                               epub
+                               a4_pdf
+                               lt_pdf
+                               tex
+                               pdf/) {
+            if ($self->$method) {
+                eval {
+                    $muse->$method;
+                };
+                if ($@) {
+                    warn $@;
+                }
+                else {
+                    my $ext = $method;
+                    $ext =~ s/_/./g;
+                    $ext = '.' . $ext;
+                    print "Created " . $muse->name . $ext . "\n";
+                }
+            }
+
+        }
+    }
     $muse->mark_as_closed;
-    die $@ if $@;
     exit;
 }
 

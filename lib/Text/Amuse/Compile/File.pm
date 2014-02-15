@@ -6,6 +6,7 @@ use utf8;
 
 # core
 # use Data::Dumper;
+use File::Copy qw/move/;
 
 # needed
 use Template;
@@ -198,7 +199,7 @@ sub purge {
         die "wtf?" if ($ext eq '.muse');
         my $target = $basename . $ext;
         if (-f $target) {
-            warn "Removing $target\n";
+            # warn "Removing $target\n";
             unlink $target or die "Couldn't unlink $target $!";
         }
     }
@@ -277,7 +278,8 @@ sub html {
                         css => ${ $self->templates->css },
                        },
                        $self->name . '.html',
-                       { binmode => ':encoding(utf-8)' });
+                       { binmode => ':encoding(utf-8)' })
+      or die $self->tt->error;
 
 }
 
@@ -289,27 +291,69 @@ sub bare_html {
                         doc => $self->document,
                        },
                        $self->name . '.bare.html',
-                       { binmode => ':encoding(utf-8)' });
+                       { binmode => ':encoding(utf-8)' })
+      or die $self->tt->error;
 }
 
-sub tex {
+sub a4_pdf {
     my $self = shift;
+    $self->_compile_imposed('a4');
+}
+
+sub lt_pdf {
+    my $self = shift;
+    $self->_compile_imposed('lt');
+}
+
+sub _compile_imposed {
+    my ($self, $size) = @_;
+    die "Missing size" unless $size;
+    # the trick: first call tex with an argument, then pdf, then
+    # impose, then rename.
+    $self->tex(size => "half-$size");
+    my $pdf = $self->pdf;
+    if ($pdf) {
+        my $outfile = $self->name . ".$size.pdf";
+        my $imposer = PDF::Imposition->new(
+                                           file => $pdf,
+                                           schema => '2up',
+                                           signature => '40-80',
+                                           cover => 1,
+                                           outfile => $outfile
+                                          );
+        $imposer->impose;
+    }
+    else {
+        die "PDF was not produced!";
+    }
+}
+
+
+sub tex {
+    my ($self, @args) = @_;
+    die "Wrong usage" if @args % 2;
+    unless (@args) {
+        @args = (size => 'default');
+    }
     $self->purge('.tex');
     $self->tt->process($self->templates->latex,
                        {
                         doc => $self->document,
+                        @args,
                        },
                        $self->name . '.tex',
-                       { binmode => ':encoding(utf-8)' });
+                       { binmode => ':encoding(utf-8)' })
+      or die $self->tt->error;
 }
 
 sub pdf {
     my $self = shift;
     my $source = $self->name . '.tex';
+    my $output = $self->name . '.pdf';
     unless (-f $source) {
         $self->tex;
     }
-    die "Missing source file!" unless -f $source;
+    die "Missing source file $source!" unless -f $source;
     $self->purge_latex;
     # maybe a check on the toc if more runs are needed?
     # 1. create the toc
@@ -353,6 +397,7 @@ sub pdf {
               or die "Can't exec xelatex $source $!";
         }
     }
+    return $output;
 }
 
 sub epub {
@@ -434,7 +479,8 @@ sub epub {
                         title => $self->_clean_html($header->{title}),
                         text => $titlepage
                        },
-                       \$firstpage);
+                       \$firstpage)
+      or die $self->tt->error;
 
     my $tpid = $epub->add_xhtml("titlepage.xhtml", $firstpage);
     my $order = 0;
@@ -457,7 +503,8 @@ sub epub {
                             title => $self->_remove_tags($title),
                             text => $fi,
                            },
-                           \$xhtml);
+                           \$xhtml)
+          or die $self->tt->error;
 
         my $id = $epub->add_xhtml($filename, $xhtml);
 

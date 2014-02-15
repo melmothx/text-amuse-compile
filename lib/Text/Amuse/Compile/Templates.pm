@@ -302,10 +302,35 @@ EOF
 
 sub latex {
         my $latex = <<'EOF';
-\documentclass[DIV=9,fontsize=10pt,oneside,paper=a5]{[% IF doc.wants_toc %]scrbook[% ELSE %]scrartcl[% END %]}
+[% # this is the preamble of the preamble... -%]
+[% # set the dimension                       -%]
+[% IF size == 'half-a4'                      -%]
+[% SET paper = 'a5'                          -%]
+[% ELSIF size == 'half-lt'                   -%]
+[% SET paper = '5.5in:8.5in'                 -%]
+[% ELSE                                      -%]
+[% SET paper = 'a4'                          -%]
+[% END                                       -%]
+[% # set the class                           -%]
+[% IF doc.wants_toc                          -%]
+[% SET class = 'scrbook'                     -%]
+[% ELSE                                      -%]
+[% SET class = 'scrartcl'                    -%]
+[% END                                       -%]
+[% # set the div, if any                     -%]
+[% UNLESS division                           -%]
+[% SET division = '12'                       -%]
+[% END                                       -%]
+[% UNLESS fontsize                           -%]
+[% SET fontsize = '10'                       -%]
+[% END                                       -%]
+\documentclass[DIV=[% division -%],%
+               fontsize=[% fontsize %]pt,%
+               oneside,%
+               paper=[% paper %]]{[% class %]}
 \usepackage{fontspec}
 \usepackage{polyglossia}
-\setmainfont[Mapping=tex-text]{Charis SIL}
+\setmainfont[Mapping=tex-text]{Linux Libertine O}
 \setsansfont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans}
 \setmonofont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans Mono}
 [% IF doc.language == 'serbian' %]

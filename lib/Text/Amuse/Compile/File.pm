@@ -444,7 +444,7 @@ sub epub {
 
         $self->tt->process($self->templates->minimal_html,
                            {
-                            title => $self->_clean_html($title),
+                            title => $self->_remove_tags($title),
                             text => $fi,
                            },
                            \$xhtml);
@@ -475,6 +475,13 @@ sub epub {
 
     # finish
     $epub->pack_zip($epubname);
+}
+
+sub _remove_tags {
+    my ($self, $string) = @_;
+    return "" unless defined $string;
+    $string =~ s/<.+?>//g;
+    return $string;
 }
 
 sub _clean_html {

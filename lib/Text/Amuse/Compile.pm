@@ -61,7 +61,7 @@ Full HTML output
 
 The EPUB
 
-=item bare
+=item bare_html
 
 The bare HTML, non <head>
 
@@ -90,7 +90,7 @@ sub new {
                 pdflt => 1,
                 epub  => 1,
                 html  => 1,
-                bare  => 1,
+                bare_html  => 1,
                };
 
     my %params = @args;
@@ -100,7 +100,7 @@ sub new {
 
     # options passed, null out and reparse the params
     if (%params) {
-        foreach my $k (qw/pdf pdfa4 pdflt epub html bare/) {
+        foreach my $k (qw/pdf pdfa4 pdflt epub html bare_html/) {
             $self->{$k} = delete $params{$k};
         }
 
@@ -126,8 +126,8 @@ sub epub {
 sub html {
     return shift->{html};
 }
-sub bare {
-    return shift->{bare};
+sub bare_html {
+    return shift->{bare_html};
 }
 
 sub templates {
@@ -212,7 +212,7 @@ sub _compile_file {
 
     # get the job done
     $muse->html if $self->html;
-
+    $muse->bare_html if $self->bare_html;
     $muse->mark_as_closed;
 }
 

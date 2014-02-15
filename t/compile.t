@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More;
+use Test::More tests => 14;
 
 use Text::Amuse::Compile;
 
@@ -19,7 +19,7 @@ ok($@);
 $compile = Text::Amuse::Compile->new(pdf  => 1);
 
 ok($compile->pdf);
-foreach my $m (qw/pdfa4 pdflt epub html bare/) {
+foreach my $m (qw/pdfa4 pdflt epub html bare_html/) {
     ok(!$compile->$m, "$m is false");
 }
 
@@ -27,10 +27,9 @@ ok(!$compile->epub);
 
 $compile = Text::Amuse::Compile->new;
 
-foreach my $m (qw/pdf pdfa4 pdflt epub html bare/) {
+foreach my $m (qw/pdf pdfa4 pdflt epub html bare_html/) {
     ok ($compile->$m, "$m is true");
 }
 
 $compile->compile("hello", "bau", "blabla");
 
-done_testing;

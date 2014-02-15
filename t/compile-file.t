@@ -51,6 +51,7 @@ ok ((-f 'test.tex'), "tex found");
 $file->bare_html;
 ok ((-f 'test.bare.html'), 'bare html found');
 
+ok($file->tt);
 
 $file->mark_as_open;
 foreach my $ext ($file->purged_extensions) {
@@ -58,7 +59,7 @@ foreach my $ext ($file->purged_extensions) {
 }
 ok(! -f 'test.html');
 
-ok($file->tt);
+
 
 
 

@@ -225,15 +225,24 @@ sub _lock_is_valid {
 sub html {
     my $self = shift;
     $self->tt->process($self->templates->html,
-                       { doc => $self->document,
-                         css => ${ $self->templates->css },
+                       {
+                        doc => $self->document,
+                        css => ${ $self->templates->css },
                        },
                        $self->name . '.html',
                        { binmode => ':encoding(utf-8)' });
 
 };
 
-sub bare_html { };
+sub bare_html {
+    my $self = shift;
+    $self->tt->process($self->templates->bare_html,
+                       {
+                        doc => $self->document,
+                       },
+                       $self->name . '.bare.html',
+                       { binmode => ':encoding(utf-8)' });
+};
 
 sub tex { };
 

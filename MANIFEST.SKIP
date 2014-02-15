@@ -28,5 +28,5 @@
 # Avoid patch remnants
 \.orig$
 \.rej$
-t/testfile/deep/deep/dir/manual\.(aux|bare\.html|html|log|ok|pdf|tex|toc)$
+t/testfile/.*\.(aux|bare\.html|html|log|ok|pdf|tex|toc|ok)$
 

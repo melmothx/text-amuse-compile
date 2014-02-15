@@ -119,6 +119,13 @@ sub document {
     my $self = shift;
     # prevent parsing of deleted, bad file
     return if $self->is_deleted;
+    # return Text::Amuse->new(file => $self->muse_file);
+
+    # this implements caching. Does really makes sense? Maybe it's
+    # better to have a fresh instance for each one. Speed is not an
+    # issue. For a 4Mb document, it would take 4 seconds to produce
+    # the output, and some minutes for LaTeXing.
+
     unless ($self->{document}) {
         my $doc = Text::Amuse->new(file => $self->muse_file);
         $self->{document} = $doc;
@@ -161,7 +168,7 @@ Remove all the output files related to basename
 sub purged_extensions {
     my $self = shift;
     my @exts = (qw/.pdf .a4.pdf .lt.pdf
-                   .tex .log .aux .toc.
+                   .tex .log .aux .toc. .ok
                    .html .bare.html .epub/);
     return @exts;
 }

@@ -17,3 +17,5 @@ pod2htm*.tmp
 pm_to_blib
 Text-Amuse-Compile-*
 Text-Amuse-Compile-*.tar.gz
+t/testfile/*
+!t/testfile/*.muse

@@ -90,6 +90,7 @@ sub new {
                 pdflt => 1,
                 epub  => 1,
                 html  => 1,
+                tex   => 1,
                 bare_html  => 1,
                };
 
@@ -111,6 +112,9 @@ sub new {
     bless $self, $class;
 }
 
+sub tex {
+    return shift->{tex};
+}
 sub pdf {
     return shift->{pdf};
 }
@@ -213,6 +217,7 @@ sub _compile_file {
     # get the job done
     $muse->html if $self->html;
     $muse->bare_html if $self->bare_html;
+    $muse->tex if $self->tex;
     $muse->mark_as_closed;
 }
 

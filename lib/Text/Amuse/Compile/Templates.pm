@@ -303,19 +303,12 @@ EOF
 sub latex {
         my $latex = <<'EOF';
 \documentclass[DIV=9,fontsize=10pt,oneside,paper=a5]{[% IF doc.wants_toc %]scrbook[% ELSE %]scrartcl[% END %]}
-[% IF xtx %]
 \usepackage{fontspec}
 \usepackage{polyglossia}
 \setmainfont[Mapping=tex-text]{Charis SIL}
 \setsansfont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans}
 \setmonofont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans Mono}
 \setmainlanguage{[% doc.language %]}
-[% ELSE %]
-\usepackage[[% doc.language %]]{babel}
-\usepackage[utf8x]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-[% END %]
 \usepackage{microtype} % you need an *updated* texlive 2012, but harmless
 \usepackage{graphicx}
 \usepackage{alltt}

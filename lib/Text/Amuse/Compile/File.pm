@@ -136,6 +136,7 @@ sub mark_as_open {
     else {
         my $header = muse_fast_scan_header($self->muse_file);
         die "Not a muse file!" unless $header && %$header;
+        # TODO maybe use storable?
         $self->_write_file($lockfile, $$ . ' ' . localtime . "\n");
         $self->purge;
         $self->_set_is_deleted($header->{DELETED});
@@ -147,6 +148,7 @@ sub mark_as_closed {
     my $self = shift;
     my $lockfile = $self->lockfile;
     unlink $lockfile or die "Couldn't unlink $lockfile!";
+    # TODO maybe use storable?
     $self->_write_file($self->complete_file, $$ . ' ' . localtime . "\n");
 }
 
@@ -193,6 +195,7 @@ sub _lock_is_valid {
     my $self = shift;
     my $lockfile = $self->lockfile;
     return unless -f $lockfile;
+    # TODO use storable instead
     open (my $fh, '<', $lockfile) or die $!;
     my $pid;
     my $string = <$fh>;
@@ -244,7 +247,15 @@ sub bare_html {
                        { binmode => ':encoding(utf-8)' });
 };
 
-sub tex { };
+sub tex {
+    my $self = shift;
+    $self->tt->process($self->templates->latex,
+                       {
+                        doc => $self->document,
+                       },
+                       $self->name . '.tex',
+                       { binmode => ':encoding(utf-8)' });
+};
 
 
 1;

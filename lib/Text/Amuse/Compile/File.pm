@@ -163,6 +163,10 @@ sub mark_as_closed {
 
 Remove all the output files related to basename
 
+=head2 purge_latex
+
+Remove files left by previous latex compilation
+
 =cut
 
 sub purged_extensions {

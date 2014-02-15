@@ -28,5 +28,5 @@
 # Avoid patch remnants
 \.orig$
 \.rej$
-t/testfile/.*\.(aux|html|log|ok|pdf|tex|toc|ok|epub)$
+t/testfile/.*\.(aux|html|log|ok|pdf|tex|toc|ok|epub|lock)$
 

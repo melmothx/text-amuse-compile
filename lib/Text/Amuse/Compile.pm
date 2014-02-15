@@ -170,14 +170,13 @@ sub compile {
         # fork here before we change dir
         my $pid = open(my $kid, "-|");
         defined $pid or die "can't fork $!";
-        my @report;
         if ($pid) {
             while (<$kid>) {
-                push @report, $_;
+                print;
+                # push @report, $_;
             }
-            close $kid or push @report, "Failure to compile $file $!\n";
+            close $kid or warn "Failure to compile $file $!\n";
             # print getcwd . "\n";
-            print @report;
         }
         else {
             open(STDERR, ">&STDOUT") or die "can't dup stdout: $!";
@@ -209,8 +208,7 @@ sub _compile_file {
                );
 
     my $muse = Text::Amuse::Compile::File->new(%args);
-
-    die "Couldn't initialize $name!" unless $muse->mark_as_open;
+    die "Couldn't acquire lock on $name$suffix!" unless $muse->mark_as_open;
 
 }
 

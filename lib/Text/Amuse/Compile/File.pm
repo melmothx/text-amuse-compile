@@ -102,14 +102,14 @@ sub _set_is_deleted {
 sub mark_as_open {
     my $self = shift;
     my $lockfile = $self->lockfile;
-    if (-f $lockfile) {
+    if ($self->_lock_is_valid) {
+        warn "Locked: $lockfile\n";
         return 0;
     }
     else {
         my $header = muse_fast_scan_header($self->muse_file);
         die "Not a muse file!" unless $header && %$header;
-
-        $self->_writefile($lockfile, $$ . ' ' . localtime . "\n");
+        $self->_write_file($lockfile, $$ . ' ' . localtime . "\n");
         $self->purge;
         $self->_set_is_deleted($header->{DELETED});
         return 1;
@@ -120,7 +120,7 @@ sub mark_as_closed {
     my $self = shift;
     my $lockfile = $self->lockfile;
     unlink $lockfile or die "Couldn't unlink $lockfile!";
-    $self->_writefile($self->complete_file, $$ . ' ' . localtime . "\n");
+    $self->_write_file($self->complete_file, $$ . ' ' . localtime . "\n");
 }
 
 =head2 purge
@@ -141,10 +141,10 @@ sub purge {
     my $self = shift;
     my $basename = $self->name;
     foreach my $ext ($self->purged_extensions) {
-        my $target = $self->basename . $ext;
+        my $target = $basename . $ext;
         if (-f $target) {
             warn "Removing $target\n";
-            unlink $target or die "Couldn't unlik $target $!";
+            unlink $target or die "Couldn't unlink $target $!";
         }
     }
 }
@@ -160,6 +160,29 @@ sub _write_file {
 
     close $fh or die "Couldn't close $target";
     return;
+}
+
+sub _lock_is_valid {
+    my $self = shift;
+    my $lockfile = $self->lockfile;
+    return unless -f $lockfile;
+    open (my $fh, '<', $lockfile) or die $!;
+    my $pid;
+    my $string = <$fh>;
+    if ($string =~ m/^(\d+)/) {
+        $pid = $1;
+    }
+    else {
+        die "Bad lockfile!\n";
+    }
+    close $fh;
+    return unless $pid;
+    if (kill 0, $pid) {
+        return 1;
+    }
+    else {
+        return;
+    }
 }
 
 1;

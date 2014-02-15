@@ -41,6 +41,10 @@ Format options (by default all of them are activated);
 
 =over 4
 
+=item tex
+
+LaTeX output
+
 =item pdf
 
 Plain PDF without any imposition
@@ -101,7 +105,7 @@ sub new {
 
     # options passed, null out and reparse the params
     if (%params) {
-        foreach my $k (qw/pdf pdfa4 pdflt epub html bare_html/) {
+        foreach my $k (qw/pdf pdfa4 pdflt epub html bare_html tex/) {
             $self->{$k} = delete $params{$k};
         }
 

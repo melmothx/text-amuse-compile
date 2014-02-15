@@ -10,6 +10,7 @@ use File::Temp;
 use Text::Amuse::Compile::Templates;
 use Text::Amuse;
 use Text::Amuse::Functions qw/muse_fast_scan_header/;
+use PDF::Imposition;
 use Cwd;
 
 
@@ -146,6 +147,21 @@ templates string references.
 
 =head1 METHODS
 
+=head2 version
+
+Report version information
+
+=cut
+
+sub version {
+    my $self = shift;
+    my $musev = $Text::Amuse::VERSION;
+    my $selfv = $VERSION;
+    my $pdfv  = $PDF::Imposition::VERSION;
+    return "Using Text::Amuse $musev, Text::Amuse::Compiler $selfv, " .
+      "PDF::Imposition $pdfv\n";
+}
+
 =head2 compile($file1, $file2, ...);
 
 =cut
@@ -175,9 +191,8 @@ sub compile {
 
 sub _compile_file {
     # this is called from a fork, so print to STDOUT to report.
+    # STDERR is duped to STDOUT so warn/print/die is the same.
     my ($self, $file) = @_;
-    chdir '/';
-    print getcwd . "\n";
     my $doc = Text::Amuse->new(file => $file);
 }
 

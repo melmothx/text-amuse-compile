@@ -18,9 +18,20 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
-        #'ABC'              => 1.6,
-        #'Foo::Bar::Module' => 5.0401,
+        'Text::Amuse' => 0.07,
+        'PDF::Imposition' => 0.04,
     },
+    EXE_FILES => [ 'bin/muse-compile.pl' ],
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Text-Amuse-Compile-*' },
+    META_MERGE => {
+        resources => {
+            repository => 'https://gitorious.org/text-amuse-compile'
+           },
+    },
+
 );
+
+# Local Variables:
+# cperl-indent-parens-as-block: t
+# End:

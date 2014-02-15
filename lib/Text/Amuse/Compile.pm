@@ -224,6 +224,7 @@ sub _compile_file {
         $muse->bare_html if $self->bare_html;
         $muse->tex if $self->tex;
         $muse->pdf if $self->pdf;
+        $muse->epub if $self->epub;
     };
     $muse->mark_as_closed;
     die $@ if $@;

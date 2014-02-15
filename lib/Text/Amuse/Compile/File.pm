@@ -4,10 +4,18 @@ use strict;
 use warnings;
 use utf8;
 
+# core
+# use Data::Dumper;
+
+# needed
 use Template;
+use EBook::EPUB;
+
+# ours
+use PDF::Imposition;
 use Text::Amuse;
 use Text::Amuse::Functions qw/muse_fast_scan_header/;
-use PDF::Imposition;
+
 
 
 =encoding utf8
@@ -238,6 +246,9 @@ sub _lock_is_valid {
 
 =head1 METHODS
 
+Emit the respective format, saving it in a file. Return value is
+meaningless, but exceptions could be raised.
+
 =head2 html
 
 =head2 bare_html
@@ -245,6 +256,8 @@ sub _lock_is_valid {
 =head2 tex
 
 =head2 pdf
+
+=head2 epub
 
 =cut
 
@@ -331,6 +344,152 @@ sub pdf {
         }
     }
 }
+
+sub epub {
+    my $self = shift;
+
+    my $epubname = $self->name . '.epub';
+    unlink $epubname if -f $epubname;
+
+    my $text = $self->document;
+
+    my @pieces = $text->as_splat_html;
+    my @toc = $text->raw_html_toc;
+    my $missing = scalar(@pieces) - scalar(@toc);
+    # this shouldn't happen
+
+    # print Dumper(\@toc);
+
+    if ($missing > 1 or $missing < 0) {
+        print Dumper(\@pieces), Dumper(\@toc);
+        die "This shouldn't happen: missing pieces: $missing";
+    }
+    elsif ($missing == 1) {
+        unshift @toc, {
+                       index => 0,
+                       level => 0,
+                       string => "start body",
+                      };
+    }
+    my $epub = EBook::EPUB->new;
+
+    # embedded CSS
+    $epub->add_stylesheet("stylesheet.css" => ${ $self->templates->css });
+
+    # build the title page and some metadata
+    my $header = $text->header_as_html;
+
+    my $titlepage = '';
+
+    if (my $author = $header->{author}) {
+        $epub->add_author($self->_clean_html($author));
+        $titlepage .= "<h2>$author</h2>\n";
+    }
+
+    if (my $t = $header->{title}) {
+        $epub->add_title($self->_clean_html($t));
+        $titlepage .= "<h1>$t</h1>\n";
+    }
+    else {
+        $epub->add_title('Untitled');
+    }
+
+    if (my $st = $header->{subtitle}) {
+        $titlepage .= "<h2>$st</h2>\n"
+    }
+
+    if ($header->{date}) {
+        if ($header->{date} =~ m/([0-9]{4})/) {
+            $epub->add_date($1);
+            $titlepage .= "<h3>$header->{date}</h3>"
+        }
+    }
+
+    $epub->add_language($text->language_code);
+
+    if (my $source = $header->{source}) {
+        $epub->add_source($self->_clean_html($source));
+        $titlepage .= "<p>$source</p>";
+    }
+
+    if (my $notes = $header->{notes}) {
+        $epub->add_description($self->_clean_html($notes));
+        $titlepage .= "<p>$notes</p>";
+    }
+
+    # create the front page
+    my $firstpage = '';
+    $self->tt->process($self->templates->minimal_html,
+                       {
+                        title => $self->_clean_html($header->{title}),
+                        text => $titlepage
+                       },
+                       \$firstpage);
+
+    my $tpid = $epub->add_xhtml("titlepage.xhtml", $firstpage);
+    my $order = 0;
+    $epub->add_navpoint(label => "titlepage",
+                        id => $tpid,
+                        content => "titlepage.xhtml",
+                        play_order => ++$order);
+
+    # main loop
+    while (@pieces) {
+        my $fi =    shift @pieces;
+        my $index = shift @toc;
+        my $xhtml = "";
+        # print Dumper($index);
+        my $filename = "piece" . $index->{index} . '.xhtml';
+        my $title = $index->{level} . " " . $index->{string};
+
+        $self->tt->process($self->templates->minimal_html,
+                           {
+                            title => $self->_clean_html($title),
+                            text => $fi,
+                           },
+                           \$xhtml);
+
+        my $id = $epub->add_xhtml($filename, $xhtml);
+
+        $epub->add_navpoint(label => $self->_clean_html($index->{string}),
+                            content => $filename,
+                            id => $id,
+                            play_order => ++$order);
+    }
+
+    # attachments
+    foreach my $att ($text->attachments) {
+        die "$att doesn't exist!" unless -f $att;
+        my $mime;
+        if ($att =~ m/\.jpe?g$/) {
+            $mime = "image/jpeg";
+        }
+        elsif ($att =~ m/\.png$/) {
+            $mime = "image/png";
+        }
+        else {
+            die "Unrecognized attachment $att!";
+        }
+        $epub->copy_file($att, $att, $mime);
+    }
+
+    # finish
+    $epub->pack_zip($epubname);
+}
+
+sub _clean_html {
+    my ($self, $string) = @_;
+    return "" unless defined $string;
+    $string =~ s/<.+?>//g;
+    $string =~ s/&lt;/</g;
+    $string =~ s/&gt;/>/g;
+    $string =~ s/&quot;/"/g;
+    $string =~ s/&#x27;/'/g;
+    $string =~ s/&amp;/&/g;
+    return $string;
+}
+
+
 
 
 1;

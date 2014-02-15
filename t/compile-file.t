@@ -22,13 +22,15 @@ binmode STDERR, ':encoding(utf-8)';
 my $targetdir = File::Spec->catfile('t', 'testfile');
 chdir $targetdir or die $!;
 
+my $testnum = 27;
+
 # check if there is xelatex installed
 my $xelatex = system(xelatex => '--version');
 if ($xelatex == 0) {
-    plan tests => 26;
+    plan tests => $testnum;
 }
 else {
-    plan tests => 25;
+    plan tests => ($testnum - 1);
 }
 $xelatex = !$xelatex;
 
@@ -46,6 +48,7 @@ is($file->complete_file, 'test.ok');
 is($file->lockfile, 'test.lock');
 like $file->document->as_latex, qr/\\& Ćao! \\emph{another}/;
 like $file->document->as_html, qr{<em>test</em> &amp; Ćao! <em>another</em>};
+ok($file->tt);
 
 diag "Compile the html";
 $file->html;
@@ -66,7 +69,8 @@ if ($xelatex) {
 $file->bare_html;
 ok ((-f 'test.bare.html'), 'bare html found');
 
-ok($file->tt);
+$file->epub;
+ok(( -f 'test.epub'), "epub found");
 
 $file->mark_as_open;
 foreach my $ext ($file->purged_extensions) {

@@ -8,9 +8,7 @@ use File::Basename;
 use File::Temp;
 
 use Text::Amuse::Compile::Templates;
-use Text::Amuse;
-use Text::Amuse::Functions qw/muse_fast_scan_header/;
-use PDF::Imposition;
+use Text::Amuse::Compile::File;
 use Cwd;
 
 
@@ -193,8 +191,29 @@ sub _compile_file {
     # this is called from a fork, so print to STDOUT to report.
     # STDERR is duped to STDOUT so warn/print/die is the same.
     my ($self, $file) = @_;
-    my $doc = Text::Amuse->new(file => $file);
+
+    # parse the filename and chdir there.
+    my ($name, $path, $suffix) = fileparse($file, '.muse', '.txt');
+
+    if ($path) {
+        chdir $path or die "Cannot chdir into $path\n";
+    };
+
+    # first and foremost, see if we can deal with it.
+    my $filename = $name . $suffix;
+
+    my %args = (
+                name => $name,
+                suffix => $suffix,
+                templates => $self->templates,
+               );
+
+    my $muse = Text::Amuse::Compile::File->new(%args);
+
+    die "Couldn't initialize $name!" unless $muse->mark_as_open;
+
 }
+
 
 
 =head1 AUTHOR

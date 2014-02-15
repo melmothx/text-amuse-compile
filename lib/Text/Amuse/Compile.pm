@@ -218,11 +218,16 @@ sub _compile_file {
     my $muse = Text::Amuse::Compile::File->new(%args);
     die "Couldn't acquire lock on $name$suffix!" unless $muse->mark_as_open;
 
+    eval {
     # get the job done
-    $muse->html if $self->html;
-    $muse->bare_html if $self->bare_html;
-    $muse->tex if $self->tex;
+        $muse->html if $self->html;
+        $muse->bare_html if $self->bare_html;
+        $muse->tex if $self->tex;
+        $muse->pdf if $self->pdf;
+    };
     $muse->mark_as_closed;
+    die $@ if $@;
+    exit;
 }
 
 

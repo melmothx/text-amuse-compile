@@ -173,16 +173,26 @@ sub purged_extensions {
     return @exts;
 }
 
-sub purge {
-    my $self = shift;
+sub _purge {
+    my ($self, @exts) = @_;
     my $basename = $self->name;
-    foreach my $ext ($self->purged_extensions) {
+    foreach my $ext (@exts) {
         my $target = $basename . $ext;
         if (-f $target) {
             warn "Removing $target\n";
             unlink $target or die "Couldn't unlink $target $!";
         }
     }
+}
+
+sub purge {
+    my $self = shift;
+    $self->_purge($self->purged_extensions);
+}
+
+sub purge_latex {
+    my $self = shift;
+    $self->_purge(qw/.log .aux .toc .pdf/);
 }
 
 
@@ -230,6 +240,8 @@ sub _lock_is_valid {
 
 =head2 tex
 
+=head2 pdf
+
 =cut
 
 sub html {
@@ -242,7 +254,7 @@ sub html {
                        $self->name . '.html',
                        { binmode => ':encoding(utf-8)' });
 
-};
+}
 
 sub bare_html {
     my $self = shift;
@@ -252,7 +264,7 @@ sub bare_html {
                        },
                        $self->name . '.bare.html',
                        { binmode => ':encoding(utf-8)' });
-};
+}
 
 sub tex {
     my $self = shift;
@@ -262,7 +274,58 @@ sub tex {
                        },
                        $self->name . '.tex',
                        { binmode => ':encoding(utf-8)' });
-};
+}
+
+sub pdf {
+    my $self = shift;
+    my $source = $self->name . '.tex';
+    unless (-f $source) {
+        $self->tex;
+    }
+    die "Missing source file!" unless -f $source;
+    $self->purge_latex;
+    # maybe a check on the toc if more runs are needed?
+    # 1. create the toc
+    # 2. insert the toc
+    # 3. adjust the toc. Should be ok, right?
+    for (1..3) {
+        my $pid = open(my $kid, "-|");
+        defined $pid or die "Can't fork: $!";
+
+        # parent swallows the output
+        if ($pid) {
+            my $shitout;
+            while (<$kid>) {
+                my $line = $_;
+                if ($line =~ m/^[!#]/) {
+                    $shitout++;
+                }
+                if ($shitout) {
+                    print $line;
+                }
+            }
+            close $kid or die "Compilation failed\n";
+            my $exit_code = $? >> 8;
+            if ($exit_code != 0) {
+                warn "XeLaTeX compilation failed with exit code $exit_code\n";
+                if (-f $self->name  . '.log') {
+                    # if we have a .log file, this means something was
+                    # produced.
+                    die "Bailing out!";
+                }
+                else {
+                    warn "Skipping PDF generation\n";
+                    return;
+                }
+            }
+        }
+        else {
+            open(STDERR, ">&STDOUT");
+            exec(xelatex => '-interaction=nonstopmode', $source)
+              or die "Can't exec xelatex $source $!";
+        }
+    }
+}
 
 
 1;

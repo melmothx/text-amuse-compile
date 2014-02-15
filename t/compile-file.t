@@ -22,6 +22,16 @@ binmode STDERR, ':encoding(utf-8)';
 my $targetdir = File::Spec->catfile('t', 'testfile');
 chdir $targetdir or die $!;
 
+# check if there is xelatex installed
+my $xelatex = system(xelatex => '--version');
+if ($xelatex == 0) {
+    plan tests => 26;
+}
+else {
+    plan tests => 25;
+}
+$xelatex = !$xelatex;
+
 my $tt = Text::Amuse::Compile::Templates->new;
 my $file = Text::Amuse::Compile::File->new(name => 'test',
                                              suffix => '.muse',
@@ -48,6 +58,11 @@ like $html_body, qr{<em>test</em> &amp; Ćao! <em>another</em>};
 $file->tex;
 ok ((-f 'test.tex'), "tex found");
 
+if ($xelatex) {
+    $file->pdf;
+    ok((-f 'test.pdf'), "pdf found");
+}
+
 $file->bare_html;
 ok ((-f 'test.bare.html'), 'bare html found');
 
@@ -59,8 +74,3 @@ foreach my $ext ($file->purged_extensions) {
 }
 ok(! -f 'test.html');
 
-
-
-
-
-done_testing;

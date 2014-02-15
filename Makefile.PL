@@ -20,6 +20,7 @@ WriteMakefile(
     PREREQ_PM => {
         'Text::Amuse' => 0.07,
         'PDF::Imposition' => 0.04,
+        'Template' => 2.0,
     },
     EXE_FILES => [ 'bin/muse-compile.pl' ],
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

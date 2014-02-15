@@ -210,6 +210,10 @@ sub _compile_file {
     my $muse = Text::Amuse::Compile::File->new(%args);
     die "Couldn't acquire lock on $name$suffix!" unless $muse->mark_as_open;
 
+    # get the job done
+    $muse->html if $self->html;
+
+    $muse->mark_as_closed;
 }
 
 

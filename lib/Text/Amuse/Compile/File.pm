@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
+use Template;
 use Text::Amuse;
 use Text::Amuse::Functions qw/muse_fast_scan_header/;
 use PDF::Imposition;
@@ -50,6 +51,13 @@ Constructor.
 
 =item muse_file
 
+=item document
+
+The L<Text::Amuse> object
+
+=item tt
+
+The L<Template> object
 
 =back
 
@@ -97,6 +105,25 @@ sub is_deleted {
 sub _set_is_deleted {
     my $self = shift;
     $self->{is_deleted} = shift;
+}
+
+sub tt {
+    my $self = shift;
+    unless ($self->{tt}) {
+        $self->{tt} = Template->new;
+    }
+    return $self->{tt};
+}
+
+sub document {
+    my $self = shift;
+    # prevent parsing of deleted, bad file
+    return if $self->is_deleted;
+    unless ($self->{document}) {
+        my $doc = Text::Amuse->new(file => $self->muse_file);
+        $self->{document} = $doc;
+    }
+    return $self->{document};
 }
 
 sub mark_as_open {
@@ -184,5 +211,31 @@ sub _lock_is_valid {
         return;
     }
 }
+
+=head1 METHODS
+
+=head2 html
+
+=head2 bare_html
+
+=head2 tex
+
+=cut
+
+sub html {
+    my $self = shift;
+    $self->tt->process($self->templates->html,
+                       { doc => $self->document,
+                         css => ${ $self->templates->css },
+                       },
+                       $self->name . '.html',
+                       { binmode => ':encoding(utf-8)' });
+
+};
+
+sub bare_html { };
+
+sub tex { };
+
 
 1;

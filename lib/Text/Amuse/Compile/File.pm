@@ -257,15 +257,23 @@ sub _lock_is_valid {
 Emit the respective format, saving it in a file. Return value is
 meaningless, but exceptions could be raised.
 
-=head2 html
+=over 4
 
-=head2 bare_html
+=item html
 
-=head2 tex
+=item bare_html
 
-=head2 pdf
+=item tex
 
-=head2 epub
+=item pdf
+
+=item epub
+
+=item lt_pdf
+
+=item a4_pdf
+
+=back
 
 =cut
 

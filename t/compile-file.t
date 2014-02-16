@@ -22,7 +22,7 @@ binmode STDERR, ':encoding(utf-8)';
 my $targetdir = File::Spec->catfile('t', 'testfile');
 chdir $targetdir or die $!;
 
-my $testnum = 38;
+my $testnum = 43;
 
 # check if there is xelatex installed
 my $xelatex = system(xelatex => '--version');
@@ -50,6 +50,11 @@ like $file->document->as_latex, qr/\\& Ćao! \\emph{another}/;
 like $file->document->as_html, qr{<em>test</em> &amp; Ćao! <em>another</em>};
 ok($file->tt);
 
+foreach my $ext (qw/.html .tex .pdf .bare.html .epub/) {
+    unlink $file->name . $ext;
+}
+
+ok ((! -f 'test.html'));
 diag "Compile the html";
 $file->html;
 ok ((-f 'test.html'), "html found");
@@ -58,17 +63,22 @@ my $html_body = read_file ('test.html', { binmode => ':encoding(utf-8)' });
 like $html_body, qr{<em>test</em> &amp; Ćao! <em>another</em>};
 # print $html_body;
 
+ok ((! -f 'test.tex'), "tex not found");
 $file->tex;
 ok ((-f 'test.tex'), "tex found");
 
+ok (! -f 'test.pdf');
 if ($xelatex) {
     $file->pdf;
     ok((-f 'test.pdf'), "pdf found");
 }
 
+ok (! -f 'test.bare.html');
 $file->bare_html;
 ok ((-f 'test.bare.html'), 'bare html found');
 
+
+ok (! -f 'test.epub');
 $file->epub;
 ok(( -f 'test.epub'), "epub found");
 

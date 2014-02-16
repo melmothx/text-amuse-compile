@@ -17,7 +17,7 @@ Costructor
 
 =head2 TEMPLATES
 
-The following methods return a reference to a scalar with the
+The following methods return a B<reference> to a scalar with the
 templates. It should be self-evident which kind of template they
 return.
 
@@ -27,13 +27,21 @@ return.
 
 =item css
 
-(not actually a template)
+(not actually a template, it's the default CSS).
 
 =item bare_html
 
+The HTML fragment with the B<body> of the text (no HTML headers, no
+Muse headers).
+
 =item minimal_html
 
+Minimal (but valid) XHTML template, with a link to C<stylesheet.css>.
+Meant to be used in the EPUB generation.
+
 =item latex
+
+The LaTeX template, with dimension conditional.
 
 =back
 
@@ -62,18 +70,14 @@ sub html {
 </head>
 <body>
  <div id="page">
-  [% IF doc.header_as_html.author %]
+  [% IF doc.header_as_html.author.length %]
   <h2>[% doc.header_as_html.author %]</h2>
   [% END %]
   <h1>[% doc.header_as_html.title %]</h1>
 
-  [% IF doc.header_as_html.source %]
-  [% doc.header_as_html.source %]
-  [% END %]
-
-  [% IF doc.header_as_html.notes %]
-  [% doc.header_as_html.notes %]
-  [% END %]
+  [% IF doc.header_as_html.subtitle.length %]
+  <h2>[% doc.header_as_html.subtitle %]</h2>
+  [% END  %]
 
   [% IF doc.toc_as_html %]
   <div class="header">
@@ -86,6 +90,23 @@ sub html {
 [% doc.as_html %]
 
  </div>
+
+  <hr />
+  <div id="impressum">
+    <div id="source">
+    [% IF doc.header_as_html.source.length %]
+    [% doc.header_as_html.source %]
+    [% END %]
+    </div>
+
+    <div id="notes">
+    [% IF doc.header_as_html.notes.length %]
+    [% doc.header_as_html.notes %]
+    [% END %]
+    </div>
+  </div>
+
+
 </div>
 </body>
 </html>
@@ -309,7 +330,8 @@ sub latex {
 [% ELSIF size == 'half-lt'                   -%]
 [% SET paper = '5.5in:8.5in'                 -%]
 [% ELSE                                      -%]
-[% SET paper = 'a4'                          -%]
+[% # fits letter and a4                      -%]
+[% SET paper = '210mm:11in'                  -%]
 [% END                                       -%]
 [% # set the class                           -%]
 [% IF doc.wants_toc                          -%]
@@ -402,9 +424,7 @@ sub latex {
 \title{[% doc.header_as_latex.title %]}
 \date{[% doc.header_as_latex.date %]}
 \author{[% doc.header_as_latex.author %]}
-[% IF doc.header_as_latex.subtitle %]
 \subtitle{[% doc.header_as_latex.subtitle %]}
-[% END %]
 \begin{document}
 \maketitle
 
@@ -425,9 +445,19 @@ sub latex {
 
 \begin{center}
 
-[% doc.header_as_latex.source %]
+[% doc.header_as_latex.author     %]
 
-[% doc.header_as_latex.notes %]
+[% doc.header_as_latex.title      %]
+
+[% doc.header_as_latex.subtitle   %]
+
+[% doc.header_as_latex.date       %]
+
+\bigskip
+
+[% doc.header_as_latex.source     %]
+
+[% doc.header_as_latex.notes      %]
 
 \end{center}
 

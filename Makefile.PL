@@ -18,7 +18,7 @@ WriteMakefile(
         'Test::More' => 0,
     },
     PREREQ_PM => {
-        'Text::Amuse' => 0.08,
+        'Text::Amuse' => 0.09,
         'PDF::Imposition' => 0.04,
         'Template' => 2.0,
         'EBook::EPUB' => 0.6,

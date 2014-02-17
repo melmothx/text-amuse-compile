@@ -14,7 +14,7 @@ use Cwd;
 
 =head1 NAME
 
-Text::Amuse::Compile - Helper for Text::Amuse
+Text::Amuse::Compile - Compiler for Text::Amuse
 
 =head1 VERSION
 

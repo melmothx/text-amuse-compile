@@ -556,6 +556,9 @@ sub latex {
 
 \thispagestyle{empty}
 \strut
+%
+% Here a logo maybe?
+%
 \vfill
 
 \begin{center}
@@ -573,6 +576,8 @@ sub latex {
 [% doc.header_as_latex.source     %]
 
 [% doc.header_as_latex.notes      %]
+
+% Here an URL maybe?
 
 \end{center}
 

@@ -5,15 +5,29 @@ use strict;
 use warnings FATAL => 'all';
 use utf8;
 
+use File::Spec::Functions qw/catfile/;
+
 =head1 NAME
 
 Text::Amuse::Compile::Templates - Built-in templates for Text::Amuse::Compile
 
 =head1 METHODS
 
-=head2 new
+=head2 new(ttdir => 'mytemplates')
 
-Costructor
+Costructor. Options:
+
+=over 4
+
+=item ttdir
+
+The directory where to search for templates.
+
+B<Disclaimer>: some things are needed for a correct
+layout/compilation. It's strongly reccomended to use the existing one
+(known to work as expected) as starting point for a custom template.
+
+=back
 
 =head2 TEMPLATES
 
@@ -45,15 +59,99 @@ The LaTeX template, with dimension conditional.
 
 =back
 
+=head2 INTERNALS
+
+=head3 ttref($name)
+
+Return the scalar ref associated to the given template file, if any.
+
+=head3 names
+
+Return the list of methods for template generation
+
 =cut
 
+
 sub new {
-    my $class = shift;
+    my ($class, @args) = @_;
+    die "Wrong usage" if @args % 2;
+    my %params = @args;
     my $self = {};
+
+    # argument parsing
+    foreach my $k (qw/ttdir/) {
+        if (exists $params{$k}) {
+            $self->{$k} = delete $params{$k};
+        }
+    }
+    die "Unrecognized options: " . join(" ", keys %params) if %params;
+
+    $self->{tt_subrefs} = {};
+    if (exists $self->{ttdir} and defined $self->{ttdir}) {
+
+        if (-d $self->{ttdir}) {
+            my $dir = $self->{ttdir};
+            opendir (my $dh, $dir) or die "Couldn't open $dir $!";
+            my @templates = grep { -f catfile($dir, $_) 
+                                    and
+                                       /^(((bare|minimal)[_.-])?html|
+                                            latex|css)
+                                        (\.tt2?)?/x
+                               } readdir($dh);
+            closedir $dh;
+
+            foreach my $t (@templates) {
+                my $target = catfile($dir, $t); 
+                open (my $fh, '<:encoding(utf-8)', $target)
+                  or die "Can't open $target $!";
+                local $/ = undef;
+                my $content = <$fh>;
+                close $fh;
+
+                # manipulate the subref name
+                $t =~ s/\.(tt|tt2)//;
+                $t =~ s/\./_/g;
+
+                # populate the object with closures.
+                $self->{tt_subrefs}->{$t} = sub {
+                    # copy the content, otherwise we return
+                    # a ref that can be modified
+                    my $string = $content;
+                    return \$string;
+                };
+            }
+        }
+        else {
+            die "$self->{ttdir} is not a directory!\n";
+        }
+    }
     bless $self, $class;
 }
 
+sub ttdir {
+    return shift->{ttdir};
+}
+
+sub names {
+    return (qw/html minimal_html bare_html
+               css latex
+              /);
+}
+
+sub ttref {
+    my ($self, $name) = @_;
+    return unless $name;
+    if (exists $self->{tt_subrefs}->{$name}) {
+        return $self->{tt_subrefs}->{$name}->();
+    }
+    return;
+}
+
 sub html {
+    my $self = shift;
+    if (my $ref = $self->ttref('html')) {
+        return $ref;
+    }
     my $html = <<'EOF';
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -116,7 +214,12 @@ EOF
 }
 
 sub css {
+    my $self = shift;
+    if (my $ref = $self->ttref('css')) {
+        return $ref;
+    }
         my $css = <<'EOF';
+/* This is not a template, just a static file! */
 html,body {
 	margin:0;
 	padding:0;
@@ -286,6 +389,10 @@ EOF
 }
 
 sub bare_html {
+    my $self = shift;
+    if (my $ref = $self->ttref('bare_html')) {
+        return $ref;
+    }
     my $html = <<'EOF';
 
 [%- IF doc.toc_as_html -%]
@@ -302,6 +409,10 @@ EOF
 }
 
 sub minimal_html {
+    my $self = shift;
+    if (my $ref = $self->ttref('minimal_html')) {
+        return $ref;
+    }
     my $html = <<'EOF';
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
@@ -322,7 +433,11 @@ EOF
 
 
 sub latex {
-        my $latex = <<'EOF';
+    my $self = shift;
+    if (my $ref = $self->ttref('latex')) {
+        return $ref;
+    }
+    my $latex = <<'EOF';
 [% # this is the preamble of the preamble... -%]
 [% # set the dimension                       -%]
 [% IF size == 'half-a4'                      -%]

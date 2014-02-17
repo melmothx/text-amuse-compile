@@ -16,12 +16,15 @@ WriteMakefile(
     },
     BUILD_REQUIRES => {
         'Test::More' => 0,
+        'File::Temp' => 0,
     },
     PREREQ_PM => {
+        'File::Spec' => 0,
         'Text::Amuse' => 0.09,
         'PDF::Imposition' => 0.04,
         'Template' => 2.0,
         'EBook::EPUB' => 0.6,
+        'File::Path' => 0,
     },
     EXE_FILES => [ 'bin/muse-compile.pl' ],
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

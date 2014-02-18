@@ -461,19 +461,24 @@ sub latex {
 [% UNLESS fontsize                           -%]
 [% SET fontsize = '10'                       -%]
 [% END                                       -%]
+[% UNLESS mainfont                           -%]
+[% SET mainfont = 'Linux Libertine O'        -%]
+[% END                                       -%]
 \documentclass[DIV=[% division -%],%
                fontsize=[% fontsize %]pt,%
                oneside,%
                paper=[% paper %]]{[% class %]}
 \usepackage{fontspec}
 \usepackage{polyglossia}
-\setmainfont[Mapping=tex-text]{Linux Libertine O}
+\setmainfont[Mapping=tex-text]{[%- mainfont -%]}
+% these are not used but prevents XeTeX to barf
 \setsansfont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans}
 \setmonofont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans Mono}
 [% IF doc.language == 'serbian' %]
 \setmainlanguage{croatian}
-[% ELSIF doc.language == 'macedonian' %]
+[% ELSIF (doc.language == 'macedonian') OR (doc.language == 'russian') %]
 \setmainlanguage{russian}
+\newfontfamily\russianfont[Script=Cyrillic]{[%- mainfont -%]}
 [% ELSE %]
 \setmainlanguage{[% doc.language %]}
 [% END %]

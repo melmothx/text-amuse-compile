@@ -482,6 +482,12 @@ sub latex {
 [% ELSE %]
 \setmainlanguage{[% doc.language %]}
 [% END %]
+
+[%- IF doc.language == 'macedonian' -%]
+\renewcaptionname{russian}{\contentsname}{Содржина}
+
+[%- END -%]
+
 \usepackage{microtype} % you need an *updated* texlive 2012, but harmless
 \usepackage{graphicx}
 \usepackage{alltt}

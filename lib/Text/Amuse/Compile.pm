@@ -11,7 +11,6 @@ use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::File;
 use Cwd;
 
-
 =head1 NAME
 
 Text::Amuse::Compile - Compiler for Text::Amuse
@@ -186,11 +185,11 @@ sub compile {
             # print "$$ Kid is $pid, I'm in " . getcwd() . "\n";
             my @report;
             while (<$kid>) {
+                print;
                 push @report, $_;
             }
             close $kid or $self->report_failure(@report,
                                                 "Failure to compile $file $!\n");
-            print @report;
             # print getcwd . "\n";
         }
         else {

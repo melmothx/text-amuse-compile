@@ -4,8 +4,8 @@ use strict;
 use warnings;
 use Text::Amuse::Compile;
 use File::Spec;
-use File::Slurp;
-use Test::More;
+use File::Slurp qw/write_file append_file read_file/;
+use Test::More tests => 8;
 use Try::Tiny;
 
 my $c = Text::Amuse::Compile->new(
@@ -60,11 +60,24 @@ if (-f $log) {
     unlink $log or die $!;
 }
 
-$c->report_failure_sub(sub { write_file($log, "$$ calling report failure") });
+$c->report_failure_sub(sub {
+                           my @errors = @_;
+                           my $string = join("\n", @errors);
+                           append_file($log, "$$ report failure\n:$string\n");
+                       });
 
-$c->compile($target);
+$c->compile($target, "t/lasdf/asd.muse", "t/alkasdf/alsf.text");
 
-ok(-f $log);
+ok((-f $log), "Found $log");
 
-done_testing;
+my @lines = read_file($log);
+
+my @error = grep { /\Q$target\E/ } @lines;
+ok(@error >= 1);
+
+@error = grep { /Undefined control sequence/ } @lines;
+ok(@error >= 1);
+
+@error = grep { /Cannot chdir into/ } @lines;
+ok(@error = 2);
 

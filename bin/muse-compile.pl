@@ -9,6 +9,7 @@ use Text::Amuse::Compile;
 use File::Path qw/mkpath/;
 use File::Spec::Functions qw/catfile/;
 use Pod::Usage;
+use File::Slurp qw/append_file/;
 
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
@@ -24,6 +25,7 @@ GetOptions (\%options,
                pdf
                ttdir=s
                output-templates
+               log=s
                help/);
 
 if ($options{help}) {
@@ -87,6 +89,10 @@ The directory with the templates.
 
 Option to populated the above directory with the built-in templates.
 
+=item --log <file>
+
+
+
 =back
 
 =cut
@@ -94,6 +100,7 @@ Option to populated the above directory with the built-in templates.
 my %args;
 
 my $output_templates = delete $options{'output-templates'};
+my $logfile = delete $options{log};
 
 foreach my $k (keys %options) {
     my $newk = $k;
@@ -108,6 +115,17 @@ if ($output_templates and exists $options{ttdir}) {
 }
 
 my $compiler = Text::Amuse::Compile->new(%args);
+if ($logfile) {
+    if ($logfile !~ m/\.log$/) {
+        warn "Appending .log to $logfile\n";
+    }
+    print "Using $logfile to report errors\n";
+
+    $compiler->report_failure_sub(sub {
+                                      my @errors = @_;
+                                      append_file($logfile, @errors);
+                                  });
+}
 
 print $compiler->version;
 

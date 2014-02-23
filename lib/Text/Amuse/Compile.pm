@@ -190,6 +190,7 @@ sub compile {
             }
             close $kid or $self->report_failure(@report,
                                                 "Failure to compile $file $!\n");
+            print @report;
             # print getcwd . "\n";
         }
         else {
@@ -246,6 +247,7 @@ sub _compile_file {
                 };
                 if ($@) {
                     push @fatals, $@;
+                    last;
                 }
                 else {
                     my $ext = $method;

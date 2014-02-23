@@ -1,5 +1,6 @@
-Revision history for Text-Amuse-Compile
+Revision history for perl module Text::Amuse::Compile
 
-0.01 2014-02-XX
- - First public (and probably buggy) version
+0.01 2014-02-23
+ - First public version with basic features
+
 

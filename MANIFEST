@@ -8,10 +8,12 @@ README
 t/00-load.t
 t/compile-file.t
 t/compile.t
+t/failures.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
 t/templates.t
+t/testfile/broken.muse
 t/testfile/deep/deep/dir/logo.png
 t/testfile/deep/deep/dir/manual.muse
 t/testfile/deleted.muse

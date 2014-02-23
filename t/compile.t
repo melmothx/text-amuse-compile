@@ -31,5 +31,5 @@ foreach my $m (qw/pdf a4_pdf lt_pdf epub html bare_html tex/) {
     ok ($compile->$m, "$m is true");
 }
 
-$compile->compile("hello", "bau", "blabla");
+$compile->compile("hello.muse", "t/sadf/aklsdf/bau.muse", "asdf/aldkf/blabla.muse");
 

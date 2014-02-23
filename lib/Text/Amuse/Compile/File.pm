@@ -150,6 +150,7 @@ sub mark_as_open {
         return 0;
     }
     else {
+        $self->purge('.ok');
         my $header = muse_fast_scan_header($self->muse_file);
         die "Not a muse file!" unless $header && %$header;
         # TODO maybe use storable?

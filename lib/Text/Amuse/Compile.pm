@@ -31,9 +31,11 @@ our $VERSION = '0.01';
     my $compiler = Text::Amuse::Compile->new;
     $compiler->compile($file1, $file2, $file3)
 
-=head1 SUBROUTINES/METHODS
+=head1 METHODS/ACCESSORS
 
-=head2 new(ttdir => '.', pdf => 1, ...);
+=head2 CONSTRUCTOR
+
+=head3 new(ttdir => '.', pdf => 1, ...);
 
 Constructor. It will accept the following options
 
@@ -81,6 +83,8 @@ The directory where to look for templates, named as format.tt
 
 =back
 
+You can retrieve the value by calling them on the object.
+
 =cut
 
 sub new {
@@ -102,6 +106,8 @@ sub new {
 
     $self->{templates} =
       Text::Amuse::Compile::Templates->new(ttdir => delete($params{ttdir}));
+
+    $self->{report_failure_sub} = delete $params{report_failure_sub};
 
     # options passed, null out and reparse the params
     if (%params) {
@@ -142,18 +148,15 @@ sub templates {
     return shift->{templates};
 }
 
-=head1 ACCESSORS
 
-=head2 templates
+=head2 METHODS
+
+=head3 templates
 
 The L<Text::Amuse::Compile::Templates> object, which will provide the
 templates string references.
 
-=cut
-
-=head1 METHODS
-
-=head2 version
+=head3 version
 
 Report version information
 
@@ -168,28 +171,38 @@ sub version {
       "PDF::Imposition $pdfv\n";
 }
 
-=head2 compile($file1, $file2, ...);
+=head3 compile($file1, $file2, ...);
 
 =cut
 
 sub compile {
     my ($self, @files) = @_;
     foreach my $file (@files) {
+        # print "pid: $$\n";
         # fork here before we change dir
         my $pid = open(my $kid, "-|");
         defined $pid or die "can't fork $!";
         if ($pid) {
+            # print "$$ Kid is $pid, I'm in " . getcwd() . "\n";
+            my @report;
             while (<$kid>) {
-                print;
-                # push @report, $_;
+                push @report, $_;
             }
-            close $kid or warn "Failure to compile $file $!\n";
+            close $kid or $self->report_failure(@report,
+                                                "Failure to compile $file $!\n");
             # print getcwd . "\n";
         }
         else {
             open(STDERR, ">&STDOUT") or die "can't dup stdout: $!";
-            $self->_compile_file($file);
-            exit 0;
+            print "Working on $file in " . getcwd() . "\n";
+            eval {
+                $self->_compile_file($file);
+            };
+            print $@ if $@;
+            # if the module is inside an eval, when we die in
+            # _compile_file the exception is caught and the fork
+            # doesn't exit, so use exit here.
+            $@ ? exit 2 : exit 0;
         }
     }
 }
@@ -203,7 +216,7 @@ sub _compile_file {
     my ($name, $path, $suffix) = fileparse($file, '.muse', '.txt');
 
     if ($path) {
-        chdir $path or die "Cannot chdir into $path\n";
+        chdir $path or die "Cannot chdir into $path from " . getcwd() . "\n" ;
     };
 
     my $filename = $name . $suffix;
@@ -217,7 +230,9 @@ sub _compile_file {
     my $muse = Text::Amuse::Compile::File->new(%args);
     die "Couldn't acquire lock on $name$suffix!" unless $muse->mark_as_open;
 
-    if (! $muse->is_deleted) {
+    my @fatals;
+
+    unless ($muse->is_deleted) {
         foreach my $method (qw/bare_html
                                html
                                epub
@@ -230,7 +245,7 @@ sub _compile_file {
                     $muse->$method;
                 };
                 if ($@) {
-                    warn $@;
+                    push @fatals, $@;
                 }
                 else {
                     my $ext = $method;
@@ -239,14 +254,53 @@ sub _compile_file {
                     print "Created " . $muse->name . $ext . "\n";
                 }
             }
-
         }
     }
+    if (@fatals) {
+        die join(" ", @fatals);
+    }
+    # leave the thing open
     $muse->mark_as_closed;
     exit;
 }
 
+=head3 report_failure($message1, $message2, ...)
 
+This method is called when the compilation of a file raises an
+exception, so it's for internal usage.
+
+It passes the arguments along to C<report_failure_sub> as a list if
+you set that to a sub, otherwise it prints to the standard error.
+
+=head3 report_failure_sub(sub { my @problems = @_ ; print @problems });
+
+You can set the sub to be used to report problems using this accessor,
+which is supposed to receive the list of messages. 
+
+=cut
+
+sub report_failure_sub {
+    my ($self, $sub) = @_;
+    if ($sub) {
+        if (ref($sub) eq 'CODE') {
+            $self->{report_failure_sub} = $sub;
+        }
+        else {
+            die "First argument must be a sub!";
+        }
+    }
+    return $self->{report_failure_sub};
+}
+
+sub report_failure {
+    my ($self, @args) = @_;
+    if ($self->report_failure_sub) {
+        $self->report_failure_sub->(@args);
+    }
+    else {
+        print STDERR @args;
+    }
+}
 
 =head1 AUTHOR
 

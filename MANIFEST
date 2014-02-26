@@ -1,3 +1,4 @@
+bin/muse-compile.pl
 Changes
 lib/Text/Amuse/Compile.pm
 lib/Text/Amuse/Compile/File.pm

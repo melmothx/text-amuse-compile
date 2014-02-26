@@ -172,6 +172,11 @@ sub version {
 
 =head3 compile($file1, $file2, ...);
 
+Main method to get the job done, passing the list of muse files. You
+can inspect the errors calling C<errors>. It does produce some output.
+
+
+
 =cut
 
 sub compile {

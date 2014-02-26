@@ -152,3 +152,8 @@ if ($output_templates) {
 }
 
 $compiler->compile(@ARGV);
+
+if ($compiler->errors) {
+    $logfile ||= "above";
+    die "Compilation finished with errors, see $logfile!\n";
+}

@@ -176,6 +176,7 @@ sub version {
 
 sub compile {
     my ($self, @files) = @_;
+    $self->reset_errors;
     foreach my $file (@files) {
         # print "pid: $$\n";
         # fork here before we change dir
@@ -295,13 +296,47 @@ sub report_failure_sub {
 
 sub report_failure {
     my ($self, @args) = @_;
+    $self->add_errors(@args);
     if ($self->report_failure_sub) {
         $self->report_failure_sub->(@args);
     }
+}
+
+=head3 errors
+
+Accessor to the catched errors. It returns a list of strings.
+
+=head3 add_errors($error1, $error2,...)
+
+Add an error. [Internal]
+
+=head3 reset_errors
+
+Reset the errors
+
+=cut
+
+sub add_errors {
+    my ($self, @args) = @_;
+    $self->{errors} ||= [];
+    push @{$self->{errors}}, @args;
+}
+
+sub reset_errors {
+    my $self = shift;
+    $self->{errors} = [];
+}
+
+sub errors {
+    my $self = shift;
+    if ($self->{errors}) {
+        return @{$self->{errors}};
+    }
     else {
-        print STDERR @args;
+        return;
     }
 }
+
 
 =head1 AUTHOR
 

@@ -5,8 +5,17 @@ use warnings;
 use Text::Amuse::Compile;
 use File::Spec;
 use File::Slurp qw/write_file append_file read_file/;
-use Test::More tests => 8;
-use Try::Tiny;
+use Test::More;
+
+my $xelatex = system(xelatex => '--version');
+if ($xelatex == 0) {
+    plan tests => 14;
+}
+else {
+    plan skip_all => "No xelatex installed, skipping tests\n";
+    exit;
+}
+
 
 my $c = Text::Amuse::Compile->new(
                                   pdf => 1,
@@ -14,7 +23,6 @@ my $c = Text::Amuse::Compile->new(
                                  );
 
 my $target = File::Spec->catfile('t', 'testfile', 'broken.muse');
-write_file($target, "#title test\n\n blabla\n");
 my $pdf = $target;
 my $tex = $target;
 $pdf =~ s/muse$/pdf/;
@@ -28,6 +36,7 @@ if (-f $tex) {
 }
 
 $c->compile($target);
+ok(!$c->errors);
 ok(-f $pdf);
 ok(-f $tex);
 
@@ -40,16 +49,18 @@ eval {
 };
 
 ok($@, "Now the compiler dies");
+ok($c->errors);
 
 
 $c->report_failure_sub(sub {
-                           diag "$$ calling report failure with diag: "
+                           diag "Calling report failure with diag: "
                              . scalar (@_) . " lines";
                            });
 
 unlink $pdf if -f $pdf;
 
 $c->compile($target);
+ok($c->errors);
 
 ok((! -f $pdf), "Now we're still alive");
 
@@ -67,6 +78,7 @@ $c->report_failure_sub(sub {
                        });
 
 $c->compile($target, "t/lasdf/asd.muse", "t/alkasdf/alsf.text");
+ok($c->errors);
 
 ok((-f $log), "Found $log");
 
@@ -80,4 +92,10 @@ ok(@error >= 1);
 
 @error = grep { /Cannot chdir into/ } @lines;
 ok(@error = 2);
+
+unlink $tex or die $!;
+
+ok($c->errors);
+$c->compile($target);
+ok(!$c->errors);
 

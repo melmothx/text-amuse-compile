@@ -146,7 +146,7 @@ sub mark_as_open {
     my $self = shift;
     my $lockfile = $self->lockfile;
     if ($self->_lock_is_valid) {
-        warn "Locked: $lockfile\n";
+        print "Locked: $lockfile\n";
         return 0;
     }
     else {
@@ -384,18 +384,18 @@ sub pdf {
                     print $line;
                 }
             }
-            close $kid or warn "Compilation failed\n";
+            close $kid or print "Compilation failed\n";
             my $exit_code = $? >> 8;
             if ($exit_code != 0) {
-                warn "XeLaTeX compilation failed with exit code $exit_code\n";
+                print "XeLaTeX compilation failed with exit code $exit_code\n";
                 if (-f $self->name  . '.log') {
-                    # if we have a .log file, this means something was
+                    # if we have a .pdf file, this means something was
                     # produced. Hence, remove the .pdf
                     unlink $self->name . '.pdf';
-                    die "Bailing out!";
+                    die "Bailing out!\n";
                 }
                 else {
-                    warn "Skipping PDF generation\n";
+                    print "Skipping PDF generation\n";
                     return;
                 }
             }

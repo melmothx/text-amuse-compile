@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More;
+use Test::More tests => 54;
 use Text::Amuse::Compile;
 use File::Spec;
 use File::Slurp qw/read_file/;
@@ -59,26 +59,27 @@ foreach my $f (@results, @okfiles) {
 }
 
 
+# twice to check the option persistence
+for (1..2) {
+    $compile->compile(@targets);
 
-$compile->compile(@targets);
-
-foreach my $f (@results) {
-    ok ((-f $f), "produced $f");
-    my $c = read_file($f);
-    diag substr($c, 0, 200);
-    foreach my $string (values %$returned) {
-        like $c, qr/\Q$string\E/, "Found $string";
+    foreach my $f (@results) {
+        ok ((-f $f), "produced $f");
+        my $c = read_file($f);
+        diag substr($c, 0, 200);
+        foreach my $string (values %$returned) {
+            like $c, qr/\Q$string\E/, "Found $string";
+        }
+        like $c, qr/DIV=9/, "Found the div factor";
+        like $c, qr/fontsize=48pt/, "Found the fontsize";
     }
-    like $c, qr/DIV=9/, "Found the div factor";
-    like $c, qr/fontsize=48pt/, "Found the fontsize";
+
+
+    foreach my $f (@results, @okfiles) {
+        if (-f $f) {
+            unlink $f or die $!;
+        }
+    }
 }
 
 
-foreach my $f (@results, @okfiles) {
-    if (-f $f) {
-        unlink $f or die $!;
-    }
-}
-
-
-done_testing;

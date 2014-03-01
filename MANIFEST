@@ -12,6 +12,8 @@ t/compile-file.t
 t/compile.t
 t/failures.t
 t/manifest.t
+t/options-f/dir1/1/options1.muse
+t/options-f/dir2/2/options2.muse
 t/options.t
 t/pod-coverage.t
 t/pod.t

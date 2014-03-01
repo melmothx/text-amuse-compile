@@ -26,6 +26,7 @@ GetOptions (\%options,
                ttdir=s
                output-templates
                log=s
+               extra=s%
                help/);
 
 if ($options{help}) {
@@ -91,7 +92,27 @@ Option to populated the above directory with the built-in templates.
 
 =item --log <file>
 
+A file where we can append the report failures
 
+=item --extra key:value
+
+This option can be repeated at will. The key/value pairs will be
+passed to every template we process, regardless of the type, even if
+only the built-in LaTeX template support them.
+
+Example:
+
+  muse-compile --extra site=http://anarhija.net \
+               --extra size=a6 --extra division=15 --extra twoside=true \
+               --extra bcor=10mm --extra mainfont="Charis SIL" \
+               --extra sitename="Testsite" \
+               --extra siteslogan="Anticopyright" \
+               --extra logo=mylogo file.muse
+
+Keep in mind that in this case C<mylogo> has to be or an absolute
+filename (not reccomended, because the full path will remain in the
+.tex source), or a basename (even without extension) which can be
+found by C<kpsewhich>.
 
 =back
 
@@ -101,6 +122,10 @@ my %args;
 
 my $output_templates = delete $options{'output-templates'};
 my $logfile = delete $options{log};
+
+if ($options{extra}) {
+    $args{extra} = delete $options{extra};
+}
 
 foreach my $k (keys %options) {
     my $newk = $k;

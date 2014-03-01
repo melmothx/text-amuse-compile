@@ -70,6 +70,11 @@ The EPUB
 
 The bare HTML, non <head>
 
+=item extra
+
+An hashref of key/value pairs to pass to each template in the
+C<options> namespace.
+
 =back
 
 Template directory:
@@ -107,6 +112,8 @@ sub new {
       Text::Amuse::Compile::Templates->new(ttdir => delete($params{ttdir}));
 
     $self->{report_failure_sub} = delete $params{report_failure_sub};
+
+    $self->{extra} = delete $params{extra};
 
     # options passed, null out and reparse the params
     if (%params) {
@@ -147,6 +154,16 @@ sub templates {
     return shift->{templates};
 }
 
+sub extra {
+    my $self = shift;
+    my $hashref = $self->{extra};
+    my %out;
+    # do a shallow copy before returning
+    if ($hashref) {
+        %out = %$hashref;
+    }
+    return %out;
+}
 
 =head2 METHODS
 
@@ -231,6 +248,7 @@ sub _compile_file {
                 name => $name,
                 suffix => $suffix,
                 templates => $self->templates,
+                options => { $self->extra },
                );
 
     my $muse = Text::Amuse::Compile::File->new(%args);

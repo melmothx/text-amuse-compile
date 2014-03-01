@@ -34,9 +34,7 @@ Text::Amuse::Compile in a forked and chdir'ed environment.
 
 =head2 new(name => $basename, suffix => $suffix, templates => $templates)
 
-Constructor.
-
-=head1 INTERNALS
+Constructor. Accepts the following named parameters:
 
 =over 4
 
@@ -45,6 +43,17 @@ Constructor.
 =item suffix
 
 =item templates
+
+=item options
+
+An hashref with the options to pass to the templates. It's returned as
+an hash, not as a reference, to protect it from mangling.
+
+=back
+
+=head1 INTERNALS
+
+=over 4
 
 =item is_deleted
 
@@ -84,6 +93,16 @@ sub new {
 
 sub name {
     return shift->{name};
+}
+
+sub options {
+    my $self = shift;
+    my %out;
+    if (my $ref = $self->{options}) {
+        %out = %$ref;
+    }
+    # return a copy
+    return { %out };
 }
 
 sub suffix {
@@ -285,6 +304,7 @@ sub html {
                        {
                         doc => $self->document,
                         css => ${ $self->templates->css },
+                        options => $self->options,
                        },
                        $self->name . '.html',
                        { binmode => ':encoding(utf-8)' })
@@ -298,6 +318,7 @@ sub bare_html {
     $self->tt->process($self->templates->bare_html,
                        {
                         doc => $self->document,
+                        options => $self->options,
                        },
                        $self->name . '.bare.html',
                        { binmode => ':encoding(utf-8)' })
@@ -341,14 +362,18 @@ sub _compile_imposed {
 sub tex {
     my ($self, @args) = @_;
     die "Wrong usage" if @args % 2;
-    unless (@args) {
-        @args = (size => 'default');
+    my %params = %{ $self->options };
+    # arguments can override the global options, so they don't mess up too much
+    # when calling pdf-a4, for example
+    my %arguments = @args;
+    foreach my $k (keys %arguments) {
+        $params{$k} = $arguments{$k};
     }
     $self->purge('.tex');
     $self->tt->process($self->templates->latex,
                        {
                         doc => $self->document,
-                        @args,
+                        options => { %params },
                        },
                        $self->name . '.tex',
                        { binmode => ':encoding(utf-8)' })
@@ -491,7 +516,8 @@ sub epub {
     $self->tt->process($self->templates->minimal_html,
                        {
                         title => $self->_clean_html($header->{title}),
-                        text => $titlepage
+                        text => $titlepage,
+                        options => $self->options,
                        },
                        \$firstpage)
       or die $self->tt->error;
@@ -515,6 +541,7 @@ sub epub {
         $self->tt->process($self->templates->minimal_html,
                            {
                             title => $self->_remove_tags($title),
+                            options => $self->options,
                             text => $fi,
                            },
                            \$xhtml)

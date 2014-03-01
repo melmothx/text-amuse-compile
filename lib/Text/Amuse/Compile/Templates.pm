@@ -35,27 +35,90 @@ The following methods return a B<reference> to a scalar with the
 templates. It should be self-evident which kind of template they
 return.
 
-=over 4
+=head3 html
 
-=item html
-
-=item css
+=head3 css
 
 (not actually a template, it's the default CSS).
 
-=item bare_html
+=head3 bare_html
 
 The HTML fragment with the B<body> of the text (no HTML headers, no
 Muse headers).
 
-=item minimal_html
+=head3 minimal_html
 
 Minimal (but valid) XHTML template, with a link to C<stylesheet.css>.
 Meant to be used in the EPUB generation.
 
-=item latex
+=head3 latex
 
 The LaTeX template, with dimension conditional.
+
+The built-in LaTeX template supports the following options (they are
+passed B<verbatim> and B<unescaped>, so it's your responsibility to
+filter out garbage in an exposed environment (such a web interface).
+
+=head4 Globals
+
+=over 4
+
+=item options.size
+
+Paper size, like a4, a5 or 210mm:11in. The width and heigth are
+swapped in some komascript version. Just keep this in mind and do some
+trial and error if you need custom dimensions.
+
+=item options.division
+
+The DIV of the C<typearea> package. Defaults to 12. Go and read the doc.
+
+=item options.bcor
+
+The BCOR of the C<typearea> package. Defaults to 0mm. Go and read the doc.
+Expected a TeX dimension like 10mm or 1in or 1.2cm
+
+=item options.fontsize
+
+The font size in point (should be an integer). Defaults to 10.
+
+=item mainfont
+
+The system font name, such as C<Linux Libertine O> or C<Charis SIL>.
+This implementation uses XeLaTeX, so we can use system fonts. Defaults
+to C<Linux Libertine O>.
+
+=item options.oneside
+
+Set it to a true value to have a oneside document. Default true
+
+=item options.twoside
+
+Set it to a true value to have a twosided document.
+
+=back
+
+=head4 Colophon
+
+In the last page the built in template supports the following options
+
+=over 4
+
+=item options.sitename
+
+At the top of the page
+
+=item options.siteslogan
+
+At the top, under sitename
+
+=item options.logo
+
+At the top, under siteslogan
+
+=item options.site
+
+At the bottom of the page
 
 =back
 
@@ -440,10 +503,12 @@ sub latex {
     my $latex = <<'EOF';
 [% # this is the preamble of the preamble... -%]
 [% # set the dimension                       -%]
-[% IF size == 'half-a4'                      -%]
+[% IF options.size == 'half-a4'              -%]
 [% SET paper = 'a5'                          -%]
-[% ELSIF size == 'half-lt'                   -%]
+[% ELSIF options.size == 'half-lt'           -%]
 [% SET paper = '5.5in:8.5in'                 -%]
+[% ELSIF options.size                        -%]
+[% SET paper = options.size                  -%]
 [% ELSE                                      -%]
 [% # fits letter and a4                      -%]
 [% SET paper = '210mm:11in'                  -%]
@@ -455,18 +520,40 @@ sub latex {
 [% SET class = 'scrartcl'                    -%]
 [% END                                       -%]
 [% # set the div, if any                     -%]
-[% UNLESS division                           -%]
+[% IF options.division                       -%]
+[% SET division = options.division           -%]
+[% ELSE                                      -%]
 [% SET division = '12'                       -%]
 [% END                                       -%]
-[% UNLESS fontsize                           -%]
-[% SET fontsize = '10'                       -%]
+[% # set the fontsize                        -%]
+[% IF options.fontsize                       -%]
+[% SET fontsize = options.fontsize           -%]
+[% ELSE                                      -%]
+[% SET fontsize = 10                         -%]
 [% END                                       -%]
-[% UNLESS mainfont                           -%]
+[% # set the font                            -%]
+[% IF options.mainfont                       -%]
+[% SET mainfont = options.mainfont           -%]
+[% ELSE                                      -%]
 [% SET mainfont = 'Linux Libertine O'        -%]
 [% END                                       -%]
+[% IF options.oneside                        -%]
+[% SET paging = 'oneside'                    -%]
+[% ELSIF options.twoside                     -%]
+[% SET paging = 'twoside'                    -%]
+[% ELSE                                      -%]
+[% SET paging = 'oneside'                    -%]
+[% END                                       -%]
+[% IF options.bcor                           -%]
+[% SET bcor = options.bcor                   -%]
+[% ELSE                                      -%]
+[% SET bcor = '0mm'                          -%]
+[% END                                       -%]
+[% # end of options                          -%]
 \documentclass[DIV=[% division -%],%
+               BCOR=[% bcor -%],%
                fontsize=[% fontsize %]pt,%
-               oneside,%
+               [% paging %],%
                paper=[% paper %]]{[% class %]}
 \usepackage{fontspec}
 \usepackage{polyglossia}
@@ -557,19 +644,41 @@ sub latex {
 [% IF doc.wants_toc %]
 
 \tableofcontents
+% start a new right-handed page
 \cleardoublepage
 
 [% END %]
 
 [% doc.as_latex %]
 
-\cleardoublepage
+\clearpage
+% new page for the colophon
 
 \thispagestyle{empty}
+
+\begin{center}
+[% IF options.sitename %]
+[% options.sitename %]
+[% END %]
+
+[% IF options.siteslogan %]
+\smallskip
+[% options.siteslogan %]
+[% END %]
+
+[% IF options.logo %]
+\bigskip
+\includegraphics[width=0.25\textwidth]{[% options.logo %]}
+\bigskip
+[% ELSE %]
 \strut
-%
-% Here a logo maybe?
-%
+[% END %]
+\end{center}
+
+
+\strut
+
+
 \vfill
 
 \begin{center}
@@ -587,6 +696,11 @@ sub latex {
 [% doc.header_as_latex.source     %]
 
 [% doc.header_as_latex.notes      %]
+
+[% IF options.site %]
+\bigskip
+\textbf{[% options.site %]}
+[% END %]
 
 % Here an URL maybe?
 

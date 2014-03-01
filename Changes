@@ -1,5 +1,8 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.03 2014-03-01
+ - Added options to pass to the templates
+
 0.02 2014-02-26
  - Fixed missing binary in MANIFEST
 

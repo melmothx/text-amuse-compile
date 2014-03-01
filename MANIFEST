@@ -12,6 +12,7 @@ t/compile-file.t
 t/compile.t
 t/failures.t
 t/manifest.t
+t/options.t
 t/pod-coverage.t
 t/pod.t
 t/templates.t

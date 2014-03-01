@@ -113,7 +113,9 @@ sub new {
 
     $self->{report_failure_sub} = delete $params{report_failure_sub};
 
-    $self->{extra} = delete $params{extra};
+    if (my $extraref = delete $params{extra}) {
+        $self->{extra} = { %$extraref };
+    }
 
     # options passed, null out and reparse the params
     if (%params) {

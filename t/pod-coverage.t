@@ -4,6 +4,10 @@ use strict;
 use warnings FATAL => 'all';
 use Test::More;
 
+unless ($ENV{RELEASE_TESTING}) {
+    plan skip_all => "Not required for installation";
+    exit;
+}
 # Ensure a recent version of Test::Pod::Coverage
 my $min_tpc = 1.08;
 eval "use Test::Pod::Coverage $min_tpc";

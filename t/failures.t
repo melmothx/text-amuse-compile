@@ -7,12 +7,13 @@ use File::Spec;
 use File::Slurp qw/write_file append_file read_file/;
 use Test::More;
 
-my $xelatex = system(xelatex => '--version');
-if ($xelatex == 0) {
+my $xelatex = $ENV{TEST_WITH_LATEX};
+if ($xelatex) {
+    diag "Using XeLaTeX for testing";
     plan tests => 14;
 }
 else {
-    plan skip_all => "No xelatex installed, skipping tests\n";
+    plan skip_all => "No TEST_WITH_LATEX env found! skipping tests\n";
     exit;
 }
 

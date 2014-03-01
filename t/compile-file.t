@@ -25,14 +25,16 @@ chdir $targetdir or die $!;
 my $testnum = 43;
 
 # check if there is xelatex installed
-my $xelatex = system(xelatex => '--version');
-if ($xelatex == 0) {
+my $xelatex = $ENV{TEST_WITH_LATEX};
+if ($xelatex) {
     plan tests => $testnum;
+    diag "Testing with XeLaTeX";
 }
 else {
+    diag "No TEST_WITH_LATEX environment variable found, avoiding use of xelatex";
     plan tests => ($testnum - 1);
 }
-$xelatex = !$xelatex;
+
 
 my $tt = Text::Amuse::Compile::Templates->new;
 my $file = Text::Amuse::Compile::File->new(name => 'test',

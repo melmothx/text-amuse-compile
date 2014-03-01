@@ -1,5 +1,8 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.04 2014-03-01
+ - Disabled testing with XeLaTeX by default and fixed localtime warning
+
 0.03 2014-03-01
  - Added options to pass to the templates
 

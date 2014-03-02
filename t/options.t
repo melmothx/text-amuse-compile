@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 54;
+use Test::More tests => 92;
 use Text::Amuse::Compile;
 use File::Spec;
 use File::Slurp qw/read_file/;
@@ -13,10 +13,10 @@ my $extra = {
              siteslogan => "Hello there!",
              site => "http://mysite.org",
              sitename => "Another crappy test site",
-             size => "a4paperwithears",
+             papersize => "a4paperwithears",
              division => 9,
              fontsize => 48,
-             twoside => "twoside",
+             twoside => "true",
              bcor => "23",
              logo => "pallinopinco",
             };
@@ -67,11 +67,18 @@ for (1..2) {
         ok ((-f $f), "produced $f");
         my $c = read_file($f);
         diag substr($c, 0, 200);
-        foreach my $string (values %$returned) {
+        my %tests = %$returned;
+        delete $tests{bcor};
+        delete $tests{twoside};
+        foreach my $string (values %tests) {
             like $c, qr/\Q$string\E/, "Found $string";
         }
         like $c, qr/DIV=9/, "Found the div factor";
         like $c, qr/fontsize=48pt/, "Found the fontsize";
+        unlike $c, qr/twoside/, "oneside enforced";
+        like $c, qr/oneside/, "oneside enforced";
+        like $c, qr/BCOR=0mm/, "BCOR enforced";
+
     }
 
 
@@ -81,5 +88,41 @@ for (1..2) {
         }
     }
 }
+
+
+my $targetdir = File::Spec->catfile('t', 'testfile');
+chdir $targetdir or die $!;
+my $tt = Text::Amuse::Compile::Templates->new;
+my $file = Text::Amuse::Compile::File->new(name => 'test',
+                                           suffix => '.muse',
+                                           templates => $tt);
+
+foreach my $ext (qw/.html .tex .pdf .bare.html .epub/) {
+    my $f = $file->name . $ext;
+    if (-f $f) {
+        unlink $f or die $!;
+    }
+}
+
+for (1..2) {
+    $file->tex(%$returned);
+    my $texfile = $file->name . '.tex';
+    ok ((-f $texfile), "produced $texfile");
+    my $c = read_file($texfile);
+    diag substr($c, 0, 200);
+    my %tests = %$returned;
+    foreach my $string (values %tests) {
+        like $c, qr/\Q$string\E/, "Found $string";
+    }
+    like $c, qr/DIV=9/, "Found the div factor";
+    like $c, qr/fontsize=48pt/, "Found the fontsize";
+    like $c, qr/twoside/, "oneside not enforced";
+    unlike $c, qr/oneside/, "oneside not enforced";
+    unlike $c, qr/BCOR=0mm/, "BCOR not enforced";
+    like $c, qr/BCOR=23/, "BCOR not enforced";
+    unlink $texfile or die $!;
+}
+
+
 
 

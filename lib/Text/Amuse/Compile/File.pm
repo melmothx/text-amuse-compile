@@ -350,7 +350,7 @@ sub _compile_imposed {
     die "Missing size" unless $size;
     # the trick: first call tex with an argument, then pdf, then
     # impose, then rename.
-    $self->tex(size => "half-$size");
+    $self->tex(papersize => "half-$size");
     my $pdf = $self->pdf;
     if ($pdf) {
         my $outfile = $self->name . ".$size.pdf";
@@ -390,6 +390,9 @@ sub tex {
     foreach my $k (keys %arguments) {
         $params{$k} = $arguments{$k};
     }
+    use Data::Dumper;
+    print Dumper(\%params);
+
     $self->purge('.tex');
     $self->tt->process($self->templates->latex,
                        {

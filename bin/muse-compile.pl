@@ -103,7 +103,7 @@ only the built-in LaTeX template support them.
 Example:
 
   muse-compile --extra site=http://anarhija.net \
-               --extra size=a6 --extra division=15 --extra twoside=true \
+               --extra papersize=a6 --extra division=15 --extra twoside=true \
                --extra bcor=10mm --extra mainfont="Charis SIL" \
                --extra sitename="Testsite" \
                --extra siteslogan="Anticopyright" \

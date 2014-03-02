@@ -2,6 +2,8 @@ Revision history for perl module Text::Amuse::Compile
 
 0.05 2014-03-02
  - Force bcor=0mm and oneside=true for default .tex output
+ - Renamed option size to papersize to avoid TT problems (which would interpret
+   the size as the size of the options hashref
 
 0.04 2014-03-01
  - Disabled testing with XeLaTeX by default and fixed localtime warning

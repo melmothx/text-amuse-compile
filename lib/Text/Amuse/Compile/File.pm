@@ -390,8 +390,6 @@ sub tex {
     foreach my $k (keys %arguments) {
         $params{$k} = $arguments{$k};
     }
-    use Data::Dumper;
-    print Dumper(\%params);
 
     $self->purge('.tex');
     $self->tt->process($self->templates->latex,

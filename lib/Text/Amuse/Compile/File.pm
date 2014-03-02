@@ -287,6 +287,14 @@ meaningless, but exceptions could be raised.
 
 =item tex
 
+This method is a bit tricky, because it's called with arguments
+internally by C<lt_pdf> and C<a4_pdf>, and with no arguments before
+C<pdf>.
+
+With no arguments, this method enforces the options C<twoside=true>
+and C<bcor=0mm>, effectively ignoring the global options which affect
+the imposed output.
+
 =item pdf
 
 =item epub
@@ -364,10 +372,21 @@ sub _compile_imposed {
 sub tex {
     my ($self, @args) = @_;
     die "Wrong usage" if @args % 2;
-    my %params = %{ $self->options };
-    # arguments can override the global options, so they don't mess up too much
-    # when calling pdf-a4, for example
     my %arguments = @args;
+
+    unless (%arguments) {
+        %arguments = (
+                      twoside => 0,
+                      oneside => 1,
+                      bcor    => '0mm',
+                     );
+    }
+
+    my %params = %{ $self->options };
+    # arguments can override the global options, so they don't mess up
+    # too much when calling pdf-a4, for example. This will also
+    # override twoside, oneside, bcor for default one.
+
     foreach my $k (keys %arguments) {
         $params{$k} = $arguments{$k};
     }

@@ -76,7 +76,11 @@ The DIV of the C<typearea> package. Defaults to 12. Go and read the doc.
 =item options.bcor
 
 The BCOR of the C<typearea> package. Defaults to 0mm. Go and read the doc.
-Expected a TeX dimension like 10mm or 1in or 1.2cm
+It expects a TeX dimension like 10mm or 1in or 1.2cm.
+
+B<Please note that this has no effect on the plain PDF output>, as we,
+opinionately, force BCOR=0mm and oneside=true for this kind of output.
+But, of course, it does affect the imposed output.
 
 =item options.fontsize
 
@@ -90,11 +94,15 @@ to C<Linux Libertine O>.
 
 =item options.oneside
 
-Set it to a true value to have a oneside document. Default true
+Set it to a true value to have a oneside document. Default is true.
 
 =item options.twoside
 
-Set it to a true value to have a twosided document.
+Set it to a true value to have a twosided document. Default is false.
+
+B<Please note that this has no effect on the plain PDF output>, as we,
+opinionately, force BCOR=0mm and oneside=true for this kind of output.
+But, of course, it does affect the imposed output.
 
 =back
 

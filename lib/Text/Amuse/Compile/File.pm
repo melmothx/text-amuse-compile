@@ -322,27 +322,29 @@ switches.
 sub html {
     my $self = shift;
     $self->purge('.html');
+    my $outfile = $self->name . '.html';
     $self->tt->process($self->templates->html,
                        {
                         doc => $self->document,
                         css => ${ $self->templates->css },
                         options => $self->options,
                        },
-                       $self->name . '.html',
+                       $outfile,
                        { binmode => ':encoding(utf-8)' })
       or die $self->tt->error;
-
+    return $outfile;
 }
 
 sub bare_html {
     my $self = shift;
     $self->purge('.bare.html');
+    my $outfile = $self->name . '.bare.html';
     $self->tt->process($self->templates->bare_html,
                        {
                         doc => $self->document,
                         options => $self->options,
                        },
-                       $self->name . '.bare.html',
+                       $outfile,
                        { binmode => ':encoding(utf-8)' })
       or die $self->tt->error;
 }
@@ -364,8 +366,8 @@ sub _compile_imposed {
     # impose, then rename.
     $self->tex(papersize => "half-$size");
     my $pdf = $self->pdf;
+    my $outfile = $self->name . ".$size.pdf";
     if ($pdf) {
-        my $outfile = $self->name . ".$size.pdf";
         my $imposer = PDF::Imposition->new(
                                            file => $pdf,
                                            schema => '2up',
@@ -378,11 +380,13 @@ sub _compile_imposed {
     else {
         die "PDF was not produced!";
     }
+    return $outfile;
 }
 
 
 sub tex {
     my ($self, @args) = @_;
+    my $texfile = $self->name . '.tex';
     die "Wrong usage" if @args % 2;
     my %arguments = @args;
 
@@ -409,9 +413,10 @@ sub tex {
                         doc => $self->document,
                         options => { %params },
                        },
-                       $self->name . '.tex',
+                       $texfile,
                        { binmode => ':encoding(utf-8)' })
       or die $self->tt->error;
+    return $texfile;
 }
 
 sub pdf {
@@ -502,7 +507,6 @@ sub epub {
     my $self = shift;
     $self->purge('.epub');
     my $epubname = $self->name . '.epub';
-    unlink $epubname if -f $epubname;
 
     my $text = $self->document;
 
@@ -637,6 +641,7 @@ sub epub {
 
     # finish
     $epub->pack_zip($epubname);
+    return $epubname;
 }
 
 sub _remove_tags {

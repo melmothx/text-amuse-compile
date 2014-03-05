@@ -23,6 +23,7 @@ GetOptions (\%options,
                lt-pdf
                tex
                pdf
+               zip
                ttdir=s
                output-templates
                log=s
@@ -68,6 +69,11 @@ HTML body alone (wrapped in a C<div> tag)
 =item --tex
 
 LaTeX output
+
+=item --zip
+
+Pack the tex, the source and the html with the attachments in a zip
+file.
 
 =item --pdf
 
@@ -127,11 +133,21 @@ if ($options{extra}) {
     $args{extra} = delete $options{extra};
 }
 
+# manage some dependencies
+
+if ($options{zip}) {
+    $options{tex} = $options{html} = 1;
+}
+
+if ($options{pdf}) {
+    $options{tex} = 1;
+}
 foreach my $k (keys %options) {
     my $newk = $k;
     $newk =~ s/-/_/g;
     $args{$newk} = $options{$k};
 }
+
 
 if ($output_templates and exists $options{ttdir}) {
     if (! -d $options{ttdir}) {

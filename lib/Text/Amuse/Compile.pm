@@ -70,6 +70,10 @@ The EPUB
 
 The bare HTML, non <head>
 
+=item zip
+
+The zipped sources
+
 =item extra
 
 An hashref of key/value pairs to pass to each template in the
@@ -104,6 +108,7 @@ sub new {
                 html  => 1,
                 tex   => 1,
                 bare_html  => 1,
+                zip => 1,
                };
 
     my %params = @args;
@@ -119,7 +124,7 @@ sub new {
 
     # options passed, null out and reparse the params
     if (%params) {
-        foreach my $k (qw/pdf a4_pdf lt_pdf epub html bare_html tex/) {
+        foreach my $k (qw/pdf a4_pdf lt_pdf epub html bare_html tex zip/) {
             $self->{$k} = delete $params{$k};
         }
 
@@ -128,6 +133,10 @@ sub new {
     }
 
     bless $self, $class;
+}
+
+sub zip {
+    return shift->{zip};
 }
 
 sub tex {
@@ -265,6 +274,7 @@ sub _compile_file {
                                a4_pdf
                                lt_pdf
                                tex
+                               zip
                                pdf/) {
             if ($self->$method) {
                 eval {

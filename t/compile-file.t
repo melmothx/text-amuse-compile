@@ -22,7 +22,7 @@ binmode STDERR, ':encoding(utf-8)';
 my $targetdir = File::Spec->catfile('t', 'testfile');
 chdir $targetdir or die $!;
 
-my $testnum = 43;
+my $testnum = 59;
 
 # check if there is xelatex installed
 my $xelatex = $ENV{TEST_WITH_LATEX};
@@ -52,7 +52,7 @@ like $file->document->as_latex, qr/\\& Ćao! \\emph{another}/;
 like $file->document->as_html, qr{<em>test</em> &amp; Ćao! <em>another</em>};
 ok($file->tt);
 
-foreach my $ext (qw/.html .tex .pdf .bare.html .epub/) {
+foreach my $ext (qw/.html .tex .pdf .bare.html .epub .zip/) {
     unlink $file->name . $ext;
 }
 
@@ -84,6 +84,18 @@ ok (! -f 'test.epub');
 $file->epub;
 ok(( -f 'test.epub'), "epub found");
 
+
+ok (! -f 'test.zip');
+$file->zip;
+ok(( -f 'test.zip'), "zip found");
+
+$file->purge_all;
+
+foreach my $ext ($file->purged_extensions) {
+    ok((! -f "test$ext"), "test$ext purged");
+}
+
+
 $file = Text::Amuse::Compile::File->new(name => 'deleted',
                                         suffix => '.muse',
                                         templates => $tt);
@@ -91,14 +103,14 @@ $file = Text::Amuse::Compile::File->new(name => 'deleted',
 
 foreach my $ext ($file->purged_extensions) {
     write_file($file->name . $ext, '1');
-    ok( -f "deleted$ext");
+    ok(( -f "deleted$ext"), "deleted$ext now exists (manually)");
 }
 
 
 
 $file->mark_as_open;
 foreach my $ext ($file->purged_extensions) {
-    ok(! -f "deleted$ext", "deleted$ext purged");
+    ok(! -f "deleted$ext", "deleted$ext purged by mark_as_open");
 }
 ok(! -f 'deleted.html');
 

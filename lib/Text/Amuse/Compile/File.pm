@@ -11,6 +11,9 @@ use File::Copy qw/move/;
 # needed
 use Template;
 use EBook::EPUB;
+use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
+use File::Copy;
+use File::Spec;
 
 # ours
 use PDF::Imposition;
@@ -210,7 +213,9 @@ sub purged_extensions {
     my $self = shift;
     my @exts = (qw/.pdf .a4.pdf .lt.pdf
                    .tex .log .aux .toc .ok
-                   .html .bare.html .epub/);
+                   .html .bare.html .epub
+                   .zip
+                  /);
     return @exts;
 }
 
@@ -221,7 +226,7 @@ sub purge {
         die "wtf?" if ($ext eq '.muse');
         my $target = $basename . $ext;
         if (-f $target) {
-            # warn "Removing $target\n";
+            warn "Removing $target\n";
             unlink $target or die "Couldn't unlink $target $!";
         }
     }
@@ -302,6 +307,13 @@ the imposed output.
 =item lt_pdf
 
 =item a4_pdf
+
+=item zip
+
+The zipped sources. Beware that if you don't call html or tex before
+this, the attachments (if any) are ignored if both html and tex files
+exist. Hence, the muse-compile.pl scripts forces the --tex and --html
+switches.
 
 =back
 
@@ -455,6 +467,36 @@ sub pdf {
     }
     return $output;
 }
+
+sub zip {
+    my $self = shift;
+    $self->purge('.zip');
+    my $zipname = $self->name . '.zip';
+    my $tempdir = File::Temp->newdir;
+    my $tempdirname = $tempdir->dirname;
+    foreach my $todo (qw/tex html/) {
+        my $target = $self->name . '.' . $todo;
+        unless (-f $target) {
+            $self->$todo;
+        }
+        die "Couldn't produce $target" unless -f $target;
+        copy($target, $tempdirname)
+          or die "Couldn't copy $target in $tempdirname $!";
+    }
+    copy ($self->name . '.muse', $tempdirname);
+
+    my $text = $self->document;
+    foreach my $attach ($text->attachments) {
+        copy($attach, $tempdirname) or die $!;
+    }
+    my $zip = Archive::Zip->new;
+    $zip->addTree($tempdirname, $self->name) == AZ_OK
+      or die "Failure zipping $tempdirname";
+    $zip->writeToFileNamed($zipname) == AZ_OK
+      or die "Failure writing $zipname";
+    return $zipname;
+}
+
 
 sub epub {
     my $self = shift;

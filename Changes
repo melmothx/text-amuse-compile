@@ -1,5 +1,8 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.07 FUTURE
+ - New format: zip file with sources and attachments
+
 0.06 2014-03-02
  - Removed noisy debug (leftover of the previous change)
 

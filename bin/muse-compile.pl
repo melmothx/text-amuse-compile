@@ -77,8 +77,7 @@ file.
 
 =item --pdf
 
-PDF output. B<Beware>: the source LaTeX is not rebuilt if exists. So
-to force a rebuilding, you have to pass C<--tex --pdf>
+PDF output.
 
 =item --a4-pdf
 

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 42;
+use Test::More tests => 50;
 use Text::Amuse::Compile::Templates;
 use File::Spec::Functions qw/catfile/;
 use Data::Dumper;
@@ -11,7 +11,7 @@ use File::Temp;
 
 my $templates = Text::Amuse::Compile::Templates->new;
 
-foreach my $method (qw/html css bare_html minimal_html latex/) {
+foreach my $method (qw/html css bare_html minimal_html latex bare_latex/) {
     ok($templates->$method);
     is ref($templates->$method), 'SCALAR', "$method returns a scalar ref";
     my $got = $templates->$method;
@@ -47,7 +47,7 @@ sub populate_dir {
     my $dir = File::Temp->newdir;
     my $dirname = $dir->dirname;
     foreach my $f (qw/html.tt latex.tt bare.html
-                      minimal.html css/) {
+                      minimal.html bare-latex css/) {
         my $target = catfile($dirname, $f);
         diag "Creating $target";
         open (my $fh, ">:encoding(utf-8)", $target)

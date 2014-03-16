@@ -59,6 +59,11 @@ The built-in LaTeX template supports the following options (they are
 passed B<verbatim> and B<unescaped>, so it's your responsibility to
 filter out garbage in an exposed environment (such a web interface).
 
+=head3 bare_latex
+
+Minimal and uncomplete LaTeX chunck, meant to be used when merging
+files.
+
 =head4 Globals
 
 =over 4
@@ -166,7 +171,8 @@ sub new {
             my @templates = grep { -f catfile($dir, $_) 
                                     and
                                        /^(((bare|minimal)[_.-])?html|
-                                            latex|css)
+                                            (bare[_.-])?latex     |
+                                            css)
                                         (\.tt2?)?/x
                                } readdir($dh);
             closedir $dh;
@@ -181,7 +187,7 @@ sub new {
 
                 # manipulate the subref name
                 $t =~ s/\.(tt|tt2)//;
-                $t =~ s/\./_/g;
+                $t =~ s/[\.-]/_/g;
 
                 # populate the object with closures.
                 $self->{tt_subrefs}->{$t} = sub {
@@ -205,7 +211,7 @@ sub ttdir {
 
 sub names {
     return (qw/html minimal_html bare_html
-               css latex
+               css latex bare_latex
               /);
 }
 
@@ -722,6 +728,64 @@ EOF
     return \$latex;
 }
 
+sub bare_latex {
+    my $self = shift;
+    if (my $ref = $self->ttref('bare_latex')) {
+        return $ref;
+    }
+    my $latex =<<'LATEX';
+
+\cleardoublepage
+
+\thispagestyle{empty}
+
+\strut
+
+\phantomsection
+\addcontentsline{toc}{part}{[% doc.header_as_latex.title %]}
+
+\vspace{0.1\textheight}
+
+\begin{center}
+\huge{\textbf{[% doc.header_as_latex.title %]}\par}
+
+\bigskip
+
+[% IF doc.header_as_latex.subtitle.size %]
+\LARGE{\textbf{[% doc.header_as_latex.subtitle %]}\par}
+
+\bigskip
+[% END %]
+
+[% IF doc.header_as_latex.author.size %]
+\Large{[% doc.header_as_latex.author %]\par}
+
+\bigskip
+[% END %]
+
+[% IF doc.header_as_latex.date.size %]
+\large{[% doc.header_as_latex.date %]}
+[% END %]
+
+\end{center}
+
+\vfill
+
+\begin{center}
+
+[% doc.header_as_latex.source     %]
+
+[% doc.header_as_latex.notes      %]
+
+\end{center}
+
+\cleardoublepage
+
+[% doc.as_latex %]
+
+LATEX
+    return \$latex;
+}
 
 =head1 EXPORT
 

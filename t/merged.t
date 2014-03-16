@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 19;
+use Test::More tests => 21;
 
 use File::Spec;
 use Data::Dumper;
@@ -48,6 +48,20 @@ like $tex, qr/First file subtitle/, "Found the first text subtitle";
 like $tex, qr/Pallone Ponchi/, "Found the second file author";
 like $tex, qr/\{Second file subtitle\}/, "Found the title of the second file";
 
+is_deeply $doc->header_as_latex,
+  {
+   title => "Title is Bla \\emph{bla} bla",
+   author => "Various",
+  }, "Header as latex OK";
+
+is_deeply $doc->header_as_html,
+  {
+   title => "Title is Bla <em>bla</em> bla",
+   author => "Various",
+  }, "Header as latex OK";
+
+
+
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Templates;
 
@@ -73,3 +87,4 @@ like $outtex, qr/\\title\{Title is Bla \\emph\{bla\} bla\}/, "Doc title found";
 
 # my $outpdf = $compile->pdf;
 $compile->purge_all;
+

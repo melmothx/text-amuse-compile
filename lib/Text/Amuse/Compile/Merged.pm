@@ -103,6 +103,16 @@ sub wants_toc {
     return 1;
 }
 
+=head2 header_as_latex
+
+Returns an hashref with the LaTeX-formatted info (passed to the constructor).
+
+=head2 header_as_html
+
+Same as above, but with HTML format.
+
+=cut
+
 sub header_as_latex {
     return { %{ shift->{latex_headers} } };
 }

@@ -103,6 +103,17 @@ sub wants_toc {
     return 1;
 }
 
+=head2 is_deleted
+
+Always returns false
+
+=cut
+
+sub is_deleted {
+    return 0;
+}
+
+
 =head2 header_as_latex
 
 Returns an hashref with the LaTeX-formatted info (passed to the constructor).

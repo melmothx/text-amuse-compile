@@ -10,6 +10,7 @@ README
 t/00-load.t
 t/changes.t
 t/compile-file.t
+t/compile-merged.t
 t/compile.t
 t/failures.t
 t/manifest.t

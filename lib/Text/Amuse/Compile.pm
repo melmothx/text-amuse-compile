@@ -9,6 +9,7 @@ use File::Temp;
 
 use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::File;
+use Text::Amuse::Compile::Merged;
 use Cwd;
 
 =head1 NAME
@@ -203,7 +204,66 @@ sub version {
 Main method to get the job done, passing the list of muse files. You
 can inspect the errors calling C<errors>. It does produce some output.
 
+The file may also be an hash reference. In this case, the compile will
+act on a list of files and will merge them. Beware that so far only
+the C<pdf> and C<tex> options will work, while the other html methods
+will throw exceptions or (worse probably) produce empty files. This
+will be fixed soon. This feature is marked as B<experimental> and
+could change in the future.
 
+=head4 virtual file hashref
+
+The hash reference should have those mandatory fields:
+
+=over 4
+
+=item files
+
+An B<arrayref> of filenames without extension.
+
+=item path
+
+A mandatory directory where to find the above files.
+
+=back
+
+Optional keys
+
+=over 4
+
+=item name
+
+Default to virtual. This is the basename of the files which will be
+produced. It's up to you to provide a sensible name we don't do any
+check on that.
+
+=item suffix
+
+Defaults to '.muse' and you have no reason to change this.
+
+=back
+
+Every other key is the metadata of the new document, so usually you
+want to set C<title> and optionally C<author>.
+
+Example:
+
+  $c->compile({
+               # mandatory
+               path  => File::Spec->catdir(qw/t merged-dir/),
+               files => [qw/first second/],
+
+               # recommended
+               name  => 'my-new-test',
+               title => 'My new shiny test',
+
+               # optional
+               subtitle => 'Another one',
+               date => 'Today!',
+               source => 'Text::Amuse::Compile',
+              });
+
+You can pass as many hashref you want.
 
 =cut
 
@@ -228,10 +288,15 @@ sub compile {
         }
         else {
             open(STDERR, ">&STDOUT") or die "can't dup stdout: $!";
-            print "Working on $file in " . getcwd() . "\n";
-            eval {
-                $self->_compile_file($file);
-            };
+            if (ref($file)) {
+                print "Working on virtual file in " . getcwd(). "\n";
+                eval { $self->_compile_virtual_file($file); };
+
+            }
+            else {
+                print "Working on $file in " . getcwd() . "\n";
+                eval { $self->_compile_file($file); };
+            }
             print $@ if $@;
             # if the module is inside an eval, when we die in
             # _compile_file the exception is caught and the fork
@@ -240,6 +305,33 @@ sub compile {
         }
     }
 }
+
+sub _compile_virtual_file {
+    my ($self, $vfile) = @_;
+    # check if the reference is good
+    die "Virtual file is not a hashref" unless ref($vfile) eq 'HASH';
+    my %virtual = %$vfile;
+    my $files = delete $virtual{files};
+    die "No file list found" unless $files && @$files;
+    my $path  = delete $virtual{path};
+    die "No directory path" unless $path && -d $path;
+    chdir $path or die "Couldn't chdir into $path $!";
+    my $suffix = delete($virtual{suffix}) || '.muse';
+    my $name =   delete($virtual{name})   || 'virtual';
+
+    my @filelist = map { $_ . $suffix } @$files;
+    my $doc = Text::Amuse::Compile::Merged->new(files => \@filelist, %virtual);
+    my $muse = Text::Amuse::Compile::File->new(
+                                               name => $name,
+                                               suffix => $suffix,
+                                               templates => $self->templates,
+                                               options => { $self->extra },
+                                               document => $doc,
+                                              );
+    $self->_muse_compile($muse);
+    exit;
+}
+
 
 sub _compile_file {
     # this is called from a fork, so print to STDOUT to report.
@@ -264,7 +356,14 @@ sub _compile_file {
 
     my $muse = Text::Amuse::Compile::File->new(%args);
     die "Couldn't acquire lock on $name$suffix!" unless $muse->mark_as_open;
+    $self->_muse_compile($muse);
+    # leave the thing open
+    $muse->mark_as_closed;
+    exit;
+}
 
+sub _muse_compile {
+    my ($self, $muse) = @_;
     my @fatals;
 
     unless ($muse->is_deleted) {
@@ -296,9 +395,6 @@ sub _compile_file {
     if (@fatals) {
         die join(" ", @fatals);
     }
-    # leave the thing open
-    $muse->mark_as_closed;
-    exit;
 }
 
 =head3 report_failure($message1, $message2, ...)

@@ -24,6 +24,7 @@ WriteMakefile(
         'PDF::Imposition' => 0.05,
         # needed
         'Template' => 2.24,
+        'IO::Pipe' => 0,
         'EBook::EPUB' => 0.6,
         'File::Slurp' => 0,
         'Archive::Zip' => 0, # alread a requirement of EBook::EPUB

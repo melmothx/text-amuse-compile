@@ -16,16 +16,14 @@ if (my $pid = fork()) { # Parent
     ok($pipe->close, "Closed the pipe");
     ok(!$pipe->close, "Reclosing doesn't work");
     my $ripped = wait; # just to be sure
-    my $exit_status = $?;
-    is sprintf('%d', $? >> 8), 3, "Exit status caught correctly";
+    my $exit_status = $? >> 8;
+    ok($exit_status, "child died");
 }
 elsif (defined $pid) { # Child
     $pipe->writer();
-    close(STDERR);
-    close(STDOUT);
+    *STDOUT = *STDERR = $pipe;
     $pipe->autoflush(1);
-    print $pipe "WARN Hellow\n";
-    print $pipe "FATAL Blabla\n";
-    exit 3;
+    print "WARN Hellow\n";
+    die "FATAL Blabla\n";
 }
 

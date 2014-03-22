@@ -89,7 +89,7 @@ my @error = grep { /\Q$target\E/ } @lines;
 ok(@error >= 1);
 
 @error = grep { /Undefined control sequence/ } @lines;
-ok(@error >= 1);
+ok(@error >= 1, "Found the undefined control sequence errors");
 
 @error = grep { /Cannot chdir into/ } @lines;
 ok(@error = 2);

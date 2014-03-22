@@ -14,12 +14,12 @@ use EBook::EPUB;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use File::Copy;
 use File::Spec;
+use IO::Pipe;
 
 # ours
 use PDF::Imposition;
 use Text::Amuse;
 use Text::Amuse::Functions qw/muse_fast_scan_header/;
-
 
 
 =encoding utf8
@@ -146,6 +146,27 @@ sub tt {
     return $self->{tt};
 }
 
+sub logger {
+    return shift->{logger};
+}
+
+sub log_info {
+    my ($self, @info) = @_;
+    my $logger = $self->logger;
+    if ($logger) {
+        $logger->(@info);
+    }
+    else {
+        print @info;
+    }
+}
+
+sub log_fatal {
+    my ($self, @info) = @_;
+    $self->log_info(@info);
+    die "Fatal exception\n";
+}
+
 sub document {
     my $self = shift;
     # prevent parsing of deleted, bad file
@@ -168,7 +189,7 @@ sub mark_as_open {
     my $self = shift;
     my $lockfile = $self->lockfile;
     if ($self->_lock_is_valid) {
-        print "Locked: $lockfile\n";
+        $self->log_info("Locked: $lockfile\n");
         return 0;
     }
     else {
@@ -226,7 +247,7 @@ sub purge {
         die "wtf?" if ($ext eq '.muse');
         my $target = $basename . $ext;
         if (-f $target) {
-            warn "Removing $target\n";
+            $self->log_info("Removing $target\n");
             unlink $target or die "Couldn't unlink $target $!";
         }
     }
@@ -432,42 +453,36 @@ sub pdf {
     # 1. create the toc
     # 2. insert the toc
     # 3. adjust the toc. Should be ok, right?
-    for (1..3) {
-        my $pid = open(my $kid, "-|");
-        defined $pid or die "Can't fork: $!";
-
+    foreach my $i (1..3) {
+        my $pipe = IO::Pipe->new;
         # parent swallows the output
-        if ($pid) {
-            my $shitout;
-            while (<$kid>) {
-                my $line = $_;
-                if ($line =~ m/^[!#]/) {
-                    $shitout++;
-                }
-                if ($shitout) {
-                    print $line;
-                }
+        $pipe->reader(xelatex => '-interaction=nonstopmode', $source);
+        $pipe->autoflush(1);
+        my $shitout;
+        while (<$pipe>) {
+            my $line = $_;
+            if ($line =~ m/^[!#]/) {
+                $shitout++;
             }
-            close $kid or print "Compilation failed\n";
-            my $exit_code = $? >> 8;
-            if ($exit_code != 0) {
-                print "XeLaTeX compilation failed with exit code $exit_code\n";
-                if (-f $self->name  . '.log') {
-                    # if we have a .pdf file, this means something was
-                    # produced. Hence, remove the .pdf
-                    unlink $self->name . '.pdf';
-                    die "Bailing out!\n";
-                }
-                else {
-                    print "Skipping PDF generation\n";
-                    return;
-                }
+            if ($shitout) {
+                $self->log_info($line);
             }
         }
-        else {
-            open(STDERR, ">&STDOUT");
-            exec(xelatex => '-interaction=nonstopmode', $source)
-              or die "Can't exec xelatex $source $!";
+        wait;
+        my $exit_code = $? >> 8;
+        if ($exit_code != 0) {
+            $self->log_info("XeLaTeX compilation failed with exit code $exit_code\n");
+            if (-f $self->name  . '.log') {
+                # if we have a .pdf file, this means something was
+                # produced. Hence, remove the .pdf
+                unlink $self->name . '.pdf';
+                $self->log_info("Bailing out\n");
+                exit 2;
+            }
+            else {
+                $self->log_info("Skipping PDF generation\n");
+                return;
+            }
         }
     }
     return $output;
@@ -518,7 +533,7 @@ sub epub {
     # print Dumper(\@toc);
 
     if ($missing > 1 or $missing < 0) {
-        print Dumper(\@pieces), Dumper(\@toc);
+        $self->log_info(Dumper(\@pieces), Dumper(\@toc));
         die "This shouldn't happen: missing pieces: $missing";
     }
     elsif ($missing == 1) {

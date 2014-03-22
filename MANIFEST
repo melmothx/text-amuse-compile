@@ -15,7 +15,9 @@ t/compile.t
 t/failures.t
 t/manifest.t
 t/merged-dir/first.muse
+t/merged-dir/forth.muse
 t/merged-dir/second.muse
+t/merged-dir/third.muse
 t/merged.t
 t/options-f/dir1/1/options1.muse
 t/options-f/dir2/2/options2.muse

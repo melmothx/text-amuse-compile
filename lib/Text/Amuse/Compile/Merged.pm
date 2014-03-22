@@ -105,10 +105,10 @@ Return the english name of the main language
 
 Return the code of the main language
 
-=head2 other_language_codes
+=head2 other_languages
 
 If it's a multilingual merged text, return an arrayref of the other
-language codes, undef otherwise.
+language names, undef otherwise.
 
 =head2 other_language_codes
 
@@ -147,10 +147,6 @@ sub other_languages {
     }
 }
 
-sub select_language_fmt {
-    return '\selectlanguage{%s}';
-}
-
 =head2 as_latex
 
 Return the latex body
@@ -174,7 +170,7 @@ sub as_latex {
         }
 
         if ($doc_language ne $current_language) {
-            $output = sprintf($self->select_language_fmt, $doc_language) . "\n\n";
+            $output = sprintf('\selectlanguage{%s}', $doc_language) . "\n\n";
             $current_language = $doc_language;
         }
 

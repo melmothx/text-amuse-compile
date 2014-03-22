@@ -586,6 +586,29 @@ sub latex {
 \setmainlanguage{[% doc.language %]}
 [% END %]
 
+[% # this is a piece of ugly code, but can't be helped %]
+[% IF doc.other_languages                  -%]
+[% SET other_languages    = {}             -%]
+[% SET additional_strings = {}             -%]
+[% FOREACH language IN doc.other_languages -%]
+[%   mylang = language                     -%]
+[%     IF (language == 'macedonian') OR (language == 'russian') -%]
+[%       mylang = 'russian'                -%]
+[%       additional_string = '\newfontfamily\russianfont[Script=Cyrillic]{' _ mainfont _ '}' -%]
+[%       additional_strings.$additional_string = 1 -%]
+[%     END                                 -%]
+[%     IF (language == 'serbian')          -%]
+[%        mylang = 'croatian'              -%]
+[%     END                                 -%]
+[%   other_languages.$mylang = 1           -%]
+[% END                                     -%]
+\setotherlanguages{[%- other_languages.keys.join(',') -%]}
+[% FOREACH additional_string IN additional_strings.keys %]
+[% additional_string %]
+[% END %]
+[% END -%]
+
+
 [%- IF doc.language == 'macedonian' -%]
 \renewcaptionname{russian}{\contentsname}{Содржина}
 

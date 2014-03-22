@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 21;
+use Test::More tests => 25;
 
 use File::Spec;
 use Data::Dumper;
@@ -27,6 +27,11 @@ my $doc = Text::Amuse::Compile::Merged->new(files => [qw/first.muse second.muse/
 ok($doc);
 
 ok($doc->docs == 2);
+
+is $doc->language, 'french', "Main language is french";
+is $doc->language_code, 'fr', "Code ok";
+is_deeply $doc->other_languages, [ qw/english/ ];
+is_deeply $doc->other_language_codes, [ qw/en/ ];
 
 foreach my $d ($doc->docs) {
     ok($d->isa('Text::Amuse'));

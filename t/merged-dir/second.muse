@@ -2,6 +2,7 @@
 #subtitle Second file subtitle
 #notes This is the second file's note
 #author Pallone Ponchi
+#lang en
 
 Second file *text*
 

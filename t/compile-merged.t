@@ -13,7 +13,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-my $testnum = 9;
+my $testnum = 16;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
@@ -35,7 +35,7 @@ my $c = Text::Amuse::Compile->new(tex => 1,
 
 $c->compile({
              path  => File::Spec->catdir(qw/t merged-dir/),
-             files => [qw/first second/],
+             files => [qw/first forth second third/],
              name  => 'my-new-test',
              title => 'My new shiny test',
              subtitle => 'Another one',
@@ -57,10 +57,31 @@ like $outtex, qr/\{Second file subtitle\}/, "Found the title of the second file"
 
 like $outtex, qr/\\title\{My new shiny test}/, "Doc title found";
 
-if ($ENV{TEST_WITH_LATEX}) {
+
+like $outtex, qr/\\selectlanguage\{russian\}/, "Found language selection";
+like $outtex, qr/\\selectlanguage\{english\}/, "Found language selection";
+like $outtex, qr/\\setmainlanguage\{french\}/, "Found language selection";
+like $outtex, qr/\\setotherlanguages\{.*russian.*\}/;
+like $outtex, qr/\\setotherlanguages\{.*english.*\}/;
+like $outtex, qr/\\russianfont/;
+
+if ($xelatex) {
     ok(-f "$base.pdf");
 }
 
+my @chunks = grep { /language/ } split(/\n/, $outtex);
+
+is_deeply \@chunks, [
+                     '\setmainlanguage{french}',
+                     '\setotherlanguages{russian,english}',
+                     '\selectlanguage{russian}',
+                     '\selectlanguage{english}',
+                     '\selectlanguage{russian}',
+                    ];
+
 foreach my $ext (qw/aux log pdf tex toc/) {
-    unlink "$base.$ext" or warn $!;
+    my $remove = "$base.$ext";
+    if (-f $remove) {
+        unlink $remove or warn $!;
+    }
 }

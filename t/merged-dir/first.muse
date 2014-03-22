@@ -2,6 +2,7 @@
 #subtitle First file subtitle
 #notes This is the first file's note
 #author Pallino Pinco
+#lang fr
 
 First *file* text
 

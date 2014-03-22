@@ -45,6 +45,11 @@ for the C<files> option) properly formatted.
 
 The headers of the individual merged files go into the body.
 
+The first file determine the main language of the whole document.
+
+Anyway, if it's a multilanguage text, hyphenation is supposed to
+switch properly.
+
 =cut
 
 sub new {
@@ -52,8 +57,23 @@ sub new {
     my $files = delete $args{files};
     die "Missing files" unless $files && @$files;
     my @docs;
+    my (%languages, %language_codes);
+    my ($main_lang, $main_lang_code);
     foreach my $file (@$files) {
-        push @docs, Text::Amuse->new(file => $file);
+        my $doc = Text::Amuse->new(file => $file);
+        push @docs, $doc;
+
+        my $current_lang_code = $doc->language_code;
+        my $current_lang      = $doc->language;
+
+        # the first file determine the main language
+        $main_lang      ||= $current_lang;
+        $main_lang_code ||= $current_lang_code;
+
+        if ($main_lang ne $current_lang) {
+            $languages{$current_lang}++;
+            $language_codes{$current_lang_code}++;
+        }
     }
     my (%html_headers, %latex_headers);
     foreach my $k (keys %args) {
@@ -67,10 +87,68 @@ sub new {
                 latex_headers => \%latex_headers,
                 files   => [ @$files ],
                 docs    => \@docs,
+                language      => $main_lang,
+                language_code => $main_lang_code,
+                other_languages => \%languages,
+                other_language_codes => \%language_codes,
                 tt      => Template->new,
                 templates => Text::Amuse::Compile::Templates->new,
                };
     bless $self, $class;
+}
+
+=head2 language
+
+Return the english name of the main language
+
+=head2 language_code
+
+Return the code of the main language
+
+=head2 other_language_codes
+
+If it's a multilingual merged text, return an arrayref of the other
+language codes, undef otherwise.
+
+=head2 other_language_codes
+
+If it's a multilingual merged text, return an arrayref of the other
+language codes, undef otherwise.
+
+=cut
+
+sub language {
+    return shift->{language};
+}
+
+sub language_code {
+    return shift->{language_code},
+}
+
+sub other_language_codes {
+    my $self = shift;
+    my %langs = %{ $self->{other_language_codes} };
+    if (%langs) {
+        return [ keys %langs ];
+    }
+    else {
+        return;
+    }
+}
+
+sub other_languages {
+    my $self = shift;
+    my %langs = %{ $self->{other_languages} };
+    if (%langs) {
+        return [ keys %langs ];
+    }
+    else {
+        return;
+    }
+}
+
+sub select_language_fmt {
+    return '\selectlanguage{%s}';
 }
 
 =head2 as_latex
@@ -82,8 +160,24 @@ Return the latex body
 sub as_latex {
     my $self = shift;
     my @out;
+    my $current_language = $self->language;
+    my %lang_aliases = (
+                        macedonian => 'russian',
+                        serbian    => 'croatian',
+                       );
     foreach my $doc ($self->docs) {
-        my $output = '';
+        my $output = "\n\n";
+
+        my $doc_language = $doc->language;
+        if (my $alias = $lang_aliases{$doc_language}) {
+            $doc_language = $alias;
+        }
+
+        if ($doc_language ne $current_language) {
+            $output = sprintf($self->select_language_fmt, $doc_language) . "\n\n";
+            $current_language = $doc_language;
+        }
+
         $self->tt->process($self->templates->bare_latex,
                            { doc => $doc },
                            \$output) or die $self->tt->error;

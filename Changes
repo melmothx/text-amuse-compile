@@ -1,5 +1,8 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.11 2014-03-23
+ - Fixed test failures because of hash randomization
+
 0.10 2014-03-23
  - Use IO::Pipe instead of |- construct.
 

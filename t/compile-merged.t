@@ -13,7 +13,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-my $testnum = 16;
+my $testnum = 18;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
@@ -25,6 +25,7 @@ else {
     plan tests => ($testnum - 1);
 }
 
+diag "Creating the compiler";
 
 my $c = Text::Amuse::Compile->new(tex => 1,
                                   pdf => $xelatex,
@@ -32,6 +33,8 @@ my $c = Text::Amuse::Compile->new(tex => 1,
                                             mainfont => 'Charis SIL',
                                             papersize => 'a5',
                                            });
+
+diag "Try to compile";
 
 $c->compile({
              path  => File::Spec->catdir(qw/t merged-dir/),
@@ -43,8 +46,10 @@ $c->compile({
              source => 'Text::Amuse::Compile',
             });
 
+diag "Compiler finished, starting tests";
+
 my $base = File::Spec->catfile(qw/t merged-dir my-new-test/);
-ok(-f "$base.tex" );
+ok(-f "$base.tex", "$base.tex created");
 
 my $outtex = read_file("$base.tex", { binmode => ':encoding(utf-8)' });
 
@@ -61,23 +66,25 @@ like $outtex, qr/\\title\{My new shiny test}/, "Doc title found";
 like $outtex, qr/\\selectlanguage\{russian\}/, "Found language selection";
 like $outtex, qr/\\selectlanguage\{english\}/, "Found language selection";
 like $outtex, qr/\\setmainlanguage\{french\}/, "Found language selection";
-like $outtex, qr/\\setotherlanguages\{.*russian.*\}/;
-like $outtex, qr/\\setotherlanguages\{.*english.*\}/;
-like $outtex, qr/\\russianfont/;
+like $outtex, qr/\\setotherlanguages\{.*russian.*\}/, "Found russian lang";
+like $outtex, qr/\\setotherlanguages\{.*english.*\}/, "Found english lang";
+like $outtex, qr/\\russianfont/, "Found russian font";
 
 if ($xelatex) {
-    ok(-f "$base.pdf");
+    ok(-f "$base.pdf", "$base.pdf created");
 }
 
 my @chunks = grep { /language/ } split(/\n/, $outtex);
 
+like shift(@chunks), qr/setmainlanguage{french}/, "Found french";
+like shift(@chunks), qr/setotherlanguages{(russian|english),(russian|english)}/,
+  "Found other languages";
+  
 is_deeply \@chunks, [
-                     '\setmainlanguage{french}',
-                     '\setotherlanguages{russian,english}',
                      '\selectlanguage{russian}',
                      '\selectlanguage{english}',
                      '\selectlanguage{russian}',
-                    ];
+                    ], "Found selections in right order";
 
 foreach my $ext (qw/aux log pdf tex toc/) {
     my $remove = "$base.$ext";

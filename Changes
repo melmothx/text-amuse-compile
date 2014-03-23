@@ -1,5 +1,8 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.10 2014-03-23
+ - Use IO::Pipe instead of |- construct.
+
 0.09 2014-03-22
  - Handle the merging of files in different languages
 

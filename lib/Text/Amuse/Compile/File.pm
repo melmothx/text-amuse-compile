@@ -80,6 +80,10 @@ The L<Text::Amuse> object
 
 The L<Template> object
 
+=item logger
+
+The logger subroutine set in the constructor.
+
 =back
 
 =cut
@@ -150,23 +154,6 @@ sub logger {
     return shift->{logger};
 }
 
-sub log_info {
-    my ($self, @info) = @_;
-    my $logger = $self->logger;
-    if ($logger) {
-        $logger->(@info);
-    }
-    else {
-        print @info;
-    }
-}
-
-sub log_fatal {
-    my ($self, @info) = @_;
-    $self->log_info(@info);
-    die "Fatal exception\n";
-}
-
 sub document {
     my $self = shift;
     # prevent parsing of deleted, bad file
@@ -195,7 +182,7 @@ sub mark_as_open {
     else {
         $self->purge('.ok');
         my $header = muse_fast_scan_header($self->muse_file);
-        die "Not a muse file!" unless $header && %$header;
+        $self->log_fatal("Not a muse file!") unless $header && %$header;
         # TODO maybe use storable?
         my $localtime = localtime(time());
         $self->_write_file($lockfile, $$ . ' ' . $localtime . "\n");
@@ -210,7 +197,7 @@ sub mark_as_open {
 sub mark_as_closed {
     my $self = shift;
     my $lockfile = $self->lockfile;
-    unlink $lockfile or die "Couldn't unlink $lockfile!";
+    unlink $lockfile or $self->log_fatal("Couldn't unlink $lockfile!");
     # TODO maybe use storable?
     my $localtime = localtime(time());
     $self->_write_file($self->complete_file, $$ . ' ' . $localtime . "\n");
@@ -244,11 +231,11 @@ sub purge {
     my ($self, @exts) = @_;
     my $basename = $self->name;
     foreach my $ext (@exts) {
-        die "wtf?" if ($ext eq '.muse');
+        $self->log_fatal("wtf?") if ($ext eq '.muse');
         my $target = $basename . $ext;
         if (-f $target) {
             $self->log_info("Removing $target\n");
-            unlink $target or die "Couldn't unlink $target $!";
+            unlink $target or $self->log_fatal("Couldn't unlink $target $!");
         }
     }
 }
@@ -268,11 +255,11 @@ sub purge_latex {
 sub _write_file {
     my ($self, $target, @strings) = @_;
     open (my $fh, ">:encoding(utf-8)", $target)
-      or die "Couldn't open $target $!";
+      or $self->log_fatal("Couldn't open $target $!");
 
     print $fh @strings;
 
-    close $fh or die "Couldn't close $target";
+    close $fh or $self->log_fatal("Couldn't close $target");
     return;
 }
 
@@ -288,7 +275,7 @@ sub _lock_is_valid {
         $pid = $1;
     }
     else {
-        die "Bad lockfile!\n";
+        $self->log_fatal("Bad lockfile!\n");
     }
     close $fh;
     return unless $pid;
@@ -301,6 +288,8 @@ sub _lock_is_valid {
 }
 
 =head1 METHODS
+
+=head2 Formats
 
 Emit the respective format, saving it in a file. Return value is
 meaningless, but exceptions could be raised.
@@ -339,6 +328,7 @@ switches.
 =back
 
 =cut
+
 
 sub html {
     my $self = shift;
@@ -382,7 +372,7 @@ sub lt_pdf {
 
 sub _compile_imposed {
     my ($self, $size) = @_;
-    die "Missing size" unless $size;
+    $self->log_fatal("Missing size") unless $size;
     # the trick: first call tex with an argument, then pdf, then
     # impose, then rename.
     $self->tex(papersize => "half-$size");
@@ -399,7 +389,7 @@ sub _compile_imposed {
         $imposer->impose;
     }
     else {
-        die "PDF was not produced!";
+        $self->log_fatal("PDF was not produced!");
     }
     return $outfile;
 }
@@ -408,7 +398,7 @@ sub _compile_imposed {
 sub tex {
     my ($self, @args) = @_;
     my $texfile = $self->name . '.tex';
-    die "Wrong usage" if @args % 2;
+    $self->log_fatal("Wrong usage") if @args % 2;
     my %arguments = @args;
 
     unless (%arguments) {
@@ -447,7 +437,7 @@ sub pdf {
     unless (-f $source) {
         $self->tex;
     }
-    die "Missing source file $source!" unless -f $source;
+    $self->log_fatal("Missing source file $source!") unless -f $source;
     $self->purge_latex;
     # maybe a check on the toc if more runs are needed?
     # 1. create the toc
@@ -499,9 +489,9 @@ sub zip {
         unless (-f $target) {
             $self->$todo;
         }
-        die "Couldn't produce $target" unless -f $target;
+        $self->log_fatal("Couldn't produce $target") unless -f $target;
         copy($target, $tempdirname)
-          or die "Couldn't copy $target in $tempdirname $!";
+          or $self->log_fatal("Couldn't copy $target in $tempdirname $!");
     }
     copy ($self->name . '.muse', $tempdirname);
 
@@ -511,9 +501,9 @@ sub zip {
     }
     my $zip = Archive::Zip->new;
     $zip->addTree($tempdirname, $self->name) == AZ_OK
-      or die "Failure zipping $tempdirname";
+      or $self->log_fatal("Failure zipping $tempdirname");
     $zip->writeToFileNamed($zipname) == AZ_OK
-      or die "Failure writing $zipname";
+      or $self->log_fatal("Failure writing $zipname");
     return $zipname;
 }
 
@@ -534,7 +524,7 @@ sub epub {
 
     if ($missing > 1 or $missing < 0) {
         $self->log_info(Dumper(\@pieces), Dumper(\@toc));
-        die "This shouldn't happen: missing pieces: $missing";
+        $self->log_fatal("This shouldn't happen: missing pieces: $missing");
     }
     elsif ($missing == 1) {
         unshift @toc, {
@@ -640,7 +630,7 @@ sub epub {
 
     # attachments
     foreach my $att ($text->attachments) {
-        die "$att doesn't exist!" unless -f $att;
+        $self->log_fatal("$att doesn't exist!") unless -f $att;
         my $mime;
         if ($att =~ m/\.jpe?g$/) {
             $mime = "image/jpeg";
@@ -649,7 +639,7 @@ sub epub {
             $mime = "image/png";
         }
         else {
-            die "Unrecognized attachment $att!";
+            $self->log_fatal("Unrecognized attachment $att!");
         }
         $epub->copy_file($att, $att, $mime);
     }
@@ -684,6 +674,48 @@ sub _is_string_ok {
     return if $string eq '';
     return 1;
 }
+
+
+=head2 Logging
+
+While the C<logger> accessor holds a reference to a sub, but could be
+very well be empty, the object uses these two methods:
+
+=over 4
+
+=item log_info(@strings)
+
+If C<logger> exists, it will call it passing the strings as arguments.
+Otherwise print to the standard output.
+
+=item log_fatal(@strings)
+
+Calls C<log_info> and dies.
+
+=back
+
+=cut
+
+sub log_info {
+    my ($self, @info) = @_;
+    my $logger = $self->logger;
+    if ($logger) {
+        $logger->(@info);
+    }
+    else {
+        print @info;
+    }
+}
+
+sub log_fatal {
+    my ($self, @info) = @_;
+    $self->log_info(@info);
+    die "Fatal exception\n";
+}
+
+
+
+
 
 
 1;

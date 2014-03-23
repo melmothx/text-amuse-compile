@@ -166,14 +166,6 @@ sub templates {
     return shift->{templates};
 }
 
-sub logger {
-    my ($self, $sub) = @_;
-    if (@_ > 1) {
-        $self->{logger} = $sub;
-    }
-    return $self->{logger};
-}
-
 sub extra {
     my $self = shift;
     my $hashref = $self->{extra};
@@ -205,6 +197,22 @@ sub version {
     my $pdfv  = $PDF::Imposition::VERSION;
     return "Using Text::Amuse $musev, Text::Amuse::Compiler $selfv, " .
       "PDF::Imposition $pdfv\n";
+}
+
+=head3 logger
+
+Subroutine reference stored in the object when forking itself to
+compile the file. The parent process has this to undef. The child
+store a sub which then passes to L<Text::Amuse::Compile::File>
+
+=cut
+
+sub logger {
+    my ($self, $sub) = @_;
+    if (@_ > 1) {
+        $self->{logger} = $sub;
+    }
+    return $self->{logger};
 }
 
 =head3 compile($file1, $file2, ...);
@@ -301,7 +309,7 @@ sub compile {
         else {
             $pipe->writer;
             $pipe->autoflush(1);
-            # here we are in another process, which will compile 1
+            # here we are in another process, which will compile one
             # thing and exit.
             my $logger = sub {
                 print $pipe @_ if @_;

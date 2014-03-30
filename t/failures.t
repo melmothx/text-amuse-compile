@@ -20,7 +20,10 @@ else {
 
 my $c = Text::Amuse::Compile->new(
                                   pdf => 1,
-                                  report_failure_sub => sub { die join(" ", @_) },
+                                  report_failure_sub => sub {
+                                      my @msg = @_;
+                                      diag join(" ", @msg);
+                                      die join(" ", @msg) },
                                  );
 
 my $target = File::Spec->catfile('t', 'testfile', 'broken.muse');
@@ -56,6 +59,7 @@ ok($c->errors);
 $c->report_failure_sub(sub {
                            diag "Calling report failure with diag: "
                              . scalar (@_) . " lines";
+                           diag join(" ", @_);
                            });
 
 unlink $pdf if -f $pdf;
@@ -75,6 +79,7 @@ if (-f $log) {
 $c->report_failure_sub(sub {
                            my @errors = @_;
                            my $string = join("\n", @errors);
+                           diag $string;
                            append_file($log, "$$ report failure\n:$string\n");
                        });
 

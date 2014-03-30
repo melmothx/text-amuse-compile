@@ -29,3 +29,4 @@
 \.orig$
 \.rej$
 t/testfile/.*\.(aux|html|log|ok|pdf|tex|toc|ok|epub|lock|test)$
+t/merged-dir/.*ok$

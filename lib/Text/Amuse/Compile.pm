@@ -11,7 +11,6 @@ use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Merged;
 use Cwd;
-use IO::Pipe;
 
 =head1 NAME
 
@@ -212,6 +211,9 @@ sub logger {
     if (@_ > 1) {
         $self->{logger} = $sub;
     }
+    elsif (!$self->{logger}) {
+        $self->{logger} = sub { print @_ };
+    }
     return $self->{logger};
 }
 
@@ -286,48 +288,35 @@ You can pass as many hashref you want.
 sub compile {
     my ($self, @files) = @_;
     $self->reset_errors;
+    my $cwd = getcwd;
     foreach my $file (@files) {
-        # print "pid: $$\n";
-        # fork here before we change dir
-        my $pipe = IO::Pipe->new;
-        my $pid = fork();
-        defined $pid or die "can't fork $!";
-        if ($pid) {
-            $pipe->reader;
-            # print "$$ Kid is $pid, I'm in " . getcwd() . "\n";
-            my @report;
-            while (<$pipe>) {
-                print '# ' . $_;
-                push @report, $_;
-            }
-            wait;
-            if ($? != 0) {
-                $self->report_failure(@report,
-                                      "Failure to compile $file $!\n");
-            }
+        # print Dumper($file);
+        chdir $cwd or die "Couldn't chdir into $cwd $!";
+        my @report;
+        my $logger = sub {
+            push @report, @_;
+        };
+        $self->logger($logger);
+        if (ref($file)) {
+            $self->logger->("Working on virtual file in " . getcwd(). "\n");
+            eval { $self->_compile_virtual_file($file); };
         }
         else {
-            $pipe->writer;
-            $pipe->autoflush(1);
-            # here we are in another process, which will compile one
-            # thing and exit.
-            my $logger = sub {
-                print $pipe @_ if @_;
-            };
-            $self->logger($logger);
-            if (ref($file)) {
-                $self->logger->("Working on virtual file in " . getcwd(). "\n");
-                # those eval are needed if some parent eval catch the exception
-                # and never reaching the exit;
-                eval { $self->_compile_virtual_file($file); };
-            }
-            else {
-                $self->logger->("Working on $file in " . getcwd() . "\n");
-                eval { $self->_compile_file($file); };
-            }
-            print $pipe $@ if $@;
-            $@ ? exit 2 : exit 0;
+            $self->logger->("Working on $file in " . getcwd() . "\n");
+            eval { $self->_compile_file($file); };
         }
+        my $fatal;
+        if ($@) {
+            $fatal = 1;
+            $self->logger->($@);
+        }
+        chdir $cwd or die "Couldn't chdir into $cwd $!";
+        if ($fatal) {
+            $self->report_failure(@report,
+                                  "Failure to compile $file\n");
+        }
+        $self->logger(undef);
+        undef @report;
     }
 }
 
@@ -353,9 +342,9 @@ sub _compile_virtual_file {
                                                options => { $self->extra },
                                                document => $doc,
                                                logger => $self->logger,
+                                               virtual => 1,
                                               );
     $self->_muse_compile($muse);
-    exit;
 }
 
 
@@ -382,15 +371,13 @@ sub _compile_file {
                );
 
     my $muse = Text::Amuse::Compile::File->new(%args);
-    die "Couldn't acquire lock on $name$suffix!" unless $muse->mark_as_open;
     $self->_muse_compile($muse);
-    # leave the thing open
-    $muse->mark_as_closed;
-    exit;
 }
 
 sub _muse_compile {
     my ($self, $muse) = @_;
+    die "Couldn't acquire lock on " . $muse->name . $muse->suffix . '!'
+      unless $muse->mark_as_open;
     my @fatals;
 
     unless ($muse->is_deleted) {
@@ -422,6 +409,7 @@ sub _muse_compile {
     if (@fatals) {
         die join(" ", @fatals);
     }
+    $muse->mark_as_closed;
 }
 
 =head3 report_failure($message1, $message2, ...)
@@ -454,9 +442,13 @@ sub report_failure_sub {
 
 sub report_failure {
     my ($self, @args) = @_;
+    # print "Reporting the failure..\n";
     $self->add_errors(@args);
     if ($self->report_failure_sub) {
         $self->report_failure_sub->(@args);
+    }
+    else {
+        print join('\n', @args);
     }
 }
 

@@ -43,6 +43,10 @@ Constructor. Accepts the following named parameters:
 
 =item name
 
+=item virtual
+
+If it's a virtual file which doesn't exit on the disk (a merged one)
+
 =item suffix
 
 =item templates
@@ -100,6 +104,10 @@ sub new {
 
 sub name {
     return shift->{name};
+}
+
+sub virtual {
+    return shift->{virtual};
 }
 
 sub options {
@@ -181,12 +189,17 @@ sub mark_as_open {
     }
     else {
         $self->purge('.ok');
-        my $header = muse_fast_scan_header($self->muse_file);
-        $self->log_fatal("Not a muse file!") unless $header && %$header;
-        # TODO maybe use storable?
+        my $deleted;
+        # it could be virtual
+        if (!$self->virtual) {
+            my $header = muse_fast_scan_header($self->muse_file);
+            $self->log_fatal("Not a muse file!") unless $header && %$header;
+            $deleted = $header->{DELETED};
+            # TODO maybe use storable?
+        }
         my $localtime = localtime(time());
         $self->_write_file($lockfile, $$ . ' ' . $localtime . "\n");
-        $self->_set_is_deleted($header->{DELETED});
+        $self->_set_is_deleted($deleted);
         if ($self->is_deleted) {
             $self->purge_all;
         }
@@ -268,7 +281,8 @@ sub _lock_is_valid {
     my $lockfile = $self->lockfile;
     return unless -f $lockfile;
     # TODO use storable instead
-    open (my $fh, '<', $lockfile) or die $!;
+    open (my $fh, '<', $lockfile)
+      or $self->log_fatal("Couldn't open $lockfile $!");
     my $pid;
     my $string = <$fh>;
     if ($string =~ m/^(\d+)/) {
@@ -342,7 +356,7 @@ sub html {
                        },
                        $outfile,
                        { binmode => ':encoding(utf-8)' })
-      or die $self->tt->error;
+      or $self->log_fatal($self->tt->error);
     return $outfile;
 }
 
@@ -357,7 +371,7 @@ sub bare_html {
                        },
                        $outfile,
                        { binmode => ':encoding(utf-8)' })
-      or die $self->tt->error;
+      or $self->log_fata($self->tt->error);
 }
 
 sub a4_pdf {
@@ -426,7 +440,7 @@ sub tex {
                        },
                        $texfile,
                        { binmode => ':encoding(utf-8)' })
-      or die $self->tt->error;
+      or self->log_fatal($self->tt->error);
     return $texfile;
 }
 
@@ -466,8 +480,7 @@ sub pdf {
                 # if we have a .pdf file, this means something was
                 # produced. Hence, remove the .pdf
                 unlink $self->name . '.pdf';
-                $self->log_info("Bailing out\n");
-                exit 2;
+                $self->log_fatal("Bailing out\n");
             }
             else {
                 $self->log_info("Skipping PDF generation\n");
@@ -497,7 +510,8 @@ sub zip {
 
     my $text = $self->document;
     foreach my $attach ($text->attachments) {
-        copy($attach, $tempdirname) or die $!;
+        copy($attach, $tempdirname)
+          or $self->log_fatal("Couldn't copy $attach to $tempdirname $!");
     }
     my $zip = Archive::Zip->new;
     $zip->addTree($tempdirname, $self->name) == AZ_OK
@@ -593,7 +607,7 @@ sub epub {
                         options => $self->options,
                        },
                        \$firstpage)
-      or die $self->tt->error;
+      or $self->log_fatal($self->tt->error);
 
     my $tpid = $epub->add_xhtml("titlepage.xhtml", $firstpage);
     my $order = 0;
@@ -618,7 +632,7 @@ sub epub {
                             text => $fi,
                            },
                            \$xhtml)
-          or die $self->tt->error;
+          or $self->log_fatal($self->tt->error);
 
         my $id = $epub->add_xhtml($filename, $xhtml);
 
@@ -690,7 +704,7 @@ Otherwise print to the standard output.
 
 =item log_fatal(@strings)
 
-Calls C<log_info> and dies.
+Calls C<log_info>, remove the lock and dies.
 
 =back
 
@@ -710,6 +724,10 @@ sub log_info {
 sub log_fatal {
     my ($self, @info) = @_;
     $self->log_info(@info);
+    my $lockfile = $self->lockfile;
+    if (-f $lockfile) {
+        unlink $lockfile or $self->log_fatal("Couldn't unlink lockfile!");
+    }
     die "Fatal exception\n";
 }
 

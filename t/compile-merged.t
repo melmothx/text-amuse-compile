@@ -13,7 +13,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-my $testnum = 18;
+my $testnum = 20;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
@@ -77,14 +77,13 @@ if ($xelatex) {
 my @chunks = grep { /language/ } split(/\n/, $outtex);
 
 like shift(@chunks), qr/setmainlanguage{french}/, "Found french";
-like shift(@chunks), qr/setotherlanguages{(russian|english),(russian|english)}/,
+like shift(@chunks), qr/setotherlanguages{(russian,english|english,russian)}/,
   "Found other languages";
-  
-is_deeply \@chunks, [
-                     '\selectlanguage{russian}',
-                     '\selectlanguage{english}',
-                     '\selectlanguage{russian}',
-                    ], "Found selections in right order";
+
+
+foreach my $l (qw/russian english russian/) {
+    like shift(@chunks), qr/\\selectlanguage\{\Q$l\E\}/, "Found $l";
+}
 
 foreach my $ext (qw/aux log pdf tex toc/) {
     my $remove = "$base.$ext";

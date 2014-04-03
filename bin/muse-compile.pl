@@ -10,6 +10,7 @@ use File::Path qw/mkpath/;
 use File::Spec::Functions qw/catfile/;
 use Pod::Usage;
 use File::Slurp qw/append_file/;
+use Encode;
 
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
@@ -129,7 +130,11 @@ my $output_templates = delete $options{'output-templates'};
 my $logfile = delete $options{log};
 
 if ($options{extra}) {
-    $args{extra} = delete $options{extra};
+    my $extras = delete $options{extra};
+    foreach my $k (keys %$extras) {
+        $extras->{$k} = decode('utf-8', $extras->{$k});
+    }
+    $args{extra} = $extras;
 }
 
 # manage some dependencies

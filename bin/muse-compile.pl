@@ -106,6 +106,8 @@ This option can be repeated at will. The key/value pairs will be
 passed to every template we process, regardless of the type, even if
 only the built-in LaTeX template support them.
 
+The input is assumed to be UTF-8 (if you pass non-ascii characters)
+
 Example:
 
   muse-compile --extra site=http://anarhija.net \

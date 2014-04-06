@@ -25,4 +25,7 @@ ok (-f catfile($base, qw/t recursive-dir f .hidden prova.muse/),
 ok (-f catfile($base, qw/t recursive-dir f .hidden.muse/),
     "Hidden file in directory exists, but it's not listed");
 
+ok (-f catfile($base, qw/t recursive-dir f not_reported.muse/),
+    "File with underscore in directory exists, but it's not listed");
+
 

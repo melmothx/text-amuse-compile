@@ -6,6 +6,7 @@ use warnings FATAL => 'all';
 
 use File::Basename;
 use File::Temp;
+use File::Find;
 
 use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::File;
@@ -227,6 +228,75 @@ sub logger {
     return $self->{logger};
 }
 
+=head3 recursive_compile($directory)
+
+Compile recursive a directory, comparing the timestamps of the status
+file with the muse file. If the status file is newer, the file is
+ignored.
+
+Return a list of absolute path to the files processed. To infer the
+success or the failure of each file look at the status file or at the
+logs.
+
+=head3 find_muse_files($directory)
+
+Return a sorted list of files with extension .muse excluding illegal
+names (including hidden files)  and directories.
+
+=head3 find_new_muse_files($directory)
+
+As above, but check the age of the status file and skip already
+processed files.
+
+=cut
+
+sub find_muse_files {
+    my ($self, $dir) = @_;
+    my @files;
+    die "$dir is not a dir" unless ($dir && -d $dir);
+    find( sub {
+              my $file = $_;
+              # file only
+              return unless -f $file;
+              return unless $file =~ m/^[0-9a-z][0-9a-z-]+[0-9a-z]+\.muse$/;
+              # exclude hidden directories
+              if ($File::Find::dir =~ m/\./) {
+                  my @dirs = File::Spec->splitdir($File::Find::dir);
+                  my @dots = grep { m/^\./ } @dirs;
+                  return if @dots;
+              }
+              push @files, File::Spec->rel2abs($file);
+          }, $dir);
+    return sort @files;
+}
+
+sub find_new_muse_files {
+    my ($self, $dir) = @_;
+    my @candidates = $self->find_muse_files($dir);
+    my @newf;
+    my $mtime = 9;
+    while (@candidates) {
+        my $f = shift(@candidates);
+        die "I was expecting a file here" unless $f && -f $f;
+        my $status = $f;
+        $status =~ s/\.muse$/.status/;
+        if (! -f $status) {
+            push @newf, $f;
+        }
+        elsif ((stat($f))[$mtime] > (stat($status))[$mtime]) {
+            push @newf, $f;
+        }
+    }
+    return @newf;
+}
+
+sub recursive_compile {
+    my ($self, $dir) = @_;
+    my @found = $self->find_new_muse_files($dir);
+    my @compiled;
+}
+
+
 =head3 compile($file1, $file2, ...);
 
 Main method to get the job done, passing the list of muse files. You
@@ -299,6 +369,7 @@ sub compile {
     my ($self, @files) = @_;
     $self->reset_errors;
     my $cwd = getcwd;
+    my @compiled;
     foreach my $file (@files) {
         # print Dumper($file);
         chdir $cwd or die "Couldn't chdir into $cwd $!";
@@ -325,9 +396,13 @@ sub compile {
             $self->report_failure(@report,
                                   "Failure to compile $file\n");
         }
+        else {
+            push @compiled, $file;
+        }
         $self->logger(undef);
         undef @report;
     }
+    return @compiled;
 }
 
 sub _compile_virtual_file {

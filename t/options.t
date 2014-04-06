@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 92;
+use Test::More tests => 101;
 use Text::Amuse::Compile;
 use File::Spec;
 use File::Slurp qw/read_file/;
@@ -24,9 +24,11 @@ my $extra = {
 my $compile = Text::Amuse::Compile->new(
                                         extra => $extra,
                                         tex   => 1,
+                                        cleanup => 1,
                                        );
 
 is_deeply({ $compile->extra }, $extra, "extra options stored" );
+ok ($compile->cleanup);
 
 my $returned = { $compile->extra };
 
@@ -38,15 +40,14 @@ is_deeply({ $compile->extra }, $returned );
 my @targets;
 my @results;
 my @okfiles;
+my @statusfiles;
 foreach my $i (qw/1 2/) {
     my $target = File::Spec->catfile('t','options-f', 'dir' . $i, $i,
                                      'options' . $i);
-    my $muse = $target . '.muse';
-    my $tex  = $target . '.tex';
-    my $okfile = $target . '.ok';
-    push @results, $tex;
-    push @targets, $muse;
-    push @okfiles, $okfile;
+    push @results, $target . '.tex';
+    push @targets, $target . '.muse';
+    push @okfiles, $target . '.ok';
+    push @statusfiles, $target . '.status';
 }
 
 
@@ -61,8 +62,9 @@ foreach my $f (@results, @okfiles) {
 
 # twice to check the option persistence
 for (1..2) {
+    diag "Run $_";
     $compile->compile(@targets);
-
+    diag "Compilation finished";
     foreach my $f (@results) {
         ok ((-f $f), "produced $f");
         my $c = read_file($f);
@@ -81,11 +83,13 @@ for (1..2) {
 
     }
 
-
-    foreach my $f (@results, @okfiles) {
+    foreach my $f (@results) {
         if (-f $f) {
             unlink $f or die $!;
         }
+    }
+    foreach my $f (@okfiles, @statusfiles) {
+        ok ((! -e $f), File::Spec->rel2abs($f) . " was removed!");
     }
 }
 
@@ -95,6 +99,7 @@ chdir $targetdir or die $!;
 my $tt = Text::Amuse::Compile::Templates->new;
 my $file = Text::Amuse::Compile::File->new(name => 'test',
                                            suffix => '.muse',
+                                           cleanup => 1,
                                            templates => $tt);
 
 foreach my $ext (qw/.html .tex .pdf .bare.html .epub/) {
@@ -103,6 +108,8 @@ foreach my $ext (qw/.html .tex .pdf .bare.html .epub/) {
         unlink $f or die $!;
     }
 }
+
+diag "Working in $targetdir";
 
 for (1..2) {
     $file->tex(%$returned);

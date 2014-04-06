@@ -66,6 +66,8 @@ an hash, not as a reference, to protect it from mangling.
 
 =item complete_file
 
+=item status_file
+
 =item mark_as_closed
 
 =item mark_as_open
@@ -87,6 +89,10 @@ The L<Template> object
 =item logger
 
 The logger subroutine set in the constructor.
+
+=item cleanup
+
+Remove auxiliary files (like the complete file and the status file)
 
 =back
 
@@ -139,6 +145,10 @@ sub muse_file {
 
 sub complete_file {
     return shift->name . '.ok';
+}
+
+sub status_file {
+    return shift->name . '.status';
 }
 
 sub is_deleted {
@@ -280,6 +290,7 @@ sub _lock_is_valid {
     my $self = shift;
     my $lockfile = $self->lockfile;
     return unless -f $lockfile;
+    warn "Found a lockfile: " . File::Spec->rel2abs($lockfile);
     # TODO use storable instead
     open (my $fh, '<', $lockfile)
       or $self->log_fatal("Couldn't open $lockfile $!");
@@ -287,6 +298,7 @@ sub _lock_is_valid {
     my $string = <$fh>;
     if ($string =~ m/^(\d+)/) {
         $pid = $1;
+        warn "Found pid $pid in the lockfile (I am $$)\n";
     }
     else {
         $self->log_fatal("Bad lockfile!\n");
@@ -731,9 +743,16 @@ sub log_fatal {
     die "Fatal exception\n";
 }
 
-
-
-
-
+sub cleanup {
+    my $self = shift;
+    foreach my $f ($self->complete_file, $self->status_file) {
+        if (-f $f) {
+            unlink $f or $self->log_fatal("Couldn't unlink $f $!");
+        }
+        else {
+            $self->log_info("Couldn't find " . File::Spec->rel2abs($f));
+        }
+    }
+}
 
 1;

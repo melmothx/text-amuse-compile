@@ -161,7 +161,7 @@ if ($output_templates and exists $options{ttdir}) {
     }
 }
 
-my $compiler = Text::Amuse::Compile->new(%args);
+my $compiler = Text::Amuse::Compile->new(%args, cleanup => 1);
 if ($logfile) {
     if ($logfile !~ m/\.log$/) {
         warn "Appending .log to $logfile\n";

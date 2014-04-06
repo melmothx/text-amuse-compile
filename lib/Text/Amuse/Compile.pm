@@ -42,6 +42,10 @@ Format options (by default all of them are activated);
 
 =over 4
 
+=item cleanup
+
+Remove auxiliary files after compilation (.status, .ok)
+
 =item tex
 
 LaTeX output
@@ -122,6 +126,8 @@ sub new {
         $self->{extra} = { %$extraref };
     }
 
+    $self->{cleanup} = delete $params{cleanup};
+
     # options passed, null out and reparse the params
     if (%params) {
         foreach my $k (qw/pdf a4_pdf lt_pdf epub html bare_html tex zip/) {
@@ -163,6 +169,10 @@ sub bare_html {
 
 sub templates {
     return shift->{templates};
+}
+
+sub cleanup {
+    return shift->{cleanup};
 }
 
 sub extra {
@@ -410,6 +420,7 @@ sub _muse_compile {
         die join(" ", @fatals);
     }
     $muse->mark_as_closed;
+    $muse->cleanup if $self->cleanup;
 }
 
 =head3 report_failure($message1, $message2, ...)
@@ -448,7 +459,7 @@ sub report_failure {
         $self->report_failure_sub->(@args);
     }
     else {
-        print join('\n', @args);
+        print join("\n", @args);
     }
 }
 

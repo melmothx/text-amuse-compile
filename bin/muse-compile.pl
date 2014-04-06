@@ -29,6 +29,8 @@ GetOptions (\%options,
                output-templates
                log=s
                extra=s%
+               no-cleanup
+               recursive=s
                help/);
 
 if ($options{help}) {
@@ -100,6 +102,11 @@ Option to populated the above directory with the built-in templates.
 
 A file where we can append the report failures
 
+=item --no-cleanup
+
+Prevent the removing of the status file. This is turned on if you use
+--recursive, to prevent multiple runs to compile everything again.
+
 =item --extra key:value
 
 This option can be repeated at will. The key/value pairs will be
@@ -121,6 +128,14 @@ Keep in mind that in this case C<mylogo> has to be or an absolute
 filename (not reccomended, because the full path will remain in the
 .tex source), or a basename (even without extension) which can be
 found by C<kpsewhich>.
+
+=item --recursive <directory>
+
+Using this options, the target directory and a recursive compiling is
+started, finding all the .muse files without a newer status file, and
+compiling them accordingly to the options.
+
+No target files can be specified.
 
 =back
 
@@ -148,6 +163,14 @@ if ($options{zip}) {
 if ($options{pdf}) {
     $options{tex} = 1;
 }
+
+my $recursive  = delete $options{recursive};
+my $cleanup = 1;
+
+if (delete($options{'no-cleanup'}) || $recursive) {
+    $cleanup = 0;
+}
+
 foreach my $k (keys %options) {
     my $newk = $k;
     $newk =~ s/-/_/g;
@@ -161,7 +184,8 @@ if ($output_templates and exists $options{ttdir}) {
     }
 }
 
-my $compiler = Text::Amuse::Compile->new(%args, cleanup => 1);
+my $compiler = Text::Amuse::Compile->new(%args, cleanup => $cleanup);
+
 if ($logfile) {
     if ($logfile !~ m/\.log$/) {
         warn "Appending .log to $logfile\n";
@@ -198,7 +222,16 @@ if ($output_templates) {
     }
 }
 
-$compiler->compile(@ARGV);
+if ($recursive) {
+    die "Too many arguments passed with compile!" if @ARGV;
+    die "$recursive is not a directory" unless -d $recursive;
+    print "Starting recursive compilation against $recursive\n";
+    my @results = $compiler->recursive_compile($recursive);
+    print "Found and compiled the following files: " . join("\n", @results) . "\n";
+}
+else {
+    $compiler->compile(@ARGV);
+}
 
 if ($compiler->errors) {
     $logfile ||= "above";

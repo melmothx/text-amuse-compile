@@ -22,7 +22,7 @@ binmode STDERR, ':encoding(utf-8)';
 my $targetdir = File::Spec->catfile('t', 'testfile');
 chdir $targetdir or die $!;
 
-my $testnum = 60;
+my $testnum = 59;
 
 # check if there is xelatex installed
 my $xelatex = $ENV{TEST_WITH_LATEX};
@@ -46,9 +46,8 @@ is($file->name, 'test');
 is($file->suffix, '.muse');
 ok($file->templates->html);
 ok(!$file->is_deleted);
-is($file->complete_file, 'test.ok');
 is($file->status_file, 'test.status');
-is($file->lockfile, 'test.lock');
+is($file->lock_file, 'test.lock');
 like $file->document->as_latex, qr/\\& Ćao! \\emph{another}/;
 like $file->document->as_html, qr{<em>test</em> &amp; Ćao! <em>another</em>};
 ok($file->tt);

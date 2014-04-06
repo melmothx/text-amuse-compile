@@ -19,4 +19,6 @@ Text-Amuse-Compile-*
 Text-Amuse-Compile-*.tar.gz
 t/testfile/*
 !t/testfile/*.muse
-t/merged-dir/*ok
+t/merged-dir/*status
+
+

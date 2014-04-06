@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 101;
+use Test::More tests => 97;
 use Text::Amuse::Compile;
 use File::Spec;
 use File::Slurp qw/read_file/;
@@ -39,21 +39,19 @@ is_deeply({ $compile->extra }, $returned );
 
 my @targets;
 my @results;
-my @okfiles;
 my @statusfiles;
 foreach my $i (qw/1 2/) {
     my $target = File::Spec->catfile('t','options-f', 'dir' . $i, $i,
                                      'options' . $i);
     push @results, $target . '.tex';
     push @targets, $target . '.muse';
-    push @okfiles, $target . '.ok';
     push @statusfiles, $target . '.status';
 }
 
 
 
 
-foreach my $f (@results, @okfiles) {
+foreach my $f (@results) {
     if (-f $f) {
         unlink $f or die $!;
     }
@@ -88,7 +86,7 @@ for (1..2) {
             unlink $f or die $!;
         }
     }
-    foreach my $f (@okfiles, @statusfiles) {
+    foreach my $f (@statusfiles) {
         ok ((! -e $f), File::Spec->rel2abs($f) . " was removed!");
     }
 }

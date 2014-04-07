@@ -92,4 +92,3 @@ like $outtex, qr/\\title\{Title is Bla \\emph\{bla\} bla\}/, "Doc title found";
 
 # my $outpdf = $compile->pdf;
 $compile->purge_all;
-

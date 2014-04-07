@@ -20,6 +20,7 @@ else {
 
 my $c = Text::Amuse::Compile->new(
                                   pdf => 1,
+                                  cleanup => 1,
                                   report_failure_sub => sub {
                                       my @msg = @_;
                                       diag join(" ", @msg);

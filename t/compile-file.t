@@ -52,7 +52,7 @@ like $file->document->as_latex, qr/\\& Ćao! \\emph{another}/;
 like $file->document->as_html, qr{<em>test</em> &amp; Ćao! <em>another</em>};
 ok($file->tt);
 
-foreach my $ext (qw/.html .tex .pdf .bare.html .epub .zip/) {
+foreach my $ext (qw/.html .tex .pdf .bare.html .epub .zip .status/) {
     unlink $file->name . $ext;
 }
 
@@ -114,3 +114,4 @@ foreach my $ext ($file->purged_extensions) {
 }
 ok(! -f 'deleted.html');
 
+$file->cleanup;

@@ -85,7 +85,7 @@ foreach my $l (qw/russian english russian/) {
     like shift(@chunks), qr/\\selectlanguage\{\Q$l\E\}/, "Found $l";
 }
 
-foreach my $ext (qw/aux log pdf tex toc/) {
+foreach my $ext (qw/aux log pdf tex toc status/) {
     my $remove = "$base.$ext";
     if (-f $remove) {
         unlink $remove or warn $!;

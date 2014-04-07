@@ -31,6 +31,7 @@ GetOptions (\%options,
                extra=s%
                no-cleanup
                recursive=s
+               dry-run
                help/);
 
 if ($options{help}) {
@@ -137,6 +138,11 @@ compiling them accordingly to the options.
 
 No target files can be specified.
 
+=item --dry-run
+
+For recursive compile, you can pass this option to just list the files
+which would be compiled.
+
 =back
 
 =cut
@@ -166,6 +172,12 @@ if ($options{pdf}) {
 
 my $recursive  = delete $options{recursive};
 my $cleanup = 1;
+my $dry_run = delete $options{'dry-run'};
+
+if ($dry_run && !$recursive) {
+    die "dry-run is supported only for recursive compile\n";
+}
+
 
 if (delete($options{'no-cleanup'}) || $recursive) {
     $cleanup = 0;
@@ -226,8 +238,21 @@ if ($recursive) {
     die "Too many arguments passed with compile!" if @ARGV;
     die "$recursive is not a directory" unless -d $recursive;
     print "Starting recursive compilation against $recursive\n";
-    my @results = $compiler->recursive_compile($recursive);
-    print "Found and compiled the following files: " . join("\n", @results) . "\n";
+    my @results;
+    if ($dry_run) {
+        @results = $compiler->find_new_muse_files($recursive);
+        print "[dry-run mode, nothing will be done]\n";
+    }
+    else {
+        @results = $compiler->recursive_compile($recursive);
+    }
+    if (@results) {
+        print "Found and compiled the following files:\n"
+          . join("\n", @results) . "\n";
+    }
+    else {
+        print "Nothing to do\n";
+    }
 }
 else {
     $compiler->compile(@ARGV);

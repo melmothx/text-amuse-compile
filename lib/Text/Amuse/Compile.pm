@@ -286,14 +286,16 @@ sub find_new_muse_files {
         elsif ((stat($f))[$mtime] > (stat($status))[$mtime]) {
             push @newf, $f;
         }
+        # else {
+        #     print "Skipping $f\n";
+        # }
     }
     return @newf;
 }
 
 sub recursive_compile {
     my ($self, $dir) = @_;
-    my @found = $self->find_new_muse_files($dir);
-    my @compiled;
+    return $self->compile($self->find_new_muse_files($dir));
 }
 
 

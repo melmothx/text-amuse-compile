@@ -211,9 +211,7 @@ sub version {
 
 =head3 logger
 
-Subroutine reference stored in the object when forking itself to
-compile the file. The parent process has this to undef. The child
-store a sub which then passes to L<Text::Amuse::Compile::File>
+Subroutine reference for logging.
 
 =cut
 
@@ -373,10 +371,14 @@ sub compile {
     my $cwd = getcwd;
     my @compiled;
     foreach my $file (@files) {
-        # print Dumper($file);
         chdir $cwd or die "Couldn't chdir into $cwd $!";
         my @report;
         my $logger = sub {
+            my @args = @_;
+            foreach my $arg (@args) {
+                chomp $arg;
+                print "# $arg\n";
+            }
             push @report, @_;
         };
         $self->logger($logger);
@@ -488,7 +490,7 @@ sub _muse_compile {
                     my $ext = $method;
                     $ext =~ s/_/./g;
                     $ext = '.' . $ext;
-                    $self->logger->("Created " . $muse->name . $ext . "\n");
+                    $self->logger->("* Created " . $muse->name . $ext . "\n");
                 }
             }
         }

@@ -1,5 +1,14 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.13 2014-04-07
+ - Restored slightly verbose logging
+ - Added recursive compilation
+ - Added --recursive and --dry-run to muse-compile.pl
+ - Use a status file instead of dummy .ok
+ - Added cleanup option to remove the status file
+ - Decode --extra arguments passed on the command line
+ - Hopefully fixed tests on Win32
+
 0.12 2014-03-30
  - Remove the use of fork when compiling (save for the latex exec)
  - Improved logging

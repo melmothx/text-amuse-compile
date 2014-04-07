@@ -26,6 +26,13 @@ t/pipe-exec.t
 t/pipe.t
 t/pod-coverage.t
 t/pod.t
+t/recursive-dir/a/af/a-file.muse
+t/recursive-dir/f/.hidden.muse
+t/recursive-dir/f/.hidden/prova.muse
+t/recursive-dir/f/ff/first-file.muse
+t/recursive-dir/f/not_reported.muse
+t/recursive-dir/z/zf/z-file.muse
+t/recursive.t
 t/templates.t
 t/testfile/broken.muse
 t/testfile/deep/deep/dir/logo.png

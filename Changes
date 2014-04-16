@@ -1,5 +1,8 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.14 2014-04-15
+ - Adjusted code and tests for directory names with dots
+
 0.13 2014-04-07
  - Restored slightly verbose logging
  - Added recursive compilation

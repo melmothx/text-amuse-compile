@@ -19,11 +19,11 @@ Text::Amuse::Compile - Compiler for Text::Amuse
 
 =head1 VERSION
 
-Version 0.13
+Version 0.14
 
 =cut
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 =head1 SYNOPSIS
 
@@ -239,7 +239,7 @@ logs.
 =head3 find_muse_files($directory)
 
 Return a sorted list of files with extension .muse excluding illegal
-names (including hidden files)  and directories.
+names (including hidden files and directories).
 
 =head3 find_new_muse_files($directory)
 
@@ -260,6 +260,12 @@ sub find_muse_files {
               # exclude hidden directories
               if ($File::Find::dir =~ m/\./) {
                   my @dirs = File::Spec->splitdir($File::Find::dir);
+
+                  # for the purpose of filtering, the leading . is harmless
+                  if (@dirs && $dirs[0] && $dirs[0] eq '.') {
+                      shift(@dirs);
+                  }
+
                   my @dots = grep { m/^\./ } @dirs;
                   return if @dots;
               }
@@ -284,9 +290,6 @@ sub find_new_muse_files {
         elsif ((stat($f))[$mtime] > (stat($status))[$mtime]) {
             push @newf, $f;
         }
-        # else {
-        #     print "Skipping $f\n";
-        # }
     }
     return @newf;
 }

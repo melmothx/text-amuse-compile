@@ -461,6 +461,33 @@ div#tableofcontents{
 	font-weight: normal;
 	font-size: 8pt;
 }
+
+
+/* footnotes */
+
+a.footnote, a.footnotebody {
+    font-size: 8pt;
+    line-height: 0;
+    vertical-align: super;
+}
+
+* + p.fnline {
+    margin-top: 3em;
+    border-top: 1px solid black;
+    padding-top: 2em;
+}
+
+p.fnline + p.fnline {
+    margin-top: 1em;
+    border-top: none;
+    padding-top: 0;
+}
+
+p.fnline {
+    font-size: 8pt;
+}
+/* end footnotes */
+
 EOF
     return \$css;
 }

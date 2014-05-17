@@ -21,7 +21,7 @@ WriteMakefile(
     PREREQ_PM => {
         # ours
         'Text::Amuse' => 0.11,
-        'PDF::Imposition' => 0.05,
+        'PDF::Imposition' => 0.07,
         # needed
         'Template' => 2.24,
         'IO::Pipe' => 0,

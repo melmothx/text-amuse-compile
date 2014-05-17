@@ -20,5 +20,7 @@ Text-Amuse-Compile-*.tar.gz
 t/testfile/*
 !t/testfile/*.muse
 t/merged-dir/*status
-
+t/manual/*
+!t/manual/manual.muse
+!t/manual/logo.png
 

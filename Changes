@@ -1,5 +1,8 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.15 2014-05-17
+ - Added --extra cover and --extra cover-width keys and documentation
+
 0.14 2014-04-15
  - Adjusted code and tests for directory names with dots
 

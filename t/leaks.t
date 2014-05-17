@@ -1,8 +1,9 @@
 #!perl
 use strict;
 use constant HAS_LEAKTRACE => eval{ require Test::LeakTrace };
-use Test::More (HAS_LEAKTRACE && $ENV{RELEASE_TESTING}) ? 
-  (tests => 1) : (skip_all => 'require Test::LeakTrace and RELEASE_TESTING');
+use Test::More (HAS_LEAKTRACE && $ENV{RELEASE_TESTING} && $ENV{TEST_WITH_LATEX}) ?
+  (tests => 1) :
+  (skip_all => 'require Test::LeakTrace and RELEASE_TESTING and TEST_WITH_LATEX');
 use Test::LeakTrace;
 use Text::Amuse::Compile;
 use File::Spec;

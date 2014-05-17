@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 97;
+use Test::More tests => 127;
 use Text::Amuse::Compile;
 use File::Spec;
 use File::Slurp qw/read_file/;
@@ -19,6 +19,8 @@ my $extra = {
              twoside => "true",
              bcor => "23",
              logo => "pallinopinco",
+             cover => "mycover.pdf",
+             coverwidth => "4.13cm",
             };
 
 my $compile = Text::Amuse::Compile->new(
@@ -66,7 +68,7 @@ for (1..2) {
     foreach my $f (@results) {
         ok ((-f $f), "produced $f");
         my $c = read_file($f);
-        diag substr($c, 0, 200);
+        # diag substr($c, 0, 200);
         my %tests = %$returned;
         delete $tests{bcor};
         delete $tests{twoside};
@@ -76,9 +78,11 @@ for (1..2) {
         like $c, qr/DIV=9/, "Found the div factor";
         like $c, qr/fontsize=48pt/, "Found the fontsize";
         unlike $c, qr/twoside/, "oneside enforced";
-        like $c, qr/oneside/, "oneside enforced";
-        like $c, qr/BCOR=0mm/, "BCOR enforced";
-
+        like $c, qr/oneside/, "oneside enforced on single pdf";
+        like $c, qr/BCOR=0mm/, "BCOR validated and enforced";
+        unlike $c, qr/\\maketitle/;
+        like $c, qr/includegraphics\[width=4.13cm\]\{mycover.pdf\}/;
+        like $c, qr/\\tableofcontents/;
     }
 
     foreach my $f (@results) {
@@ -114,7 +118,7 @@ for (1..2) {
     my $texfile = $file->name . '.tex';
     ok ((-f $texfile), "produced $texfile");
     my $c = read_file($texfile);
-    diag substr($c, 0, 200);
+    # diag substr($c, 0, 200);
     my %tests = %$returned;
     foreach my $string (values %tests) {
         like $c, qr/\Q$string\E/, "Found $string";
@@ -125,6 +129,9 @@ for (1..2) {
     unlike $c, qr/oneside/, "oneside not enforced";
     unlike $c, qr/BCOR=0mm/, "BCOR not enforced";
     like $c, qr/BCOR=23/, "BCOR not enforced";
+    unlike $c, qr/\\maketitle/;
+    like $c, qr/includegraphics\[width=4.13cm\]\{mycover.pdf\}/;
+    like $c, qr/\\tableofcontents/;
     unlink $texfile or die $!;
 }
 

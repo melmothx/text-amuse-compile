@@ -32,7 +32,7 @@ GetOptions (\%options,
                no-cleanup
                recursive=s
                dry-run
-               help/);
+               help/) or die "Bad option passed!\n";
 
 if ($options{help}) {
     pod2usage("Using Text::Amuse::Compile version " .
@@ -123,12 +123,50 @@ Example:
                --extra bcor=10mm --extra mainfont="Charis SIL" \
                --extra sitename="Testsite" \
                --extra siteslogan="Anticopyright" \
-               --extra logo=mylogo file.muse
+               --extra logo=mylogo \
+               --extra cover=mycover.pdf \
+               file.muse
 
 Keep in mind that in this case C<mylogo> has to be or an absolute
-filename (not reccomended, because the full path will remain in the
+filename (not recommended, because the full path will remain in the
 .tex source), or a basename (even without extension) which can be
-found by C<kpsewhich>.
+found by C<kpsewhich> (or a file in the current directory, if you
+aren't doing a recursive compilation). Same applies for C<cover>.
+
+Supported extra keys (documented in L<Text::Amuse::Compile::Templates>):
+
+B<No validation is done, as it's supposed to be run by a trusted,
+local user>.
+
+=over 4
+
+=item * papersize (common values: a4, a5, letter)
+
+=item * mainfont (grep fc-list -l for the correct name)
+
+=item * fontsize (10pt, 11pt, 12pt)
+
+=item * oneside (true or false)
+
+=item * twoside (true or false)
+
+=item * bcor (binding correction for inner margins)
+
+=item * sitename
+
+=item * siteslogan
+
+=item * site
+
+=item * logo (filename)
+
+=item * cover (filename for front cover)
+
+=item * coverwidth (dimension of the cover image, es '4.5cm')
+
+=item * division (the DIV factor for margin control)
+
+=back
 
 =item --recursive <directory>
 

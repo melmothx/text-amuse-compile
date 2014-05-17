@@ -60,7 +60,7 @@ find sub {
         push @scan, [ $File::Find::name, (stat($_))[9] ];
     } }, catdir(qw/t recursive-dir/);
 
-diag Dumper(\@scan);
+# diag Dumper(\@scan);
 
 @found = $compiler->find_new_muse_files(catdir(qw/t recursive-dir/));
 

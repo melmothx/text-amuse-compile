@@ -3,15 +3,14 @@ use strict;
 use warnings;
 use utf8;
 use Test::More;
-use Memory::Usage;
-use Test::Memory::Cycle;
 use Text::Amuse::Compile;
 use Data::Dumper;
 use File::Spec;
 
 eval "use Test::Memory::Cycle; use Memory::Usage";
-if ($@ || !$ENV{TEST_WITH_LATEX} || !$ENV{RELEASE_TESTING}) {
-    plan skip_all => "Test::Memory::Cycle required for testing memory cycles";
+if ($@ || !$ENV{TEST_WITH_LATEX} ||
+    !$ENV{RELEASE_TESTING} || !$ENV{TEST_WITH_LATEX}) {
+    plan skip_all => "Not required for installation";
     exit;
 }
 else {

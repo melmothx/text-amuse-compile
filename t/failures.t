@@ -10,7 +10,7 @@ use Test::More;
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
     diag "Using XeLaTeX for testing";
-    plan tests => 14;
+    plan tests => 15;
 }
 else {
     plan skip_all => "No TEST_WITH_LATEX env found! skipping tests\n";
@@ -53,7 +53,8 @@ eval {
     $c->compile($target);
 };
 
-ok($@, "Now the compiler dies");
+ok($@, "Now the compiler dies with $@");
+like $@, qr/Undefined control sequence/;
 ok($c->errors);
 
 

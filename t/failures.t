@@ -6,11 +6,12 @@ use Text::Amuse::Compile;
 use File::Spec;
 use File::Slurp qw/write_file append_file read_file/;
 use Test::More;
+use Cwd;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
     diag "Using XeLaTeX for testing";
-    plan tests => 15;
+    plan tests => 16;
 }
 else {
     plan skip_all => "No TEST_WITH_LATEX env found! skipping tests\n";
@@ -40,7 +41,12 @@ if (-f $tex) {
     unlink $tex or die $!;
 }
 
+diag "In " . getcwd();
+
 $c->compile($target);
+
+diag "In " . getcwd();
+
 ok(!$c->errors);
 ok(-f $pdf);
 ok(-f $tex);
@@ -49,12 +55,18 @@ diag "Overwriting .tex with garbage";
 
 write_file($tex, "\\laskdflasdf\\bye");
 
+my $logged;
+$c->logger(sub {
+               for (@_) { $logged .= $_ };
+           });
 eval {
     $c->compile($target);
 };
 
+diag "In " . getcwd();
+
 ok($@, "Now the compiler dies with $@");
-like $@, qr/Undefined control sequence/;
+like $logged, qr/Undefined control sequence/, "Logged ok";
 ok($c->errors);
 
 
@@ -66,6 +78,8 @@ $c->report_failure_sub(sub {
 
 unlink $pdf if -f $pdf;
 
+diag "In " . getcwd();
+
 $c->compile($target);
 ok($c->errors);
 
@@ -74,21 +88,34 @@ ok((! -f $pdf), "Now we're still alive");
 my $log = $target;
 $log =~ s/muse$/test/;
 
+
+
 if (-f $log) {
     unlink $log or die $!;
 }
 
+diag "In " . getcwd();
+
+
+diag $log;
+my $logfile = File::Spec->rel2abs($log);
+diag $logfile;
+
+$c->logger(sub {
+               append_file($logfile, @_);
+           });
+
+my $failure = 0;
+
 $c->report_failure_sub(sub {
-                           my @errors = @_;
-                           my $string = join("\n", @errors);
-                           diag $string;
-                           append_file($log, "$$ report failure\n:$string\n");
+                           $failure = 1
                        });
 
 $c->compile($target, "t/lasdf/asd.muse", "t/alkasdf/alsf.text");
 ok($c->errors);
 
-ok((-f $log), "Found $log");
+ok((-f $logfile), "Found $logfile");
+ok($failure, "Failure set to 1 via sub");
 
 my @lines = read_file($log);
 

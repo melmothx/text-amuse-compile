@@ -122,6 +122,7 @@ sub new {
       Text::Amuse::Compile::Templates->new(ttdir => delete($params{ttdir}));
 
     $self->{report_failure_sub} = delete $params{report_failure_sub};
+    $self->{logger} = delete $params{logger};
 
     if (my $extraref = delete $params{extra}) {
         $self->{extra} = { %$extraref };
@@ -209,9 +210,10 @@ sub version {
       "PDF::Imposition $pdfv\n";
 }
 
-=head3 logger
+=head3 logger($sub)
 
-Subroutine reference for logging.
+Accessor/setter for the subroutine which will handle the logging.
+Defaults to printing to the standard output.
 
 =cut
 
@@ -375,16 +377,6 @@ sub compile {
     my @compiled;
     foreach my $file (@files) {
         chdir $cwd or die "Couldn't chdir into $cwd $!";
-        my @report;
-        my $logger = sub {
-            my @args = @_;
-            foreach my $arg (@args) {
-                chomp $arg;
-                print "# $arg\n";
-            }
-            push @report, @_;
-        };
-        $self->logger($logger);
         if (ref($file)) {
             $self->logger->("Working on virtual file in " . getcwd(). "\n");
             eval { $self->_compile_virtual_file($file); };
@@ -393,21 +385,15 @@ sub compile {
             $self->logger->("Working on $file in " . getcwd() . "\n");
             eval { $self->_compile_file($file); };
         }
-        my $fatal;
-        if ($@) {
-            $fatal = 1;
-            $self->logger->($@);
-        }
+        my $fatal = $@;
         chdir $cwd or die "Couldn't chdir into $cwd $!";
         if ($fatal) {
-            $self->report_failure(@report,
-                                  "Failure to compile $file\n");
+            $self->logger->($fatal);
+            $self->report_failure("Failure to compile $file: $fatal\n");
         }
         else {
             push @compiled, $file;
         }
-        $self->logger(undef);
-        undef @report;
     }
     return @compiled;
 }

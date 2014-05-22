@@ -7,8 +7,12 @@ use Test::More (HAS_LEAKTRACE && $ENV{RELEASE_TESTING} && $ENV{TEST_WITH_LATEX})
 use Test::LeakTrace;
 use Text::Amuse::Compile;
 use File::Spec;
- 
+
 no_leaks_ok {
+    my @logs;
+    my $logger = sub {
+        push @logs, @_;
+    };
     my %opt = (
                'bare_html' => '1',
                'pdf' => '1',
@@ -29,11 +33,13 @@ no_leaks_ok {
                            'bcor' => '1cm'
                           },
                'tex' => '1',
-               'a4_pdf' => '1'
+               'a4_pdf' => '1',
+               'logger' => $logger,
               );
 
     my $compiler = Text::Amuse::Compile->new(%opt);
     my $target = File::Spec->catfile(qw/t manual manual.muse/);
     $compiler->compile($target);
     $compiler->compile($target);
+    diag "found logs: " . scalar(@logs);
 }, "No leaks found";

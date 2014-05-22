@@ -1,5 +1,8 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.16 2014-05-22
+ - Adjusted logger
+
 0.15 2014-05-17
  - Added --extra cover and --extra cover-width keys and documentation
 

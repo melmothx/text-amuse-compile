@@ -389,7 +389,8 @@ sub compile {
         chdir $cwd or die "Couldn't chdir into $cwd $!";
         if ($fatal) {
             $self->logger->($fatal);
-            $self->report_failure("Failure to compile $file: $fatal\n");
+            $self->add_errors("$file $fatal");
+            $self->report_failure_sub->($file);
         }
         else {
             push @compiled, $file;
@@ -491,45 +492,28 @@ sub _muse_compile {
     $muse->cleanup if $self->cleanup;
 }
 
-=head3 report_failure($message1, $message2, ...)
+=head3 report_failure_sub(sub { push @problems, $_[0] });
 
-This method is called when the compilation of a file raises an
-exception, so it's for internal usage.
+You can set the sub to be used to report problems using this accessor.
+It will receive as first argument the file which lead to failure.
 
-It passes the arguments along to C<report_failure_sub> as a list if
-you set that to a sub, otherwise it prints to the standard error.
-
-=head3 report_failure_sub(sub { my @problems = @_ ; print @problems });
-
-You can set the sub to be used to report problems using this accessor,
-which is supposed to receive the list of messages. 
+The actual errors are logged by the C<logger> sub.
 
 =cut
 
 sub report_failure_sub {
     my ($self, $sub) = @_;
-    if ($sub) {
-        if (ref($sub) eq 'CODE') {
-            $self->{report_failure_sub} = $sub;
-        }
-        else {
-            die "First argument must be a sub!";
-        }
+    if (@_ > 1) {
+        $self->{report_failure_sub} = $sub;
+    }
+    elsif (!$self->{report_failure_sub}) {
+        $self->{report_failure_sub} = sub {
+            print "Failure to compile $_[0]\n";
+        };
     }
     return $self->{report_failure_sub};
 }
 
-sub report_failure {
-    my ($self, @args) = @_;
-    # print "Reporting the failure..\n";
-    $self->add_errors(@args);
-    if ($self->report_failure_sub) {
-        $self->report_failure_sub->(@args);
-    }
-    else {
-        print join("\n", @args);
-    }
-}
 
 =head3 errors
 

@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More tests => 2;
 use Text::Amuse::Compile;
 
 
@@ -11,9 +11,17 @@ my $logger = sub {
     $counter++;
 };
 
-my $c = Text::Amuse::Compile->new(logger => $logger);
+my @errors;
+
+my $c = Text::Amuse::Compile->new(logger => $logger,
+                                  report_failure_sub => sub {
+                                      push @errors, $_[0];
+                                  });
 
 $c->compile('laksdfljalsdkfj.muse');
+
+is_deeply(\@errors, ['laksdfljalsdkfj.muse']);
+
 ok $counter;
 
 

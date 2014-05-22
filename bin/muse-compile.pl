@@ -236,16 +236,16 @@ if ($output_templates and exists $options{ttdir}) {
 
 my $compiler = Text::Amuse::Compile->new(%args, cleanup => $cleanup);
 
+$compiler->report_failure_sub(sub {
+                                  print "Failure to compile $_[0]\n";
+                              });
+
 if ($logfile) {
     if ($logfile !~ m/\.log$/) {
-        warn "Appending .log to $logfile\n";
+        warn "Appending log to $logfile\n";
     }
-    print "Using $logfile to report errors\n";
-
-    $compiler->report_failure_sub(sub {
-                                      my @errors = @_;
-                                      append_file($logfile, @errors);
-                                  });
+    print "Logging output in $logfile\n";
+    $compiler->logger(sub { print @_; append_file($logfile, @_ ) });
 }
 
 print $compiler->version;

@@ -495,7 +495,7 @@ sub _muse_compile {
 =head3 report_failure_sub(sub { push @problems, $_[0] });
 
 You can set the sub to be used to report problems using this accessor.
-It will receive as first argument the file which lead to failure.
+It will receive as first argument the file which led to failure.
 
 The actual errors are logged by the C<logger> sub.
 

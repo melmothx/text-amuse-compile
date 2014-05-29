@@ -7,6 +7,7 @@ use warnings FATAL => 'all';
 use File::Basename;
 use File::Temp;
 use File::Find;
+use File::Spec;
 
 use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::File;
@@ -19,11 +20,11 @@ Text::Amuse::Compile - Compiler for Text::Amuse
 
 =head1 VERSION
 
-Version 0.16
+Version 0.17
 
 =cut
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 =head1 SYNOPSIS
 
@@ -98,23 +99,41 @@ The directory where to look for templates, named as format.tt
 
 You can retrieve the value by calling them on the object.
 
+=head3 available_methods
+
+Return a list of all the available compilation methods
+
+=head3 compile_methods
+
+Return the list of the methods which are going to be used.
+
 =cut
+
+sub available_methods {
+    return (qw/bare_html html
+               epub
+               a4_pdf lt_pdf
+               tex zip
+               pdf/);
+}
+
+sub compile_methods {
+    my $self = shift;
+    my @out;
+    foreach my $m ($self->available_methods) {
+        if ($self->$m) {
+            push @out, $m;
+        }
+    }
+    return @out;
+}
 
 sub new {
     my ($class, @args) = @_;
     # available options by default
     die "Wrong usage" if @args % 2;
 
-    my $self = {
-                pdf   => 1,
-                a4_pdf => 1,
-                lt_pdf => 1,
-                epub  => 1,
-                html  => 1,
-                tex   => 1,
-                bare_html  => 1,
-                zip => 1,
-               };
+    my $self = { map { $_ => 1 } $class->available_methods };
 
     my %params = @args;
 
@@ -132,7 +151,7 @@ sub new {
 
     # options passed, null out and reparse the params
     if (%params) {
-        foreach my $k (qw/pdf a4_pdf lt_pdf epub html bare_html tex zip/) {
+        foreach my $k ($class->available_methods) {
             $self->{$k} = delete $params{$k};
         }
 
@@ -460,28 +479,17 @@ sub _muse_compile {
     my @fatals;
 
     unless ($muse->is_deleted) {
-        foreach my $method (qw/bare_html
-                               html
-                               epub
-                               a4_pdf
-                               lt_pdf
-                               tex
-                               zip
-                               pdf/) {
-            if ($self->$method) {
-                eval {
-                    $muse->$method;
-                };
-                if ($@) {
-                    push @fatals, $@;
-                    last;
-                }
-                else {
-                    my $ext = $method;
-                    $ext =~ s/_/./g;
-                    $ext = '.' . $ext;
-                    $self->logger->("* Created " . $muse->name . $ext . "\n");
-                }
+        foreach my $method ($self->compile_methods) {
+            eval {
+                $muse->$method;
+            };
+            if ($@) {
+                push @fatals, $@;
+                last;
+            }
+            else {
+                my $output = $muse->name . $self->_suffix_for_method($method);
+                $self->logger->("* Created $output\n");
             }
         }
     }
@@ -490,6 +498,44 @@ sub _muse_compile {
     }
     $muse->mark_as_closed;
     $muse->cleanup if $self->cleanup;
+}
+
+sub _suffix_for_method {
+    my ($self, $method) = @_;
+    return unless $method;
+    my $ext = $method;
+    $ext =~ s/_/./g;
+    $ext = '.' . $ext;
+    return $ext;
+}
+
+=head3 file_needs_compilation
+
+Returns true if the file has already been compiled, false if some
+output file is missing or stale.
+
+=cut
+
+sub file_needs_compilation {
+    my ($self, $file) = @_;
+    die "Bad usage" unless $file;
+    die "$file is not a file" unless -f $file;
+    my ($name, $path, $suffix) = fileparse($file, '.muse');
+    die "Bad usage, not a muse file" unless $suffix;
+    my $need = 0;
+    my $mtime = 9;
+    foreach my $m ($self->compile_methods) {
+        my $outsuffix = $self->_suffix_for_method($m);
+        my $outfile = File::Spec->catfile($path, $name . $outsuffix);
+        if (-f $outfile and (stat($outfile))[$mtime] > (stat($file))[$mtime]) {
+            next;
+        }
+        else {
+            $need = 1;
+            last;
+        }
+    }
+    return $need;
 }
 
 =head3 report_failure_sub(sub { push @problems, $_[0] });

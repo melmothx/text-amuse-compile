@@ -24,6 +24,7 @@ t/merged-dir/forth.muse
 t/merged-dir/second.muse
 t/merged-dir/third.muse
 t/merged.t
+t/methods.t
 t/options-f/dir1/1/options1.muse
 t/options-f/dir2/2/options2.muse
 t/options.t

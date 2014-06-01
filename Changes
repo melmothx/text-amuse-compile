@@ -1,5 +1,8 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.18 FUTURE
+ - Set the language code in the html tag in the HTML output
+
 0.17 2014-05-29
  - Added method to see if a file has already been compiled
 

@@ -13,6 +13,7 @@ t/compile-file.t
 t/compile-merged.t
 t/compile.t
 t/failures.t
+t/langs.t
 t/leaks.t
 t/logger.t
 t/manifest.t

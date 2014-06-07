@@ -66,13 +66,9 @@ an hash, not as a reference, to protect it from mangling.
 
 =item status_file
 
-=item mark_as_closed
-
-=item mark_as_open
+=item check_status
 
 =item purged_extensions
-
-=item lock_file
 
 =item muse_file
 
@@ -132,10 +128,6 @@ sub templates {
     return shift->{templates};
 }
 
-sub lock_file {
-    return shift->name . '.lock';
-}
-
 sub muse_file {
     my $self = shift;
     return $self->name . $self->suffix;
@@ -184,44 +176,20 @@ sub document {
     return $self->{document};
 }
 
-sub mark_as_open {
+sub check_status {
     my $self = shift;
-    my $lock_file = $self->lock_file;
-    if ($self->_lock_is_valid) {
-        $self->log_info("Locked: $lock_file\n");
-        return 0;
+    my $deleted;
+    # it could be virtual
+    if (!$self->virtual) {
+        my $header = muse_fast_scan_header($self->muse_file);
+        $self->log_fatal("Not a muse file!") unless $header && %$header;
+        $deleted = $header->{DELETED};
+        # TODO maybe use storable?
     }
-    else {
-        my $deleted;
-        # it could be virtual
-        if (!$self->virtual) {
-            my $header = muse_fast_scan_header($self->muse_file);
-            $self->log_fatal("Not a muse file!") unless $header && %$header;
-            $deleted = $header->{DELETED};
-            # TODO maybe use storable?
-        }
-        my $localtime = localtime(time());
-        $self->_write_file($lock_file, $$ . ' ' . $localtime . "\n");
-        $self->_set_is_deleted($deleted);
-        if ($self->is_deleted) {
-            $self->purge_all;
-            $self->_update_status_file('DELETED');
-        }
-        else {
-            $self->_update_status_file('STARTED');
-        }
-        return 1;
-    }
+    $self->purge_all if $deleted;
+    $self->_set_is_deleted($deleted);
 }
 
-sub mark_as_closed {
-    my $self = shift;
-    my $lock_file = $self->lock_file;
-    unlink $lock_file or $self->log_fatal("Couldn't unlink $lock_file!");
-    # TODO maybe use storable?
-    my $localtime = localtime(time());
-    $self->_write_file($self->status_file, $$ . ' OK ' . $localtime . "\n");
-}
 
 =head2 purge_all
 
@@ -254,7 +222,7 @@ sub purge {
         $self->log_fatal("wtf?") if ($ext eq '.muse');
         my $target = $basename . $ext;
         if (-f $target) {
-            $self->log_info("Removing $target\n");
+            # $self->log_info("Removing $target\n");
             unlink $target or $self->log_fatal("Couldn't unlink $target $!");
         }
     }
@@ -283,32 +251,6 @@ sub _write_file {
     return;
 }
 
-sub _lock_is_valid {
-    my $self = shift;
-    my $lock_file = $self->lock_file;
-    return unless -f $lock_file;
-    warn "Found a lock_file: " . File::Spec->rel2abs($lock_file);
-    # TODO use storable instead
-    open (my $fh, '<', $lock_file)
-      or $self->log_fatal("Couldn't open $lock_file $!");
-    my $pid;
-    my $string = <$fh>;
-    if ($string =~ m/^(\d+)/) {
-        $pid = $1;
-        warn "Found pid $pid in the lock_file (I am $$)\n";
-    }
-    else {
-        $self->log_fatal("Bad lock_file!\n");
-    }
-    close $fh;
-    return unless $pid;
-    if (kill 0, $pid) {
-        return 1;
-    }
-    else {
-        return;
-    }
-}
 
 =head1 METHODS
 
@@ -733,10 +675,6 @@ sub log_info {
 sub log_fatal {
     my ($self, @info) = @_;
     $self->log_info(@info);
-    my $lock_file = $self->lock_file;
-    if (-f $lock_file) {
-        unlink $lock_file or die("Couldn't unlink lock_file!");
-    }
     die "Fatal exception\n";
 }
 
@@ -752,11 +690,5 @@ sub cleanup {
     }
 }
 
-sub _update_status_file {
-    my ($self, $msg) = @_;
-    $msg ||= '??';
-    my $localtime = localtime();
-    $self->_write_file($self->status_file, "$$ $msg $localtime\n");
-}
 
 1;

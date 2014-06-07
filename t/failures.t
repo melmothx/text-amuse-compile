@@ -11,7 +11,7 @@ use Cwd;
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
     diag "Using XeLaTeX for testing";
-    plan tests => 16;
+    plan tests => 18;
 }
 else {
     plan skip_all => "No TEST_WITH_LATEX env found! skipping tests\n";
@@ -21,7 +21,7 @@ else {
 
 my $c = Text::Amuse::Compile->new(
                                   pdf => 1,
-                                  cleanup => 1,
+                                  cleanup => 0,
                                   report_failure_sub => sub {
                                       my @msg = @_;
                                       diag join(" ", @msg);
@@ -31,8 +31,11 @@ my $c = Text::Amuse::Compile->new(
 my $target = File::Spec->catfile('t', 'testfile', 'broken.muse');
 my $pdf = $target;
 my $tex = $target;
+my $status = $target;
 $pdf =~ s/muse$/pdf/;
 $tex =~ s/muse$/tex/;
+$status =~ s/muse$/status/;
+my $statusline;
 
 if (-f $pdf) {
     unlink $pdf or die $!;
@@ -50,6 +53,10 @@ diag "In " . getcwd();
 ok(!$c->errors);
 ok(-f $pdf);
 ok(-f $tex);
+$statusline = read_file($status);
+like $statusline, qr/^OK /, "Status file reported correctly $statusline";
+
+
 
 diag "Overwriting .tex with garbage";
 
@@ -62,6 +69,9 @@ $c->logger(sub {
 eval {
     $c->compile($target);
 };
+
+$statusline = read_file($status);
+like $statusline, qr/^FAILED/, "Status file reported correctly: $statusline";
 
 diag "In " . getcwd();
 
@@ -129,7 +139,7 @@ ok(@error >= 1, "Found the undefined control sequence errors");
 ok(@error = 2);
 
 unlink $tex or die $!;
-
+unlink $status or die $!;
 ok($c->errors);
 $c->compile($target);
 ok(!$c->errors);

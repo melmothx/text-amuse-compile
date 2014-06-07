@@ -8,6 +8,7 @@ use File::Spec;
 use Data::Dumper;
 use File::Slurp;
 
+use Text::Amuse::Compile;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Templates;
 
@@ -22,7 +23,7 @@ binmode STDERR, ':encoding(utf-8)';
 my $targetdir = File::Spec->catfile('t', 'testfile');
 chdir $targetdir or die $!;
 
-my $testnum = 59;
+my $testnum = 73;
 
 # check if there is xelatex installed
 my $xelatex = $ENV{TEST_WITH_LATEX};
@@ -47,7 +48,6 @@ is($file->suffix, '.muse');
 ok($file->templates->html);
 ok(!$file->is_deleted);
 is($file->status_file, 'test.status');
-is($file->lock_file, 'test.lock');
 like $file->document->as_latex, qr/\\& Ćao! \\emph{another}/;
 like $file->document->as_html, qr{<em>test</em> &amp; Ćao! <em>another</em>};
 ok($file->tt);
@@ -108,10 +108,25 @@ foreach my $ext ($file->purged_extensions) {
 
 
 
-$file->mark_as_open;
+diag "Calling check_status";
+$file->check_status;
 foreach my $ext ($file->purged_extensions) {
     ok(! -f "deleted$ext", "deleted$ext purged by mark_as_open");
 }
 ok(! -f 'deleted.html');
 
 $file->cleanup;
+
+my $c = Text::Amuse::Compile->new;
+
+$c->compile('deleted.muse');
+
+ok(-f "deleted.status", "Found the deleted.status file");
+my $line = read_file('deleted.status');
+like $line, qr/^DELETED/, "status file marked as deleted";
+
+
+foreach my $ext ($file->purged_extensions) {
+    ok(! -f "deleted$ext", "deleted$ext doesn't exist");
+}
+ok(! -f 'deleted.html');

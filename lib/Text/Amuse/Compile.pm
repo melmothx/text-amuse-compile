@@ -12,7 +12,9 @@ use File::Spec;
 use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Merged;
+
 use Cwd;
+use Fcntl qw/:flock/;
 
 =head1 NAME
 
@@ -85,6 +87,10 @@ The zipped sources
 An hashref of key/value pairs to pass to each template in the
 C<options> namespace.
 
+=item debug
+
+Slow down the compilation sleeping for a while. DO NOT USE.
+
 =back
 
 Template directory:
@@ -142,7 +148,7 @@ sub new {
 
     $self->{report_failure_sub} = delete $params{report_failure_sub};
     $self->{logger} = delete $params{logger};
-
+    $self->{debug} = delete  $params{debug};
     if (my $extraref = delete $params{extra}) {
         $self->{extra} = { %$extraref };
     }
@@ -194,6 +200,10 @@ sub templates {
 
 sub cleanup {
     return shift->{cleanup};
+}
+
+sub debug {
+    return shift->{debug};
 }
 
 sub extra {
@@ -447,10 +457,8 @@ sub _compile_virtual_file {
 
 
 sub _compile_file {
-    # this is called from a fork, so print to STDOUT to report.
-    # STDERR is duped to STDOUT so warn/print/die is the same.
     my ($self, $file) = @_;
-
+    die "$file is not a file" unless $file && -f $file;
     # parse the filename and chdir there.
     my ($name, $path, $suffix) = fileparse($file, '.muse', '.txt');
 
@@ -472,13 +480,39 @@ sub _compile_file {
     $self->_muse_compile($muse);
 }
 
+# write the  status file and unlock it after that.
+
+sub _write_status_file {
+    my ($self, $fh, $status) = @_;
+    my $localtime = localtime();
+    my %avail = (
+                 FAILED => 1,
+                 DELETED => 1,
+                 OK => 1,
+                );
+    die unless $avail{$status};
+    print $fh "$status $$ $localtime\n";
+    flock($fh, LOCK_UN) or die "Cannot unlock status file\n";
+    close $fh;
+}
+
 sub _muse_compile {
     my ($self, $muse) = @_;
-    die "Couldn't acquire lock on " . $muse->name . $muse->suffix . '!'
-      unless $muse->mark_as_open;
-    my @fatals;
+    my $statusfile = $muse->status_file;
+    open (my $fhlock, '>:encoding(utf-8)', $statusfile)
+      or die "Cannot open $statusfile\n!";
+    flock($fhlock, LOCK_EX | LOCK_NB) or die "Cannot acquire lock on $statusfile";
 
-    unless ($muse->is_deleted) {
+    if ($self->debug) {
+        sleep 5;
+    }
+    my @fatals;
+    $muse->check_status;
+    if ($muse->is_deleted) {
+        $self->_write_status_file($fhlock, 'DELETED');
+        return;
+    }
+    else {
         foreach my $method ($self->compile_methods) {
             eval {
                 $muse->$method;
@@ -494,9 +528,12 @@ sub _muse_compile {
         }
     }
     if (@fatals) {
+        $self->_write_status_file($fhlock, 'FAILED');
         die join(" ", @fatals);
     }
-    $muse->mark_as_closed;
+    else {
+        $self->_write_status_file($fhlock, 'OK');
+    }
     $muse->cleanup if $self->cleanup;
 }
 

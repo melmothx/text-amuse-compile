@@ -2,19 +2,34 @@
 
 use strict;
 use warnings;
-use Test::More tests => 15;
+use Test::More;
 use File::Temp;
 use File::Slurp qw/read_file write_file/;
 use File::Spec::Functions qw/catfile/;
 use Cwd;
 
+use Text::Amuse::Compile;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Templates;
+
+my $xelatex = $ENV{TEST_WITH_LATEX};
+if ($xelatex) {
+    plan tests => 25;
+    diag "Testing with XeLaTeX";
+}
+else {
+    diag "No TEST_WITH_LATEX environment variable found, avoiding use of xelatex";
+    plan tests => 20;
+}
+
+
 
 my $dirh = File::Temp->newdir(CLEANUP => 1);
 my $wd = $dirh->dirname;
 
 my $home = getcwd;
+
+my $target = catfile($wd, 'test.muse');
 
 chdir $wd;
 
@@ -36,20 +51,12 @@ my $muse = Text::Amuse::Compile::File->new(name => 'test',
 
 my $tex = read_file($muse->tex);
 
-like $tex, qr/blablabla/, "Found the body";
-like $tex, qr/oneside/, "Found oneside";
-like $tex, qr/bcor=0mm/i, "Found bcor=0";
-unlike $tex, qr/twoside/, "Found twoside";
-unlike $tex, qr/bcor=12mm/i, "Found bcor=12mm";
+check_overriden($tex);
 
 # but with arguments, bcor and sides are obeyed.
 $tex = read_file($muse->tex(dummy => 1));
 
-like $tex, qr/blablabla/, "Found the body";
-like $tex, qr/twoside/, "Found twoside";
-like $tex, qr/bcor=12mm/i, "Found bcor=12mm";
-unlike $tex, qr/oneside/, "Found oneside";
-unlike $tex, qr/bcor=0mm/i, "Found bcor=0";
+check_no_overriden($tex);
 
 
 $muse = Text::Amuse::Compile::File->new(name => 'test',
@@ -64,17 +71,56 @@ $muse = Text::Amuse::Compile::File->new(name => 'test',
 
 $tex = read_file($muse->tex);
 
-like $tex, qr/blablabla/, "Found the body";
-like $tex, qr/twoside/, "Found twoside";
-like $tex, qr/bcor=12mm/i, "Found bcor=12mm";
-unlike $tex, qr/oneside/, "Found oneside";
-unlike $tex, qr/bcor=0mm/i, "Found bcor=0";
-
+check_no_overriden($tex);
 
 chdir $home;
 
+my $c = Text::Amuse::Compile->new(tex => 1,
+                                  extra => {
+                                            oneside => 0,
+                                            twoside => 1,
+                                            bcor => '12mm',
+                                           });
+
+$c->compile($target);
+
+$tex = read_file(catfile($wd, 'test.tex'));
+
+check_no_overriden($tex);
+
+exit unless $xelatex;
+
+$c = Text::Amuse::Compile->new(tex => 1,
+                               a4_pdf => 1,
+                               extra => {
+                                         oneside => 0,
+                                         twoside => 1,
+                                         bcor => '12mm',
+                                        });
+
+$c->compile($target);
+
+$tex = read_file(catfile($wd, 'test.tex'));
+
+check_overriden($tex);
 
 
+sub check_overriden {
+    my $tex = shift;
+    like $tex, qr/blablabla/, "Found the body";
+    like $tex, qr/oneside/, "Found oneside";
+    like $tex, qr/bcor=0mm/i, "Found bcor=0";
+    unlike $tex, qr/twoside/, "Found twoside";
+    unlike $tex, qr/bcor=12mm/i, "Found bcor=12mm";
+}
 
+sub check_no_overriden {
+    my $tex = shift;
+    like $tex, qr/blablabla/, "Found the body";
+    like $tex, qr/twoside/, "Found twoside";
+    like $tex, qr/bcor=12mm/i, "Found bcor=12mm";
+    unlike $tex, qr/oneside/, "Found oneside";
+    unlike $tex, qr/bcor=0mm/i, "Found bcor=0";
+}
 
 

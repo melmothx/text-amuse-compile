@@ -87,6 +87,10 @@ The zipped sources
 An hashref of key/value pairs to pass to each template in the
 C<options> namespace.
 
+=item standalone
+
+Do not force bcor=0 and oneside for plain tex and pdf
+
 =item debug
 
 Slow down the compilation sleeping for a while. DO NOT USE.
@@ -149,6 +153,9 @@ sub new {
     $self->{report_failure_sub} = delete $params{report_failure_sub};
     $self->{logger} = delete $params{logger};
     $self->{debug} = delete  $params{debug};
+    if (exists $params{standalone}) {
+        $self->{standalone} = delete $params{standalone};
+    }
     if (my $extraref = delete $params{extra}) {
         $self->{extra} = { %$extraref };
     }
@@ -206,10 +213,17 @@ sub debug {
     return shift->{debug};
 }
 
-sub _is_standalone {
+sub standalone {
     my $self = shift;
-    my $need = $self->a4_pdf || $self->lt_pdf;
-    return !$need;
+    unless (defined $self->{standalone}) {
+        if ($self->a4_pdf || $self->lt_pdf) {
+            $self->{standalone} = 0;
+        }
+        else {
+            $self->{standalone} = 1;
+        }
+    }
+    return $self->{standalone};
 }
 
 
@@ -458,7 +472,7 @@ sub _compile_virtual_file {
                                                document => $doc,
                                                logger => $self->logger,
                                                virtual => 1,
-                                               standalone => $self->_is_standalone,
+                                               standalone => $self->standalone,
                                               );
     $self->_muse_compile($muse);
 }
@@ -482,7 +496,7 @@ sub _compile_file {
                 templates => $self->templates,
                 options => { $self->extra },
                 logger => $self->logger,
-                standalone => $self->_is_standalone,
+                standalone => $self->standalone,
                );
 
     my $muse = Text::Amuse::Compile::File->new(%args);

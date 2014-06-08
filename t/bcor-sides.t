@@ -82,7 +82,7 @@ my $c = Text::Amuse::Compile->new(tex => 1,
                                             bcor => '12mm',
                                            });
 
-ok ($c->_is_standalone, "Is standalone") or (diag Dumper($c) and exit);
+ok ($c->standalone, "Is standalone") or (diag Dumper($c) and exit);
 
 
 $c->compile($target);
@@ -99,7 +99,7 @@ $c = Text::Amuse::Compile->new(tex => 1,
                                          bcor => '12mm',
                                         });
 
-ok (!$c->_is_standalone, "it's not standalone");
+ok (!$c->standalone, "it's not standalone");
 
 exit unless $xelatex;
 

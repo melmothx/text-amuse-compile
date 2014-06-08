@@ -25,6 +25,7 @@ my $extra = {
 
 my $compile = Text::Amuse::Compile->new(
                                         extra => $extra,
+                                        standalone => 0,
                                         tex   => 1,
                                         cleanup => 1,
                                        );

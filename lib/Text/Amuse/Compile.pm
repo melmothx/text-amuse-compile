@@ -48,7 +48,7 @@ Format options (by default all of them are activated);
 
 =item cleanup
 
-Remove auxiliary files after compilation (.status, .ok)
+Remove auxiliary files after compilation (.status)
 
 =item tex
 
@@ -205,6 +205,13 @@ sub cleanup {
 sub debug {
     return shift->{debug};
 }
+
+sub _is_standalone {
+    my $self = shift;
+    my $need = $self->a4_pdf || $self->lt_pdf;
+    return !$need;
+}
+
 
 sub extra {
     my $self = shift;
@@ -451,6 +458,7 @@ sub _compile_virtual_file {
                                                document => $doc,
                                                logger => $self->logger,
                                                virtual => 1,
+                                               standalone => $self->_is_standalone,
                                               );
     $self->_muse_compile($muse);
 }
@@ -474,6 +482,7 @@ sub _compile_file {
                 templates => $self->templates,
                 options => { $self->extra },
                 logger => $self->logger,
+                standalone => $self->_is_standalone,
                );
 
     my $muse = Text::Amuse::Compile::File->new(%args);

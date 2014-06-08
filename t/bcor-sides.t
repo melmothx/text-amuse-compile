@@ -7,19 +7,19 @@ use File::Temp;
 use File::Slurp qw/read_file write_file/;
 use File::Spec::Functions qw/catfile/;
 use Cwd;
-
+use Data::Dumper;
 use Text::Amuse::Compile;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Templates;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
-    plan tests => 25;
+    plan tests => 27;
     diag "Testing with XeLaTeX";
 }
 else {
     diag "No TEST_WITH_LATEX environment variable found, avoiding use of xelatex";
-    plan tests => 20;
+    plan tests => 22;
 }
 
 
@@ -82,13 +82,14 @@ my $c = Text::Amuse::Compile->new(tex => 1,
                                             bcor => '12mm',
                                            });
 
+ok ($c->_is_standalone, "Is standalone") or (diag Dumper($c) and exit);
+
+
 $c->compile($target);
 
 $tex = read_file(catfile($wd, 'test.tex'));
 
 check_no_overriden($tex);
-
-exit unless $xelatex;
 
 $c = Text::Amuse::Compile->new(tex => 1,
                                a4_pdf => 1,
@@ -98,20 +99,23 @@ $c = Text::Amuse::Compile->new(tex => 1,
                                          bcor => '12mm',
                                         });
 
+ok (!$c->_is_standalone, "it's not standalone");
+
+exit unless $xelatex;
+
 $c->compile($target);
 
 $tex = read_file(catfile($wd, 'test.tex'));
 
 check_overriden($tex);
 
-
 sub check_overriden {
     my $tex = shift;
     like $tex, qr/blablabla/, "Found the body";
     like $tex, qr/oneside/, "Found oneside";
     like $tex, qr/bcor=0mm/i, "Found bcor=0";
-    unlike $tex, qr/twoside/, "Found twoside";
-    unlike $tex, qr/bcor=12mm/i, "Found bcor=12mm";
+    unlike $tex, qr/twoside/, "Not found twoside";
+    unlike $tex, qr/bcor=12mm/i, "Not found bcor=12mm";
 }
 
 sub check_no_overriden {
@@ -119,8 +123,8 @@ sub check_no_overriden {
     like $tex, qr/blablabla/, "Found the body";
     like $tex, qr/twoside/, "Found twoside";
     like $tex, qr/bcor=12mm/i, "Found bcor=12mm";
-    unlike $tex, qr/oneside/, "Found oneside";
-    unlike $tex, qr/bcor=0mm/i, "Found bcor=0";
+    unlike $tex, qr/oneside/, "Not found oneside";
+    unlike $tex, qr/bcor=0mm/i, "Not found bcor=0";
 }
 
 

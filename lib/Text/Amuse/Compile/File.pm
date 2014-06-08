@@ -51,6 +51,10 @@ If it's a virtual file which doesn't exit on the disk (a merged one)
 
 =item templates
 
+=item standalone
+
+When set to true, the tex output will obey bcor and twoside/oneside.
+
 =item options
 
 An hashref with the options to pass to the templates. It's returned as
@@ -118,6 +122,10 @@ sub options {
     }
     # return a copy
     return { %out };
+}
+
+sub standalone {
+    return shift->{standalone}
 }
 
 sub suffix {
@@ -273,7 +281,7 @@ C<pdf>.
 
 With no arguments, this method enforces the options C<twoside=true>
 and C<bcor=0mm>, effectively ignoring the global options which affect
-the imposed output.
+the imposed output, unless C<standalone> is set to true.
 
 =item pdf
 
@@ -366,7 +374,7 @@ sub tex {
     $self->log_fatal("Wrong usage") if @args % 2;
     my %arguments = @args;
 
-    unless (%arguments) {
+    unless (scalar(@args) || $self->standalone) {
         %arguments = (
                       twoside => 0,
                       oneside => 1,

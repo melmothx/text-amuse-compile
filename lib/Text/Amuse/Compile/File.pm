@@ -407,6 +407,7 @@ sub pdf {
     my $self = shift;
     my $source = $self->name . '.tex';
     my $output = $self->name . '.pdf';
+    my $logfile = $self->name . '.log';
     unless (-f $source) {
         $self->tex;
     }
@@ -446,6 +447,16 @@ sub pdf {
                 return;
             }
         }
+    }
+    if (-f $logfile) {
+        open (my $fh, '<:encoding(UTF-8)', $logfile)
+          or $self->log_fatal("Couldn't open $logfile $!");
+        while (my $line = <$fh>) {
+            if ($line =~ m/missing character/i) {
+                $self->log_info($line);
+            }
+        }
+        close $fh;
     }
     return $output;
 }

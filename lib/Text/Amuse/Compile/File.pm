@@ -21,7 +21,6 @@ use PDF::Imposition;
 use Text::Amuse;
 use Text::Amuse::Functions qw/muse_fast_scan_header/;
 
-
 =encoding utf8
 
 =head1 NAME

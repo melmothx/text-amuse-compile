@@ -2,6 +2,7 @@ Revision history for perl module Text::Amuse::Compile
 
 0.19 2014-07-20
  - Removed dependency on File::Slurp
+ - Basic validation of extra options which enter the template not interpolated
 
 0.18 2014-06-08
  - Set the language code in the html tag in the HTML output

@@ -20,7 +20,7 @@ my $extra = {
              bcor => "23",
              logo => "pallinopinco",
              cover => "mycover.pdf",
-             coverwidth => "4.13cm",
+             coverwidth => "\\0.5", # given the filtering, the \\ will  be stripped
             };
 
 my $compile = Text::Amuse::Compile->new(
@@ -30,7 +30,9 @@ my $compile = Text::Amuse::Compile->new(
                                         cleanup => 1,
                                        );
 
-is_deeply({ $compile->extra }, $extra, "extra options stored" );
+my $extracopy = { %$extra };
+$extracopy->{coverwidth} = '0.5';
+is_deeply({ $compile->extra }, $extracopy, "extra options stored" );
 ok ($compile->cleanup);
 
 my $returned = { $compile->extra };
@@ -82,7 +84,7 @@ for (1..2) {
         like $c, qr/oneside/, "oneside enforced on single pdf";
         like $c, qr/BCOR=0mm/, "BCOR validated and enforced";
         unlike $c, qr/\\maketitle/;
-        like $c, qr/includegraphics\[width=4.13cm\]\{mycover.pdf\}/;
+        like $c, qr/includegraphics\[width=0\.5\\textwidth\]\{mycover.pdf\}/;
         like $c, qr/\\tableofcontents/;
     }
 
@@ -131,11 +133,8 @@ for (1..2) {
     unlike $c, qr/BCOR=0mm/, "BCOR not enforced";
     like $c, qr/BCOR=23/, "BCOR not enforced";
     unlike $c, qr/\\maketitle/;
-    like $c, qr/includegraphics\[width=4.13cm\]\{mycover.pdf\}/;
+    like $c, qr/includegraphics\[width=0\.5\\textwidth\]\{mycover.pdf\}/;
     like $c, qr/\\tableofcontents/;
     unlink $texfile or die $!;
 }
-
-
-
 

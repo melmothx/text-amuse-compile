@@ -162,7 +162,9 @@ local user>.
 
 =item * cover (filename for front cover)
 
-=item * coverwidth (dimension of the cover image, es '4.5cm')
+=item * coverwidth (dimension ratio with the text width, eg. '0.85')
+
+It requires a float, where 1 is the full text-width, 0.5 half, etc.
 
 =item * division (the DIV factor for margin control)
 

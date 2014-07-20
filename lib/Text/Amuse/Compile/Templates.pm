@@ -124,7 +124,8 @@ cover placed in the middle of the page.
 =item options.coverwidth
 
 Option to control the cover width, when is set (ignored otherwise).
-Defaults to C<0.65\textwidth>
+Defaults to the full text width (i.e., 1). You have to pass a float
+here with the ratio to the text width, like C<0.5>, C<1>.
 
 =back
 
@@ -740,10 +741,10 @@ sub latex {
 [% IF options.coverwidth               -%]
 [% SET coverwidth = options.coverwidth -%]
 [% ELSE                                -%]
-[% SET coverwidth = '0.65\textwidth'   -%]
+[% SET coverwidth = 1 -%]
 [% END -%]
     \vfill
-    \includegraphics[width=[% coverwidth %]]{[% options.cover %]}
+    \includegraphics[width=[% coverwidth %]\textwidth]{[% options.cover %]}
     \vfill
     [% IF doc.header_as_latex.date %]
     {\large [% doc.header_as_latex.date %]}

@@ -231,9 +231,17 @@ sub extra {
     my $self = shift;
     my $hashref = $self->{extra};
     my %out;
-    # do a shallow copy before returning
+    # do a shallow copy before returning, filtering out \\ to avoid
+    # command injections.
     if ($hashref) {
-        %out = %$hashref;
+        foreach my $k (keys %$hashref) {
+            my $v = $hashref->{$k};
+            if (defined($v) and $v =~ m/\\/) {
+                warn "Found command $v in extra key $k!\n";
+                $v =~ s/\\//g;
+            }
+            $out{$k} = $v;
+        }
     }
     return %out;
 }

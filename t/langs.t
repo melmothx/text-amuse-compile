@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::More tests => 42;
 
-use File::Slurp qw/read_file write_file/;
+use Text::Amuse::Compile::Utils qw/read_file write_file/;
 use File::Spec::Functions qw/catfile catdir/;
 use File::Temp;
 use Text::Amuse::Compile;

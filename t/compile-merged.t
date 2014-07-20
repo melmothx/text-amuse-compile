@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 use Text::Amuse::Compile;
 use File::Spec;
-use File::Slurp;
+use Text::Amuse::Compile::Utils qw/write_file read_file/;
 
 my $builder = Test::More->builder;
 binmode $builder->output,         ":utf8";
@@ -51,7 +51,7 @@ diag "Compiler finished, starting tests";
 my $base = File::Spec->catfile(qw/t merged-dir my-new-test/);
 ok(-f "$base.tex", "$base.tex created");
 
-my $outtex = read_file("$base.tex", { binmode => ':encoding(utf-8)' });
+my $outtex = read_file("$base.tex");
 
 like $outtex, qr/First \\emph\{file\} text/, "Found the first file body";
 like $outtex, qr/Second file \\emph\{text\}/, "Found the second file body";

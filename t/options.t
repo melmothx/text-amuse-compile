@@ -5,7 +5,7 @@ use utf8;
 use Test::More tests => 127;
 use Text::Amuse::Compile;
 use File::Spec;
-use File::Slurp qw/read_file/;
+use Text::Amuse::Compile::Utils qw/read_file/;
 
 my $extra = {
              site => "Test site",

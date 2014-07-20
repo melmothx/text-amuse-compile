@@ -6,7 +6,7 @@ use Test::More tests => 25;
 
 use File::Spec;
 use Data::Dumper;
-use File::Slurp;
+use Text::Amuse::Compile::Utils qw/write_file read_file/;
 
 my $builder = Test::More->builder;
 binmode $builder->output,         ":utf8";
@@ -79,7 +79,7 @@ my $compile = Text::Amuse::Compile::File->new(
                                               templates => $templates,
                                              );
 
-my $outtex = read_file($compile->tex, { binmode => ':encoding(utf-8)' });
+my $outtex = read_file($compile->tex);
 
 like $outtex, qr/First \\emph\{file\} text/, "Found the first file body";
 like $outtex, qr/Second file \\emph\{text\}/, "Found the second file body";

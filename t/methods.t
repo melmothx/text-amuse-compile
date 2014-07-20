@@ -6,7 +6,7 @@ use Test::More tests => 12;
 use Text::Amuse::Compile;
 use File::Temp;
 use File::Spec;
-use File::Slurp qw/write_file/;
+use Text::Amuse::Compile::Utils qw/write_file/;
 
 my $c = Text::Amuse::Compile->new(pdf => 1);
 

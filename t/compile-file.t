@@ -6,7 +6,7 @@ use Test::More;
 
 use File::Spec;
 use Data::Dumper;
-use File::Slurp;
+use Text::Amuse::Compile::Utils qw/read_file write_file/;
 
 use Text::Amuse::Compile;
 use Text::Amuse::Compile::File;
@@ -61,7 +61,7 @@ diag "Compile the html";
 $file->html;
 ok ((-f 'test.html'), "html found");
 
-my $html_body = read_file ('test.html', { binmode => ':encoding(utf-8)' });
+my $html_body = read_file ('test.html');
 like $html_body, qr{<em>test</em> &amp; Ćao! <em>another</em>};
 # print $html_body;
 

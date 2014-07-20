@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Text::Amuse::Compile;
 use File::Spec;
-use File::Slurp qw/write_file append_file read_file/;
+use Text::Amuse::Compile::Utils qw/write_file append_file read_file/;
 use Test::More;
 use Cwd;
 
@@ -58,7 +58,7 @@ like $statusline, qr/^OK /, "Status file reported correctly $statusline";
 
 
 
-diag "Overwriting .tex with garbage";
+diag "Overwriting $tex with garbage";
 
 write_file($tex, "\\laskdflasdf\\bye");
 
@@ -69,13 +69,13 @@ $c->logger(sub {
 eval {
     $c->compile($target);
 };
+ok($@, "Now the compiler dies with $@");
 
 $statusline = read_file($status);
 like $statusline, qr/^FAILED/, "Status file reported correctly: $statusline";
 
 diag "In " . getcwd();
 
-ok($@, "Now the compiler dies with $@");
 like $logged, qr/Undefined control sequence/, "Logged ok";
 ok($c->errors);
 

@@ -7,6 +7,7 @@ use utf8;
 # core
 # use Data::Dumper;
 use File::Copy qw/move/;
+use Encode qw/decode_utf8/;
 
 # needed
 use Template;
@@ -406,7 +407,6 @@ sub pdf {
     my $self = shift;
     my $source = $self->name . '.tex';
     my $output = $self->name . '.pdf';
-    my $logfile = $self->name . '.log';
     unless (-f $source) {
         $self->tex;
     }
@@ -447,18 +447,11 @@ sub pdf {
             }
         }
     }
-    if (-f $logfile) {
-        open (my $fh, '<:encoding(UTF-8)', $logfile)
-          or $self->log_fatal("Couldn't open $logfile $!");
-        while (my $line = <$fh>) {
-            if ($line =~ m/missing character/i) {
-                $self->log_info($line);
-            }
-        }
-        close $fh;
-    }
+    $self->parse_tex_log_file;
     return $output;
 }
+
+
 
 sub zip {
     my $self = shift;
@@ -675,6 +668,10 @@ Otherwise print to the standard output.
 
 Calls C<log_info>, remove the lock and dies.
 
+=item parse_tex_log_file
+
+(Internal) Parse the produced logfile for missing characters.
+
 =back
 
 =cut
@@ -694,6 +691,29 @@ sub log_fatal {
     my ($self, @info) = @_;
     $self->log_info(@info);
     die "Fatal exception\n";
+}
+
+sub parse_tex_log_file {
+    my $self = shift;
+    my $logfile = $self->name . '.log';
+    if (-f $logfile) {
+        # if you're wandering why we open this in raw mode: The log
+        # file produced by XeLaTeX is utf8, but it splits the output
+        # at 80 bytes or so. This of course sometimes, expecially
+        # working with cyrillic scripts, cut the multibyte character
+        # in half, producing invalid utf8 octects.
+        open (my $fh, '<:raw', $logfile)
+          or $self->log_fatal("Couldn't open $logfile $!");
+        while (my $line = <$fh>) {
+            if ($line =~ m/^missing character/i) {
+                chomp $line;
+                # if we get the warning, nothing we can do about it,
+                # but shouldn't happen.
+                $self->log_info(decode_utf8($line) . '...');
+            }
+        }
+        close $fh;
+    }
 }
 
 sub cleanup {

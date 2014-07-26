@@ -18,6 +18,7 @@ t/concurrency.t
 t/failures.t
 t/langs.t
 t/leaks.t
+t/log-encoding.log
 t/logger.t
 t/manifest.t
 t/manual/logo.png

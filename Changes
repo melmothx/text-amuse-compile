@@ -1,5 +1,8 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.20 2014-07-26
+ - Avoid useless and warmful decoding of TeX log file (known to have invalid utf8)
+
 0.19 2014-07-20
  - Removed dependency on File::Slurp
  - Basic validation of extra options which enter the template not interpolated

@@ -14,7 +14,7 @@ else {
     exit;
 }
 
-my $dir = File::Temp->newdir(CLEANUP => 0);
+my $dir = File::Temp->newdir(CLEANUP => 1);
 
 my $home = getcwd;
 chdir $dir->dirname or die $!;

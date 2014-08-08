@@ -168,6 +168,10 @@ It requires a float, where 1 is the full text-width, 0.5 half, etc.
 
 =item * division (the DIV factor for margin control)
 
+=item * nocoverpage
+
+Use the LaTeX article class if toc is not present
+
 =back
 
 =item --recursive <directory>

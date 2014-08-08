@@ -15,6 +15,7 @@ t/compile-file.t
 t/compile-merged.t
 t/compile.t
 t/concurrency.t
+t/coverpage.t
 t/failures.t
 t/langs.t
 t/leaks.t

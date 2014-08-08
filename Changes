@@ -1,5 +1,12 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.21 2014-08-08
+
+ - Changed default LaTeX class to book, even for texts without a table
+   of contents. You can switch to the old behaviour either setting
+   nocoverpage to a true value in the header or passing the extra key
+   nocoverpage=1 to the compiler.
+
 0.20 2014-07-26
  - Avoid useless and warmful decoding of TeX log file (known to have invalid utf8)
 

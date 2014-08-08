@@ -68,6 +68,11 @@ files.
 
 =over 4
 
+=item options.nocoverpage
+
+If the text doesn't require a toc, this options set the class to
+komascript's article. Ignored if there is a toc.
+
 =item options.papersize
 
 Paper size, like a4, a5 or 210mm:11in. The width and heigth are
@@ -576,10 +581,11 @@ sub latex {
 [% SET paper = '210mm:11in'                  -%]
 [% END                                       -%]
 [% # set the class                           -%]
-[% IF doc.wants_toc                          -%]
 [% SET class = 'scrbook'                     -%]
-[% ELSE                                      -%]
-[% SET class = 'scrartcl'                    -%]
+[% UNLESS doc.wants_toc                      -%]
+[%   IF (doc.header_as_latex.nocoverpage || options.nocoverpage) -%]
+[%   SET class = 'scrartcl'                                      -%]
+[%   END                                                         -%]
 [% END                                       -%]
 [% # set the div, if any                     -%]
 [% IF options.division                       -%]

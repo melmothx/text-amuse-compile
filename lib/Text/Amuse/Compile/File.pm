@@ -273,16 +273,6 @@ meaningless, but exceptions could be raised.
 
 =item bare_html
 
-=item tex
-
-This method is a bit tricky, because it's called with arguments
-internally by C<lt_pdf> and C<a4_pdf>, and with no arguments before
-C<pdf>.
-
-With no arguments, this method enforces the options C<twoside=true>
-and C<bcor=0mm>, effectively ignoring the global options which affect
-the imposed output, unless C<standalone> is set to true.
-
 =item pdf
 
 =item epub
@@ -297,8 +287,6 @@ The zipped sources. Beware that if you don't call html or tex before
 this, the attachments (if any) are ignored if both html and tex files
 exist. Hence, the muse-compile.pl scripts forces the --tex and --html
 switches.
-
-=back
 
 =cut
 
@@ -367,6 +355,25 @@ sub _compile_imposed {
     return $outfile;
 }
 
+
+=item tex
+
+This method is a bit tricky, because it's called with arguments
+internally by C<lt_pdf> and C<a4_pdf>, and with no arguments before
+C<pdf>.
+
+With no arguments, this method enforces the options C<twoside=true>
+and C<bcor=0mm>, effectively ignoring the global options which affect
+the imposed output, unless C<standalone> is set to true.
+
+This means that the twoside and binding correction options follow this
+logic: if you have some imposed format, they are ignored for the
+standalone PDF but applied for the imposed ones. If you have only
+the standalone PDF, they are applied to it.
+
+=back
+
+=cut
 
 sub tex {
     my ($self, @args) = @_;

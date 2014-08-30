@@ -172,6 +172,10 @@ It requires a float, where 1 is the full text-width, 0.5 half, etc.
 
 Use the LaTeX article class if toc is not present
 
+=item * notoc
+
+Never generate a table of contents
+
 =back
 
 =item --recursive <directory>

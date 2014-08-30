@@ -73,6 +73,11 @@ files.
 If the text doesn't require a toc, this options set the class to
 komascript's article. Ignored if there is a toc.
 
+=item options.notoc
+
+Do not generate a table of contents, even if the document requires
+one.
+
 =item options.papersize
 
 Paper size, like a4, a5 or 210mm:11in. The width and heigth are
@@ -762,12 +767,12 @@ sub latex {
 \maketitle
 [% END %]
 
+[% UNLESS options.notoc %]
 [% IF doc.wants_toc %]
-
 \tableofcontents
 % start a new right-handed page
 \cleardoublepage
-
+[% END %]
 [% END %]
 
 [% doc.as_latex %]

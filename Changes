@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.22 2014-08-30
+
+ - Added notoc option to suppress the table of content generation
+
 0.21 2014-08-08
 
  - Changed default LaTeX class to book, even for texts without a table

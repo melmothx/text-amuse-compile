@@ -627,6 +627,7 @@ sub latex {
                BCOR=[% bcor -%],%
                fontsize=[% fontsize %]pt,%
                [% paging %],%
+               footinclude=false,%
                paper=[% paper %]]{[% class %]}
 \usepackage{fontspec}
 \usepackage{polyglossia}
@@ -725,10 +726,13 @@ sub latex {
 \pagestyle{plain}
 \addtokomafont{disposition}{\rmfamily}
 % forbid widows/orphans
-\clubpenalty=10000
-\widowpenalty=10000
 \frenchspacing
 \sloppy
+\clubpenalty=10000
+\widowpenalty=10000
+
+% given that we said footinclude=false, this should be safe
+\setlength{\footskip}{2\baselineskip}
 
 \title{[% doc.header_as_latex.title %]}
 \date{[% doc.header_as_latex.date %]}

@@ -9,7 +9,7 @@ use Text::Amuse::Compile;
 use File::Path qw/mkpath/;
 use File::Spec::Functions qw/catfile/;
 use Pod::Usage;
-use File::Slurp qw/append_file/;
+use Text::Amuse::Compile::Utils qw/append_file/;
 use Encode;
 
 binmode STDOUT, ':encoding(utf-8)';

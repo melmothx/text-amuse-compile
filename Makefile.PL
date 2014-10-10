@@ -33,7 +33,7 @@ WriteMakefile(
     clean => { FILES => 'Text-Amuse-Compile-*' },
     META_MERGE => {
         resources => {
-            repository => 'https://gitorious.org/text-amuse-compile'
+            repository => 'https://github.com/melmothx/text-amuse-compile',
            },
     },
 

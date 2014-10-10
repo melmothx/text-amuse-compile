@@ -716,7 +716,7 @@ sub parse_tex_log_file {
                 chomp $line;
                 # if we get the warning, nothing we can do about it,
                 # but shouldn't happen.
-                $self->log_info(decode_utf8($line) . '...');
+                $self->log_info(decode_utf8($line) . "...\n");
             }
         }
         close $fh;

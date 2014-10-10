@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.25 2014-10-10
+
+ - Fixed output out missing character report (missing newline)
+ - Removed File::Slurp from the script
+
 0.24 2014-09-08
 
  - LaTeX template change: reduced the footskip to 2 baselines.

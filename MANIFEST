@@ -16,6 +16,7 @@ t/compile-merged.t
 t/compile.t
 t/concurrency.t
 t/coverpage.t
+t/epub.t
 t/failures.t
 t/langs.t
 t/leaks.t
@@ -52,5 +53,6 @@ t/testfile/broken.muse
 t/testfile/deep/deep/dir/logo.png
 t/testfile/deep/deep/dir/manual.muse
 t/testfile/deleted.muse
+t/testfile/for-epub.muse
 t/testfile/test.muse
 t/utils.t

@@ -1,0 +1,17 @@
+#title title & title & title <em>test</em>"'
+#subtitle title & subtitle & subtitle
+#author pinco & pallino & tizio
+#source from 1 & 2 & 3
+#notes notes1 & notes2 & notes3
+
+*** first & chapter & chapter  <em>test</em>"'
+
+body first & chapter & chapter
+
+*** second & chapter & chapter  <em>test</em>"'
+
+body second & chapter & chapter
+
+*** third & chapter & chapter  <em>test</em>"'
+
+body third & chapter & chapter

@@ -571,7 +571,7 @@ sub epub {
     my $firstpage = '';
     $self->tt->process($self->templates->minimal_html,
                        {
-                        title => $self->_clean_html($header->{title}),
+                        title => $self->_remove_tags($header->{title}),
                         text => $titlepage,
                         options => $self->options,
                        },

@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.26 2014-12-12
+
+ - Fixed bug with missing escape in the epub's titlepage
+
 0.25 2014-10-10
 
  - Fixed output out missing character report (missing newline)

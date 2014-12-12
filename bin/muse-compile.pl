@@ -144,7 +144,7 @@ local user>.
 
 =item * mainfont (grep fc-list -l for the correct name)
 
-=item * fontsize (10pt, 11pt, 12pt)
+=item * fontsize (9, 10, 11, 12) as integer, meaning points (pt)
 
 =item * oneside (true or false)
 

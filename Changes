@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.27 2015-01-13
+
+ - Fixed minor bug with missing cleardoublepage after title page
+ - Prepared tests for upcoming downgrade from Template to Template::Tiny
+
 0.26 2014-12-12
 
  - Fixed bug with missing escape in the epub's titlepage

@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 24;
+plan tests => 28;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -114,7 +114,7 @@ sub test_file {
                                                $f . '.muse');
             my $muse = Text::Amuse->new(file => $fullpath);
             my $current = index($body, $muse->as_latex);
-            ok($current >= $index) or $error++;;
+            ok($current >= $index, "$current is greater than $index") or $error++;;
             $index = $current;
         }
     }
@@ -123,8 +123,10 @@ sub test_file {
         my $latex = $muse->as_latex;
         ok ((index($body, $latex) > 0), "Found the body") or $error++;
     }
-    unlink $out unless $error;
-    $out =~ s/tex$/status/;
-    unlink $out unless $error;
+    unless ($ENV{NO_CLEANUP}) {
+        unlink $out unless $error;
+        $out =~ s/tex$/status/;
+        unlink $out unless $error;
+    }
 }
 

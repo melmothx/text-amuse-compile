@@ -1,0 +1,13 @@
+#title Testing *for* me
+#author Pallino *Pinco*
+#date 2014
+#lang mk
+
+** This is just a test
+
+àààà test
+
+** Another test
+
+àààà test ć đ ÀÀÀÀ TEST Ć Đ 
+

@@ -55,4 +55,7 @@ t/testfile/deep/deep/dir/manual.muse
 t/testfile/deleted.muse
 t/testfile/for-epub.muse
 t/testfile/test.muse
+t/tex.t
+t/tex/testing-no-toc.muse
+t/tex/testing.muse
 t/utils.t

@@ -766,9 +766,11 @@ sub latex {
     [% END %]
     \strut
   \end{center}
-\cleardoublepage
 [% ELSE %]
 \maketitle
+[% END %]
+[% UNLESS doc.header_as_latex.nocoverpage || options.nocoverpage %]
+\cleardoublepage
 [% END %]
 
 [% UNLESS options.notoc %]
@@ -831,8 +833,6 @@ sub latex {
 \bigskip
 \textbf{[% options.site %]}
 [% END %]
-
-% Here an URL maybe?
 
 \end{center}
 

@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 28;
+plan tests => 39;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -30,14 +30,27 @@ test_file($file_no_toc, {
                          division => 9,
                          fontsize => 11,
                          papersize => 'half-lt',
+                         nocoverpage => 0,
                         },
           qr/scrbook/,
           qr/DIV=9/,
           qr/fontsize=11pt/,
           qr/mainlanguage\{croatian\}/,
           qr/paper=5.5in:8.5in/,
+          qr/\\maketitle\s*\\cleardoublepage/s,
          );
 
+test_file($file_no_toc, {
+                         nocoverpage => 1,
+                        },
+          qr/\\maketitle\s*\w/,
+         );
+
+test_file($file_with_toc, {
+                           cover => 'prova.pdf',
+                          },
+          qr/\\end\{center\}\s*\\cleardoublepage\s*\\tableofcontents/s,
+         );
 
 
 test_file($file_with_toc, {
@@ -47,12 +60,14 @@ test_file($file_with_toc, {
           qr/mainlanguage\{russian\}/,
           qr/\\renewcaptionname\{russian\}\{\\contentsname\}\{Содржина\}/,
           qr/paper=210mm:11in/,
+          qr/\\maketitle\s*\\cleardoublepage/s,
          );
 
 test_file($file_with_toc, {
                            papersize => 'half-a4',
                           },
           qr/paper=a5/,
+          qr/\\maketitle\s*\\cleardoublepage/s,
          );
 
 test_file({
@@ -65,6 +80,7 @@ test_file({
           },
           qr/croatian/,
           qr/russian/,
+          qr/\\maketitle\s*\\cleardoublepage/s,
           qr/\\setmainlanguage\{russian\}\s*
              \\newfontfamily\s*
              \\russianfont\[Script=Cyrillic\]\{Linux\sLibertine\sO\}\s*
@@ -80,6 +96,7 @@ test_file({
           },
           {
           },
+          qr/\\maketitle\s*\\cleardoublepage/s,
           qr/croatian/,
           qr/russian/,
           qr/\\setmainlanguage\{croatian\}\s*
@@ -102,7 +119,7 @@ sub test_file {
     }
     ok (-f $out, "$out produced");
     my $body = read_file($out);
-    print $body;
+    # print $body;
     my $error = 0;
     foreach my $regexp (@regexps) {
         like($body, $regexp, "$regexp matches the body") or $error++;

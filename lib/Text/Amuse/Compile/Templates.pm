@@ -324,8 +324,8 @@ sub css {
     if (my $ref = $self->ttref('css')) {
         return $ref;
     }
+    # not a template, just a static file
         my $css = <<'EOF';
-/* This is not a template, just a static file! */
 html,body {
 	margin:0;
 	padding:0;

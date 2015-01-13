@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 43;
+plan tests => 45;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -72,7 +72,7 @@ test_file($file_with_toc, {
 
 test_file({
            path => File::Spec->catfile(qw/t tex/),
-           files => [ qw/testing testing-no-toc/],
+           files => [ qw/testing testing-no-toc testing/],
            name => 'merged-1',
            title => 'Merged',
           },
@@ -81,7 +81,7 @@ test_file({
           qr/croatian/,
           qr/russian/,
           qr/Pallino.*Pinco.*Second.*author/s,
-          qr/selectlanguage\{russian}.*selectlanguage\{croatian}/s,
+          qr/mainlanguage\{russian}.*selectlanguage\{croatian}.*selectlanguage\{russian}/s,
           qr/\\maketitle\s*\\cleardoublepage/s,
           qr/\\setmainlanguage\{russian\}\s*
              \\newfontfamily\s*
@@ -92,14 +92,14 @@ test_file({
 
 test_file({
            path => File::Spec->catfile(qw/t tex/),
-           files => [ qw/testing-no-toc testing/],
+           files => [ qw/testing-no-toc testing testing-no-toc/],
            name => 'merged-2',
            title => 'Merged',
           },
           {
           },
           qr/\\maketitle\s*\\cleardoublepage/s,
-          qr/selectlanguage\{croatian}.*selectlanguage\{russian}/s,
+          qr/mainlanguage\{croatian}.*selectlanguage\{russian}.*selectlanguage\{croatian}/s,
           qr/Second.*author.*Pallino.*Pinco/s,
           qr/croatian/,
           qr/russian/,
@@ -134,8 +134,8 @@ sub test_file {
             my $fullpath = File::Spec->catfile($file->{path},
                                                $f . '.muse');
             my $muse = Text::Amuse->new(file => $fullpath);
-            my $current = index($body, $muse->as_latex);
-            ok($current >= $index, "$current is greater than $index") or $error++;;
+            my $current = index($body, $muse->as_latex, $index);
+            ok($current > $index, "$current is greater than $index") or $error++;;
             $index = $current;
         }
     }

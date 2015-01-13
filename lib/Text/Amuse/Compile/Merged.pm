@@ -169,6 +169,10 @@ sub as_latex {
             $doc_language = $alias;
         }
 
+        if (my $alias = $lang_aliases{$current_language}) {
+            $current_language = $alias;
+        }
+
         if ($doc_language ne $current_language) {
             $output .= sprintf('\selectlanguage{%s}', $doc_language) . "\n\n";
             $current_language = $doc_language;

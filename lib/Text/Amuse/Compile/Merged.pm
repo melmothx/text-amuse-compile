@@ -243,7 +243,7 @@ Accessor to the L<Template> object.
 
 =head3 templates
 
-Accesso to the L<Text::Amuse::Compile::Templates> object.
+Accessor to the L<Text::Amuse::Compile::Templates> object.
 
 =cut
 

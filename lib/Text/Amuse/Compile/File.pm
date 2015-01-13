@@ -318,7 +318,7 @@ sub bare_html {
                        },
                        $outfile,
                        { binmode => ':encoding(utf-8)' })
-      or $self->log_fata($self->tt->error);
+      or $self->log_fatal($self->tt->error);
 }
 
 sub a4_pdf {

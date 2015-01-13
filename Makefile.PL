@@ -20,7 +20,7 @@ WriteMakefile(
     },
     PREREQ_PM => {
         # ours
-        'Text::Amuse' => 0.14,
+        'Text::Amuse' => 0.19,
         'PDF::Imposition' => 0.07,
         # needed
         'Template::Tiny' => 1.12, # version in wheezy

@@ -1,5 +1,5 @@
 #title Testing *for* me
-#author Pallino *Pinco*
+#author Second author
 #date 2014
 #lang sr
 

@@ -23,7 +23,7 @@ WriteMakefile(
         'Text::Amuse' => 0.14,
         'PDF::Imposition' => 0.07,
         # needed
-        'Template' => 2.24,
+        'Template::Tiny' => 1.12, # version in wheezy
         'IO::Pipe' => 0,
         'EBook::EPUB' => 0.6,
         'Archive::Zip' => 0, # alread a requirement of EBook::EPUB

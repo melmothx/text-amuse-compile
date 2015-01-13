@@ -862,24 +862,12 @@ sub bare_latex {
 
 \begin{center}
 \huge{\textbf{[% doc.header_as_latex.title %]}\par}
-
 \bigskip
-
-[% IF doc.header_as_latex.subtitle.size %]
 \LARGE{\textbf{[% doc.header_as_latex.subtitle %]}\par}
-
 \bigskip
-[% END %]
-
-[% IF doc.header_as_latex.author.size %]
 \Large{[% doc.header_as_latex.author %]\par}
-
 \bigskip
-[% END %]
-
-[% IF doc.header_as_latex.date.size %]
 \large{[% doc.header_as_latex.date %]}
-[% END %]
 
 \end{center}
 

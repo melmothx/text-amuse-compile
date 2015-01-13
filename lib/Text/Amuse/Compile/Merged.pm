@@ -7,7 +7,7 @@ use utf8;
 use Text::Amuse;
 use Text::Amuse::Functions qw/muse_format_line/;
 use Text::Amuse::Compile::Templates;
-use Template;
+use Template::Tiny;
 
 =encoding utf8
 
@@ -91,7 +91,7 @@ sub new {
                 language_code => $main_lang_code,
                 other_languages => \%languages,
                 other_language_codes => \%language_codes,
-                tt      => Template->new,
+                tt      => Template::Tiny->new,
                 templates => Text::Amuse::Compile::Templates->new,
                };
     bless $self, $class;
@@ -170,13 +170,15 @@ sub as_latex {
         }
 
         if ($doc_language ne $current_language) {
-            $output = sprintf('\selectlanguage{%s}', $doc_language) . "\n\n";
+            $output .= sprintf('\selectlanguage{%s}', $doc_language) . "\n\n";
             $current_language = $doc_language;
         }
 
+        my $template_output = '';
         $self->tt->process($self->templates->bare_latex,
                            { doc => $doc },
-                           \$output) or die $self->tt->error;
+                           \$template_output);
+        $output .= $template_output;
         push @out, $output;
     }
     return join("\n\n", @out, "\n");

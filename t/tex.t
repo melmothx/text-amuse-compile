@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 41;
+plan tests => 43;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -80,6 +80,7 @@ test_file({
           },
           qr/croatian/,
           qr/russian/,
+          qr/Pallino.*Pinco.*Second.*author/s,
           qr/selectlanguage\{russian}.*selectlanguage\{croatian}/s,
           qr/\\maketitle\s*\\cleardoublepage/s,
           qr/\\setmainlanguage\{russian\}\s*
@@ -99,6 +100,7 @@ test_file({
           },
           qr/\\maketitle\s*\\cleardoublepage/s,
           qr/selectlanguage\{croatian}.*selectlanguage\{russian}/s,
+          qr/Second.*author.*Pallino.*Pinco/s,
           qr/croatian/,
           qr/russian/,
           qr/\\setmainlanguage\{croatian\}\s*

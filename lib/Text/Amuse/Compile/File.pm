@@ -735,7 +735,7 @@ sub _process_template {
 # method for options to pass to the tex template
 sub _prepare_tex_tokens {
     my ($self, $doc, %tokens) = @_;
-    print Dumper(\%tokens);
+
     # defaults
     my %parsed = (
                   papersize => '210mm:11in', # the generic

@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 129;
+use Test::More tests => 127;
 use Text::Amuse::Compile;
 use File::Spec;
 use Text::Amuse::Compile::Utils qw/read_file/;
@@ -42,6 +42,13 @@ $extra->{ciao} = 1;
 
 is_deeply({ $compile->extra }, $returned );
 
+$returned = {
+             $compile->extra,
+             papersize => '210mm:11in',
+             fontsize => 10,
+             bcor => '0mm',
+            };
+
 my @targets;
 my @results;
 my @statusfiles;
@@ -79,7 +86,7 @@ for (1..2) {
             like $c, qr/\Q$string\E/, "Found $string";
         }
         like $c, qr/DIV=9/, "Found the div factor";
-        like $c, qr/fontsize=48pt/, "Found the fontsize";
+        like $c, qr/fontsize=10pt/, "Found the fontsize";
         unlike $c, qr/twoside/, "oneside enforced";
         like $c, qr/oneside/, "oneside enforced on single pdf";
         like $c, qr/BCOR=0mm/, "BCOR validated and enforced";
@@ -127,11 +134,10 @@ for (1..2) {
         like $c, qr/\Q$string\E/, "Found $string";
     }
     like $c, qr/DIV=9/, "Found the div factor";
-    like $c, qr/fontsize=48pt/, "Found the fontsize";
+    like $c, qr/fontsize=10pt/, "Found the fontsize";
     like $c, qr/twoside/, "oneside not enforced";
     unlike $c, qr/oneside/, "oneside not enforced";
-    unlike $c, qr/BCOR=0mm/, "BCOR not enforced";
-    like $c, qr/BCOR=23/, "BCOR not enforced";
+    like $c, qr/BCOR=0mm/, "BCOR enforced";
     unlike $c, qr/\\maketitle/;
     like $c, qr/includegraphics\[width=0\.5\\textwidth\]\{mycover.pdf\}/;
     like $c, qr/\\tableofcontents/;

@@ -245,7 +245,7 @@ Accessor to the headers.
 
 =head3 tt
 
-Accessor to the L<Template> object.
+Accessor to the L<Template::Tiny> object.
 
 =head3 templates
 

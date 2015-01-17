@@ -84,7 +84,7 @@ test_file($file_with_toc, {
                           },
           qr/scrbook/,
           qr/^\s+oneside,%$/m,
-          qr/mainlanguage\{russian\}/,
+          qr/^\\setmainlanguage\{russian\}/m,
           qr/\\renewcaptionname\{russian\}\{\\contentsname\}\{Содржина\}/,
           qr/paper=210mm:11in/,
           qr/\\maketitle\s*\\cleardoublepage/s,

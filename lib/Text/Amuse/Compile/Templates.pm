@@ -274,43 +274,37 @@ sub html {
 </head>
 <body>
  <div id="page">
-  [% IF doc.header_as_html.author.length %]
-  <h2>[% doc.header_as_html.author %]</h2>
+  [% IF doc.header_defined.author %]
+  <h2 class="amw-text-author">[% doc.header_as_html.author %]</h2>
   [% END %]
-  <h1>[% doc.header_as_html.title %]</h1>
-
-  [% IF doc.header_as_html.subtitle.length %]
+  <h1 class="amw-text-title">[% doc.header_as_html.title %]</h1>
+  [% IF doc.header_defined.subtitle %]
   <h2>[% doc.header_as_html.subtitle %]</h2>
   [% END  %]
-
+  [% IF doc.header_defined.date %]
+  <h3 class="amw-text-date">[% doc.header_as_html.date %]</h3>
+  [% END  %]
   [% IF doc.toc_as_html %]
-  <div class="header">
+  <div class="table-of-contents">
   [% doc.toc_as_html %]
   </div>
   [% END %]
-
  <div id="thework">
-
 [% doc.as_html %]
-
  </div>
-
   <hr />
   <div id="impressum">
-    <div id="source">
-    [% IF doc.header_as_html.source.length %]
+    [% IF doc.header_defined.source %]
+    <div class="amw-text-source" id="source">
     [% doc.header_as_html.source %]
-    [% END %]
     </div>
-
-    <div id="notes">
-    [% IF doc.header_as_html.notes.length %]
+    [% END %]
+    [% IF doc.header_defined.notes %]
+    <div class="amw-text-notes" id="notes">
     [% doc.header_as_html.notes %]
-    [% END %]
     </div>
+    [% END %]
   </div>
-
-
 </div>
 </body>
 </html>
@@ -527,13 +521,11 @@ sub bare_html {
         return $ref;
     }
     my $html = <<'EOF';
-
-[%- IF doc.toc_as_html -%]
+[% IF doc.toc_as_html %]
 <div class="table-of-contents">
 [% doc.toc_as_html %]
 </div>
-[%- END -%]
-
+[% END %]
 <div id="thework">
 [% doc.as_html %]
 </div>

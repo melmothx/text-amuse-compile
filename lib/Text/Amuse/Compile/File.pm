@@ -10,7 +10,7 @@ use File::Copy qw/move/;
 use Encode qw/decode_utf8/;
 
 # needed
-use Template;
+use Template::Tiny;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use File::Copy;
 use File::Spec;
@@ -81,7 +81,7 @@ The L<Text::Amuse> object
 
 =item tt
 
-The L<Template> object
+The L<Template::Tiny> object
 
 =item logger
 
@@ -156,7 +156,7 @@ sub _set_is_deleted {
 sub tt {
     my $self = shift;
     unless ($self->{tt}) {
-        $self->{tt} = Template->new;
+        $self->{tt} = Template::Tiny->new;
     }
     return $self->{tt};
 }
@@ -294,30 +294,25 @@ sub html {
     my $self = shift;
     $self->purge('.html');
     my $outfile = $self->name . '.html';
-    $self->tt->process($self->templates->html,
-                       {
-                        doc => $self->document,
-                        css => ${ $self->templates->css },
-                        options => $self->options,
-                       },
-                       $outfile,
-                       { binmode => ':encoding(utf-8)' })
-      or $self->log_fatal($self->tt->error);
-    return $outfile;
+    $self->_process_template($self->templates->html,
+                             {
+                              doc => $self->document,
+                              css => ${ $self->templates->css },
+                              options => $self->options,
+                             },
+                             $outfile);
 }
 
 sub bare_html {
     my $self = shift;
     $self->purge('.bare.html');
     my $outfile = $self->name . '.bare.html';
-    $self->tt->process($self->templates->bare_html,
-                       {
-                        doc => $self->document,
-                        options => $self->options,
-                       },
-                       $outfile,
-                       { binmode => ':encoding(utf-8)' })
-      or $self->log_fatal($self->tt->error);
+    $self->_process_template($self->templates->bare_html,
+                             {
+                              doc => $self->document,
+                              options => $self->options,
+                             },
+                             $outfile);
 }
 
 sub a4_pdf {
@@ -398,15 +393,12 @@ sub tex {
     }
 
     $self->purge('.tex');
-    $self->tt->process($self->templates->latex,
-                       {
-                        doc => $self->document,
-                        options => { %params },
-                       },
-                       $texfile,
-                       { binmode => ':encoding(utf-8)' })
-      or self->log_fatal($self->tt->error);
-    return $texfile;
+    $self->_process_template($self->templates->latex,
+                             {
+                              doc => $self->document,
+                              options => { %params },
+                             },
+                             $texfile);
 }
 
 sub pdf {
@@ -734,6 +726,23 @@ sub cleanup {
         }
     }
 }
+
+sub _process_template {
+    my ($self, $template_ref, $tokens, $outfile) = @_;
+    eval {
+        my $out = '';
+        die "Wrong usage" unless ($template_ref && $tokens && $outfile);
+        $self->tt->process($template_ref, $tokens, \$out);
+        open (my $fh, '>:encoding(UTF-8)', $outfile) or die "Couldn't open $outfile $!";
+        print $fh $out, "\n";
+        close $fh;
+    };
+    if ($@) {
+        $self->log_fatal("Error processing template for $outfile: $@");
+    };
+    return $outfile;
+}
+
 
 
 1;

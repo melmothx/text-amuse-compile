@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 53;
+plan tests => 69;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -147,6 +147,8 @@ sub test_file {
     my $body = read_file($out);
     # print $body;
     my $error = 0;
+    unlike $body, qr/\[%/, "No opening template tokens found";
+    unlike $body, qr/%\]/, "No closing template tokens found";
     foreach my $regexp (@regexps) {
         like($body, $regexp, "$regexp matches the body") or $error++;
     }

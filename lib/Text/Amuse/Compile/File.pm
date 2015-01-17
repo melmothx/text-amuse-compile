@@ -855,6 +855,28 @@ sub _prepare_tex_tokens {
         $parsed{mainlanguage_toc_name} = $toc_name;
     }
 
+    if (my $other_langs_arrayref = $doc->other_languages) {
+        my %other_languages;
+        my %additional_strings;
+        foreach my $olang (@$other_langs_arrayref) {
+
+            # a bit of duplication...
+            my $other_lang = $lang_aliases{$olang} || $olang;
+            $other_languages{$other_lang} = 1;
+            if (my $script = $scripts{$other_lang}) {
+                my $additional = "\\newfontfamily\\" . $other_lang
+                  . 'font[Script=' . $script . ']{' . $parsed{mainfont} . "}";
+                $additional_strings{$additional} = 1;
+            }
+        }
+        if (%other_languages) {
+            $parsed{other_languages} = join(',', keys %other_languages);
+        }
+        if (%additional_strings) {
+            $parsed{other_languages_additional} = join("\n", keys %additional_strings);
+        }
+    }
+
     return {
             options => \%tokens,
             safe_options => \%parsed,

@@ -579,27 +579,12 @@ sub latex {
 \setmainlanguage{[% safe_options.lang %]}
 [% safe_options.mainlanguage_script %]
 
-[% # this is a piece of ugly code, but can't be helped %]
-[% IF doc.other_languages                  -%]
-[% SET other_languages    = {}             -%]
-[% SET additional_strings = {}             -%]
-[% FOREACH language IN doc.other_languages -%]
-[%   mylang = language                     -%]
-[%     IF (language == 'macedonian') OR (language == 'russian') -%]
-[%       mylang = 'russian'                -%]
-[%       additional_string = '\newfontfamily\russianfont[Script=Cyrillic]{' _ mainfont _ '}' -%]
-[%       additional_strings.$additional_string = 1 -%]
-[%     END                                 -%]
-[%     IF (language == 'serbian')          -%]
-[%        mylang = 'croatian'              -%]
-[%     END                                 -%]
-[%   other_languages.$mylang = 1           -%]
-[% END                                     -%]
-\setotherlanguages{[%- other_languages.keys.join(',') -%]}
-[% FOREACH additional_string IN additional_strings.keys %]
-[% additional_string %]
+[% IF safe_options.other_languages %]
+\setotherlanguages{[% safe_options.other_languages %]}
 [% END %]
-[% END -%]
+[% IF safe_options.other_languages_additional %]
+[% safe_options.other_languages_additional %]
+[% END %]
 
 [% IF safe_options.mainlanguage_toc_name %]
 \renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}

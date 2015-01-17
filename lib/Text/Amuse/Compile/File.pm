@@ -518,13 +518,13 @@ sub epub {
 
     my $titlepage = '';
 
-    if ($self->_is_string_ok($header->{author})) {
+    if ($text->header_defined->{author}) {
         my $author = $header->{author};
         $epub->add_author($self->_clean_html($author));
         $titlepage .= "<h2>$author</h2>\n";
     }
 
-    if ($self->_is_string_ok($header->{title})) {
+    if ($text->header_defined->{title}) {
         my $t = $header->{title};
         $epub->add_title($self->_clean_html($t));
         $titlepage .= "<h1>$t</h1>\n";
@@ -533,12 +533,11 @@ sub epub {
         $epub->add_title('Untitled');
     }
 
-    if ($self->_is_string_ok($header->{subtitle})) {
+    if ($text->header_defined->{subtitle}) {
         my $st = $header->{subtitle};
         $titlepage .= "<h2>$st</h2>\n"
     }
-
-    if ($self->_is_string_ok($header->{date})) {
+    if ($text->header_defined->{date}) {
         if ($header->{date} =~ m/([0-9]{4})/) {
             $epub->add_date($1);
         }
@@ -547,13 +546,13 @@ sub epub {
 
     $epub->add_language($text->language_code);
 
-    if ($self->_is_string_ok($header->{source})) {
+    if ($text->header_defined->{source}) {
         my $source = $header->{source};
         $epub->add_source($self->_clean_html($source));
         $titlepage .= "<p>$source</p>";
     }
 
-    if ($self->_is_string_ok($header->{notes})) {
+    if ($text->header_defined->{notes}) {
         my $notes = $header->{notes};
         $epub->add_description($self->_clean_html($notes));
         $titlepage .= "<p>$notes</p>";
@@ -642,14 +641,6 @@ sub _clean_html {
     $string =~ s/&amp;/&/g;
     return $string;
 }
-
-sub _is_string_ok {
-    my ($self, $string) = @_;
-    return unless defined $string;
-    return if $string eq '';
-    return 1;
-}
-
 
 =head2 Logging
 

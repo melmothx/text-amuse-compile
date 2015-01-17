@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 45;
+plan tests => 53;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -108,6 +108,28 @@ test_file({
              \\newfontfamily\s*
              \\russianfont\[Script=Cyrillic\]\{Linux\sLibertine\sO\}/sx
          );
+
+test_file({
+           path => File::Spec->catfile(qw/t tex/),
+           files => [ qw/testing testing-no-toc testing headers/ ],
+           name => 'merged-3',
+           title => 'Merged 3',
+          },
+          {
+          },
+          qr/mainlanguage\{russian}.*
+             selectlanguage\{croatian}.*
+             selectlanguage\{russian}.*
+             selectlanguage\{italian}/sx,
+          qr/\\setotherlanguages\{croatian,italian\}/,
+          qr/textbf{TitleT.*
+             textbf{SubtitleT.*
+             Large{AuthorT.*
+             large{DateT}.*
+             SourceT.*
+             NotesT/sx,
+          );
+
 
 sub test_file {
     my ($file, $extra, @regexps) = @_;

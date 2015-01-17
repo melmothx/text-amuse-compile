@@ -863,23 +863,33 @@ sub bare_latex {
 \begin{center}
 \huge{\textbf{[% doc.header_as_latex.title %]}\par}
 \bigskip
+[% IF doc.header_defined.subtitle %]
 \LARGE{\textbf{[% doc.header_as_latex.subtitle %]}\par}
 \bigskip
+[% END %]
+[% IF doc.header_defined.author %]
 \Large{[% doc.header_as_latex.author %]\par}
 \bigskip
+[% END %]
+[% IF doc.header_defined.date %]
 \large{[% doc.header_as_latex.date %]}
+[% END %]
 
 \end{center}
 
 \vfill
 
+[% IF doc.header_defined.source %]
 \begin{center}
-
 [% doc.header_as_latex.source     %]
-
-[% doc.header_as_latex.notes      %]
-
 \end{center}
+[% END %]
+
+[% IF doc.header_defined.notes %]
+\begin{center}
+[% doc.header_as_latex.notes      %]
+\end{center}
+[% END %]
 
 \cleardoublepage
 

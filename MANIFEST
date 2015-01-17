@@ -56,6 +56,7 @@ t/testfile/deleted.muse
 t/testfile/for-epub.muse
 t/testfile/test.muse
 t/tex.t
+t/tex/headers.muse
 t/tex/testing-no-toc.muse
 t/tex/testing.muse
 t/utils.t

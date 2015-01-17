@@ -747,6 +747,9 @@ sub _prepare_tex_tokens {
                   bcor => '0mm',
                   cover => '',
                   coverwidth => 1,
+                  lang => 'english',
+                  mainlanguage_script => '',
+                  mainlanguage_toc_name => '',
                  );
 
     my $tex_measure = qr{[0-9]+(\.[0-9]+)?(cm|mm|in|pt)};
@@ -820,6 +823,36 @@ sub _prepare_tex_tokens {
         if ($tokens{bcor} =~ m/($tex_measure)/) {
             $parsed{bcor} = $1;
         }
+    }
+
+    # main language
+    my $orig_lang = $doc->language;
+    my %lang_aliases = (
+                        # bad hack, no mk hyphens...
+                        macedonian => 'russian',
+
+                        # the rationale is that polyglossia seems to
+                        # go south when you load serbian with latin
+                        # script, as the logs are spammed with cyrillic loading.
+                        serbian    => 'croatian',
+                       );
+    my $lang = $parsed{lang} = $lang_aliases{$orig_lang} || $orig_lang;
+
+    # I don't like doing this here, but here we go...
+    my %scripts = (
+                   russian    => 'Cyrillic',
+                  );
+
+    if (my $script = $scripts{$lang}) {
+        $parsed{mainlanguage_script} = "\\newfontfamily\\" .
+          $lang . 'font[Script=' . $script . ']{' . $parsed{mainfont} . "}\n";
+    }
+
+    my %toc_names = (
+                     macedonian => 'Содржина',
+                    );
+    if (my $toc_name = $toc_names{$orig_lang}) {
+        $parsed{mainlanguage_toc_name} = $toc_name;
     }
 
     return {

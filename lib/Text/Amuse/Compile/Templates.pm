@@ -572,18 +572,12 @@ sub latex {
                {[% safe_options.class %]}
 \usepackage{fontspec}
 \usepackage{polyglossia}
-\setmainfont[Mapping=tex-text]{safe_options.mainfont}
+\setmainfont[Mapping=tex-text]{[% safe_options.mainfont %]}
 % these are not used but prevents XeTeX to barf
 \setsansfont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans}
 \setmonofont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans Mono}
-[% IF doc.language == 'serbian' %]
-\setmainlanguage{croatian}
-[% ELSIF (doc.language == 'macedonian') OR (doc.language == 'russian') %]
-\setmainlanguage{russian}
-\newfontfamily\russianfont[Script=Cyrillic]{[%- mainfont -%]}
-[% ELSE %]
-\setmainlanguage{[% doc.language %]}
-[% END %]
+\setmainlanguage{[% safe_options.lang %]}
+[% safe_options.mainlanguage_script %]
 
 [% # this is a piece of ugly code, but can't be helped %]
 [% IF doc.other_languages                  -%]
@@ -607,11 +601,9 @@ sub latex {
 [% END %]
 [% END -%]
 
-
-[%- IF doc.language == 'macedonian' -%]
-\renewcaptionname{russian}{\contentsname}{Содржина}
-
-[%- END -%]
+[% IF safe_options.mainlanguage_toc_name %]
+\renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}
+[% END %]
 
 \usepackage{microtype} % you need an *updated* texlive 2012, but harmless
 \usepackage{graphicx}

@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 85;
+plan tests => 87;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -36,6 +36,7 @@ test_file($file_no_toc, {
           qr/DIV=9/,
           qr/fontsize=11pt/,
           qr/mainlanguage\{croatian\}/,
+          qr/\\setmainfont\[Mapping=tex-text\]\{Linux Libertine O\}/,
           qr/paper=5.5in:8.5in/,
           qr/\\maketitle\s*\\cleardoublepage/s,
          );
@@ -86,6 +87,7 @@ test_file($file_with_toc, {
           qr/^\s+oneside,%$/m,
           qr/^\\setmainlanguage\{russian\}/m,
           qr/\\renewcaptionname\{russian\}\{\\contentsname\}\{Содржина\}/,
+          qr/\\russianfont\[Script=Cyrillic\]\{Linux\sLibertine\sO\}/,
           qr/paper=210mm:11in/,
           qr/\\maketitle\s*\\cleardoublepage/s,
          );

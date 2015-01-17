@@ -749,7 +749,6 @@ sub _prepare_tex_tokens {
                   coverwidth => 1,
                   lang => 'english',
                   mainlanguage_script => '',
-                  mainlanguage_toc_name => '',
                  );
 
     my $tex_measure = qr{[0-9]+(\.[0-9]+)?(cm|mm|in|pt)};

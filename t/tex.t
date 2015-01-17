@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 69;
+plan tests => 84;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -41,15 +41,39 @@ test_file($file_no_toc, {
          );
 
 test_file($file_no_toc, {
+                         division => 9,
+                         fontsize => 10,
+                         papersize => 'a6',
                          nocoverpage => 1,
+                         bcor => '15mm',
+                        },
+          qr/\{scrartcl\}/,
+          qr/DIV=9/,
+          qr/fontsize=10pt/,
+          qr/paper=a6/,
+          qr/BCOR=15mm/,
+          qr/\\maketitle\s*\w/,
+         );
+
+test_file($file_no_toc, {
+                         nocoverpage => 1,
+                         mainfont => 'Gentium',
+                         twoside => 1,
                         },
           qr/\\maketitle\s*\w/,
+          qr/\\setmainfont\[Mapping=tex-text\]\{Gentium\}/,
+          qr/^\s+twoside,%$/m,
+          qr/BCOR=0mm/,
          );
 
 test_file($file_with_toc, {
                            cover => 'prova.pdf',
+                           oneside => 1,
+                           bcor => '2.5cm',
                           },
           qr/\\end\{center\}\s*\\cleardoublepage\s*\\tableofcontents/s,
+          qr/^\s+oneside,%$/m,
+          qr/BCOR=2.5cm/,
          );
 
 

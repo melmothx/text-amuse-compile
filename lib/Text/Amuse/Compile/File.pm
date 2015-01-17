@@ -394,10 +394,7 @@ sub tex {
 
     $self->purge('.tex');
     $self->_process_template($self->templates->latex,
-                             {
-                              doc => $self->document,
-                              options => { %params },
-                             },
+                             $self->_prepare_tex_tokens($self->document, %params),
                              $texfile);
 }
 
@@ -735,5 +732,100 @@ sub _process_template {
 }
 
 
+# method for options to pass to the tex template
+sub _prepare_tex_tokens {
+    my ($self, $doc, %tokens) = @_;
+    print Dumper(\%tokens);
+    # defaults
+    my %parsed = (
+                  papersize => '210mm:11in', # the generic
+                  class => 'scrbook',
+                  division => 12,
+                  fontsize => 10,
+                  mainfont => 'Linux Libertine O',
+                  paging => 'oneside',
+                  bcor => '0mm',
+                  cover => '',
+                  coverwidth => 1,
+                 );
+
+    my $tex_measure = qr{[0-9]+(\.[0-9]+)?(cm|mm|in|pt)};
+
+    # paper size parsing
+    if (my $size = $tokens{papersize}) {
+        my %sizes = (
+                     'half-a4' => 'a5',
+                     'half-lt' => '5.5in:8.5in',
+                     generic => '210mm:11in',
+                     a4 => 'a4',
+                     a5 => 'a5',
+                     a6 => 'a6',
+                     letter => 'letter',
+                    );
+        if (my $real_size = $sizes{$size}) {
+            $parsed{papersize} = $real_size;
+        }
+        elsif ($size =~ m/($tex_measure:$tex_measure)/) {
+            $parsed{papersize} = $1;
+        }
+        else {
+            warn "Unrecognized paper size $size, usign the default\n";
+        }
+    }
+
+    # no cover page
+    unless ($doc->wants_toc) {
+        if ($doc->header_as_latex->{nocoverpage} || $tokens{nocoverpage}) {
+            $parsed{nocoverpage} = 1;
+            $parsed{class} = 'scrartcl';
+        }
+    }
+    # division
+    if (my $div = $tokens{division}) {
+        my %divs = map { $_ => 1 } (9..15);
+        if ($divs{$div}) {
+            $parsed{division} = $div;
+        }
+        else {
+            warn "Bad value for division: $div\n";
+        }
+    }
+    # fontsize
+    if (my $fontsize = $tokens{fontsize}) {
+        my %sizes = map { $_ => 1 } (9..12);
+        if ($sizes{$fontsize}) {
+            $parsed{fontsize} = $fontsize;
+        }
+    }
+    if ($tokens{mainfont}) {
+        # just copy it over, we can't know which fonts we have
+        # installed.
+        $parsed{mainfont} = $tokens{mainfont};
+    }
+
+    # oneside or twoside
+    if ($tokens{oneside} && $tokens{twoside}) {
+        warn "Passed oneside and twoside at the same time, using oneside (default)\n";
+    }
+    elsif ($tokens{oneside}) {
+        $parsed{paging} = 'oneside';
+    }
+    elsif ($tokens{twoside}) {
+        $parsed{paging} = 'twoside';
+    }
+
+    # bcor
+    if ($tokens{bcor}) {
+        if ($tokens{bcor} =~ m/($tex_measure)/) {
+            $parsed{bcor} = $1;
+        }
+    }
+
+    return {
+            options => \%tokens,
+            safe_options => \%parsed,
+            doc => $doc,
+           };
+}
 
 1;

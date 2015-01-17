@@ -563,67 +563,16 @@ sub latex {
         return $ref;
     }
     my $latex = <<'EOF';
-[% # this is the preamble of the preamble... -%]
-[% # set the dimension and define aliases    -%]
-[% IF options.papersize == 'half-a4'         -%]
-[% SET paper = 'a5'                          -%]
-[% ELSIF options.papersize == 'half-lt'      -%]
-[% SET paper = '5.5in:8.5in'                 -%]
-[% ELSIF options.papersize == 'generic'      -%]
-[% SET paper = '210mm:11in'                  -%]
-[% ELSIF options.papersize                   -%]
-[% SET paper = options.papersize             -%]
-[% ELSE                                      -%]
-[% # fits letter and a4                      -%]
-[% SET paper = '210mm:11in'                  -%]
-[% END                                       -%]
-[% # set the class                           -%]
-[% SET class = 'scrbook'                     -%]
-[% UNLESS doc.wants_toc                      -%]
-[%   IF (doc.header_as_latex.nocoverpage || options.nocoverpage) -%]
-[%   SET class = 'scrartcl'                                      -%]
-[%   END                                                         -%]
-[% END                                       -%]
-[% # set the div, if any                     -%]
-[% IF options.division                       -%]
-[% SET division = options.division           -%]
-[% ELSE                                      -%]
-[% SET division = '12'                       -%]
-[% END                                       -%]
-[% # set the fontsize                        -%]
-[% IF options.fontsize                       -%]
-[% SET fontsize = options.fontsize           -%]
-[% ELSE                                      -%]
-[% SET fontsize = 10                         -%]
-[% END                                       -%]
-[% # set the font                            -%]
-[% IF options.mainfont                       -%]
-[% SET mainfont = options.mainfont           -%]
-[% ELSE                                      -%]
-[% SET mainfont = 'Linux Libertine O'        -%]
-[% END                                       -%]
-[% IF options.oneside                        -%]
-[% SET paging = 'oneside'                    -%]
-[% ELSIF options.twoside                     -%]
-[% SET paging = 'twoside'                    -%]
-[% ELSE                                      -%]
-[% SET paging = 'oneside'                    -%]
-[% END                                       -%]
-[% IF options.bcor                           -%]
-[% SET bcor = options.bcor                   -%]
-[% ELSE                                      -%]
-[% SET bcor = '0mm'                          -%]
-[% END                                       -%]
-[% # end of options                          -%]
-\documentclass[DIV=[% division -%],%
-               BCOR=[% bcor -%],%
-               fontsize=[% fontsize %]pt,%
-               [% paging %],%
+\documentclass[DIV=[% safe_options.division -%],%
+               BCOR=[% safe_options.bcor -%],%
+               fontsize=[% safe_options.fontsize %]pt,%
+               [% safe_options.paging %],%
                footinclude=false,%
-               paper=[% paper %]]{[% class %]}
+               paper=[% safe_options.papersize %]]%
+               {[% safe_options.class %]}
 \usepackage{fontspec}
 \usepackage{polyglossia}
-\setmainfont[Mapping=tex-text]{[%- mainfont -%]}
+\setmainfont[Mapping=tex-text]{safe_options.mainfont}
 % these are not used but prevents XeTeX to barf
 \setsansfont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans}
 \setmonofont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans Mono}
@@ -761,7 +710,7 @@ sub latex {
 [% ELSE %]
 \maketitle
 [% END %]
-[% UNLESS doc.header_as_latex.nocoverpage || options.nocoverpage %]
+[% UNLESS safe_options.nocoverpage %]
 \cleardoublepage
 [% END %]
 

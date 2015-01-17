@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 87;
+plan tests => 126;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -25,6 +25,8 @@ plan tests => 87;
 
 my $file_no_toc = File::Spec->catfile(qw/t tex testing-no-toc.muse/);
 my $file_with_toc = File::Spec->catfile(qw/t tex testing.muse/);
+my $file_with_full_header = File::Spec->catfile(qw/t tex headers.muse/);
+
 
 test_file($file_no_toc, {
                          division => 9,
@@ -71,8 +73,10 @@ test_file($file_with_toc, {
                            cover => 'prova.pdf',
                            oneside => 1,
                            bcor => '2.5cm',
+                           coverwidth => '0.1',
                           },
           qr/\\end\{center\}\s*\\cleardoublepage\s*\\tableofcontents/s,
+          qr/\\includegraphics\[width=0.1\\textwidth\]{prova.pdf}/,
           qr/^\s+oneside,%$/m,
           qr/BCOR=2.5cm/,
          );
@@ -91,6 +95,33 @@ test_file($file_with_toc, {
           qr/paper=210mm:11in/,
           qr/\\maketitle\s*\\cleardoublepage/s,
          );
+
+
+test_file($file_with_toc, {
+                           papersize => 'generic',
+                           oneside => 1,
+                           twoside => 1,
+                           cover => 'prova.pdf',
+                          },
+          qr/\\includegraphics\[width=1\\textwidth\]{prova.pdf}/,
+         );
+
+test_file($file_with_full_header, { cover => 'prova.pdf' },
+          qr/\\Large\\textbf\{AuthorT/,
+          qr/\\LARGE\\textbf\{TitleT/,
+          qr/\\large DateT/,
+          qr/\\Large\\textbf\{SubtitleT/,
+         );
+
+test_file($file_with_toc, {
+                           papersize => 'generic',
+                           oneside => 1,
+                           twoside => 1,
+                           cover => 'prova.pdf',
+                           coverwidth => 'blablabla',
+                          },
+          qr/\\includegraphics\[width=1\\textwidth\]{prova.pdf}/,);
+
 
 test_file($file_with_toc, {
                            papersize => 'half-a4',
@@ -160,6 +191,15 @@ test_file({
           );
 
 
+my $outbody = test_file($file_with_toc, { notoc => 0 });
+like $outbody, qr/tableofcontents/;
+$outbody = test_file($file_with_toc, { notoc => 1 });
+unlike $outbody, qr/tableofcontents/;
+$outbody = test_file($file_no_toc, { notoc => 1 });
+unlike $outbody, qr/tableofcontents/;
+$outbody = test_file($file_no_toc, { notoc => 0 });
+unlike $outbody, qr/tableofcontents/;
+
 sub test_file {
     my ($file, $extra, @regexps) = @_;
     my $c = Text::Amuse::Compile->new(tex => 1, extra => $extra);
@@ -202,5 +242,6 @@ sub test_file {
         $out =~ s/tex$/status/;
         unlink $out unless $error;
     }
+    return $body;
 }
 

@@ -663,23 +663,17 @@ sub latex {
   \thispagestyle{empty}
   \strut\bigskip
   \begin{center}
-    [% IF doc.header_as_latex.author %]
+    [% IF doc.header_defined.author %]
     {\Large\textbf{[% doc.header_as_latex.author %]}\\[\baselineskip]}
     [% END %]
-    {\LARGE\textbf{[%doc.header_as_latex.title %]\\[\baselineskip]}}
-    [% IF doc.header_as_latex.subtitle %]
-      {\Large{\bfseries [%doc.header_as_latex.subtitle %]\\[\baselineskip]}}
+    {\LARGE\textbf{[% doc.header_as_latex.title %]\\[\baselineskip]}}
+    [% IF doc.header_defined.subtitle %]
+      {\Large\textbf{[% doc.header_as_latex.subtitle %]}\\[\baselineskip]}
     [% END %]
-
-[% IF options.coverwidth               -%]
-[% SET coverwidth = options.coverwidth -%]
-[% ELSE                                -%]
-[% SET coverwidth = 1 -%]
-[% END -%]
     \vfill
-    \includegraphics[width=[% coverwidth %]\textwidth]{[% options.cover %]}
+    \includegraphics[width=[% safe_options.coverwidth %]\textwidth]{[% options.cover %]}
     \vfill
-    [% IF doc.header_as_latex.date %]
+    [% IF doc.header_defined.date %]
     {\large [% doc.header_as_latex.date %]}
     [% END %]
     \strut
@@ -691,12 +685,10 @@ sub latex {
 \cleardoublepage
 [% END %]
 
-[% UNLESS options.notoc %]
-[% IF doc.wants_toc %]
+[% IF safe_options.wants_toc %]
 \tableofcontents
 % start a new right-handed page
 \cleardoublepage
-[% END %]
 [% END %]
 
 [% doc.as_latex %]
@@ -725,9 +717,7 @@ sub latex {
 [% END %]
 \end{center}
 
-
 \strut
-
 
 \vfill
 

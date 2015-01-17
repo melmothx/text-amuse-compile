@@ -749,6 +749,7 @@ sub _prepare_tex_tokens {
                   coverwidth => 1,
                   lang => 'english',
                   mainlanguage_script => '',
+                  wants_toc => 0,
                  );
 
     my $tex_measure = qr{[0-9]+(\.[0-9]+)?(cm|mm|in|pt)};
@@ -824,6 +825,21 @@ sub _prepare_tex_tokens {
         }
     }
 
+    if (my $coverwidth = $tokens{coverwidth}) {
+        if ($coverwidth =~ m/([01](\.[0-9]+)?)/) {
+            $parsed{coverwidth} = $1;
+        }
+        else {
+            warn "Wrong value for coverwidth $coverwidth\n";
+        }
+    }
+
+    unless ($tokens{notoc}) {
+        if ($doc->wants_toc) {
+            $parsed{wants_toc} = 1;
+        }
+    }
+
     # main language
     my $orig_lang = $doc->language;
     my %lang_aliases = (
@@ -869,10 +885,10 @@ sub _prepare_tex_tokens {
             }
         }
         if (%other_languages) {
-            $parsed{other_languages} = join(',', keys %other_languages);
+            $parsed{other_languages} = join(',', sort keys %other_languages);
         }
         if (%additional_strings) {
-            $parsed{other_languages_additional} = join("\n", keys %additional_strings);
+            $parsed{other_languages_additional} = join("\n", sort keys %additional_strings);
         }
     }
 

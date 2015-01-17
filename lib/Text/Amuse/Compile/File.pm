@@ -806,6 +806,7 @@ sub _prepare_tex_tokens {
     # oneside or twoside
     if ($tokens{oneside} && $tokens{twoside}) {
         warn "Passed oneside and twoside at the same time, using oneside (default)\n";
+        $parsed{paging} = 'oneside';
     }
     elsif ($tokens{oneside}) {
         $parsed{paging} = 'oneside';

@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 84;
+plan tests => 85;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -79,8 +79,11 @@ test_file($file_with_toc, {
 
 test_file($file_with_toc, {
                            papersize => 'generic',
+                           oneside => 1,
+                           twoside => 1,
                           },
           qr/scrbook/,
+          qr/^\s+oneside,%$/m,
           qr/mainlanguage\{russian\}/,
           qr/\\renewcaptionname\{russian\}\{\\contentsname\}\{Содржина\}/,
           qr/paper=210mm:11in/,

@@ -231,14 +231,15 @@ sub extra {
     my $self = shift;
     my $hashref = $self->{extra};
     my %out;
-    # do a shallow copy before returning, filtering out \\ to avoid
-    # command injections.
+    # do a shallow copy before returning, filtering out special chars
+    # to avoid command injections.
+    my $specials = qr/[\\\$\&\{\}_\^%\#~]/;
     if ($hashref) {
         foreach my $k (keys %$hashref) {
             my $v = $hashref->{$k};
-            if (defined($v) and $v =~ m/\\/) {
-                warn "Found command $v in extra key $k!\n";
-                $v =~ s/\\//g;
+            if (defined($v) and $v =~ m/$specials/) {
+                warn "Found special character in $v in extra key $k, stripping\n";
+                $v =~ s/$specials//g;
             }
             $out{$k} = $v;
         }

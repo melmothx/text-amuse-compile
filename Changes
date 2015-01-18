@@ -1,5 +1,18 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.30 2015-01-18
+
+ - Downgraded requirement from Template to Template::Tiny. This change
+   should produce a minor performance improvement (both speed and
+   memory-wise) and, more important, pull out the complicated logic
+   from the the LaTeX template into the code. This of course will
+   prevent to do crazy stuff into the template. I see this as a
+   feature. Eventually, if the need arise, there could be an option to
+   use Template instead, given that the interface is the same. This is
+   a major clenaup which has the potential to introduce bugs.
+
+ - Added validation for extra values
+
 0.27 2015-01-13
 
  - Fixed minor bug with missing cleardoublepage after title page

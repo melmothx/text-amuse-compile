@@ -98,6 +98,12 @@ trial and error if you need custom dimensions.
 
 The DIV of the C<typearea> package. Defaults to 12. Go and read the doc.
 
+=item safe_options.opening
+
+On which pages the chapters should open: right, left, any. Default:
+right. The left one will probably lead to unexpected results (the PDF
+will start with an empty page), so use it at your own peril.
+
 =item safe_options.bcor
 
 The BCOR of the C<typearea> package. Defaults to 0mm. Go and read the doc.
@@ -579,11 +585,11 @@ sub latex {
         return $ref;
     }
     my $latex = <<'EOF';
-\documentclass[DIV=[% safe_options.division -%],%
-               BCOR=[% safe_options.bcor -%],%
+\documentclass[DIV=[% safe_options.division %],%
+               BCOR=[% safe_options.bcor %],%
+               footinclude=false,[% IF safe_options.opening %]open=[% safe_options.opening %],[% END %]%
                fontsize=[% safe_options.fontsize %]pt,%
                [% safe_options.paging %],%
-               footinclude=false,%
                paper=[% safe_options.papersize %]]%
                {[% safe_options.class %]}
 \usepackage{fontspec}

@@ -783,6 +783,22 @@ sub _prepare_tex_tokens {
             $parsed{class} = 'scrartcl';
         }
     }
+    if ($parsed{class} eq 'scrbook') {
+        if (my $opening = $tokens{opening}) {
+            my %openings = (
+                            right => 1,
+                            left => 1,
+                            any => 1,
+                           );
+            if ($openings{$opening}) {
+                $parsed{opening} = $opening;
+            }
+            else {
+                warn "Unrecognized opening (right|left|any) $opening\n";
+                $parsed{opening} = 'right';
+            }
+        }
+    }
     # division
     if (my $div = $tokens{division}) {
         my %divs = map { $_ => 1 } (9..15);

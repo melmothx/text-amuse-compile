@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 126;
+plan tests => 130;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -191,12 +191,27 @@ test_file({
           );
 
 
-my $outbody = test_file($file_with_toc, { notoc => 0 });
+my $outbody = test_file($file_with_toc, {
+                                         notoc => 0,
+                                         opening => 'right',
+                                        },
+                        qr/open=right/,
+                       );
 like $outbody, qr/tableofcontents/;
-$outbody = test_file($file_with_toc, { notoc => 1 });
+$outbody = test_file($file_with_toc, { notoc => 1,
+                                       opening => 'any',
+                                     },
+                     qr/open=any/,
+                    );
 unlike $outbody, qr/tableofcontents/;
-$outbody = test_file($file_no_toc, { notoc => 1 });
+$outbody = test_file($file_no_toc, { notoc => 1,
+                                     nocoverpage => 1,
+                                     opening => 'any',
+                                   },
+                     qr/\{scrartcl\}/,
+                    );
 unlike $outbody, qr/tableofcontents/;
+unlike $outbody, qr/open=any/, "No opening found, it has no toc";
 $outbody = test_file($file_no_toc, { notoc => 0 });
 unlike $outbody, qr/tableofcontents/;
 

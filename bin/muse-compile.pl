@@ -125,6 +125,7 @@ Example:
                --extra siteslogan="Anticopyright" \
                --extra logo=mylogo \
                --extra cover=mycover.pdf \
+               --extra opening=any \
                file.muse
 
 Keep in mind that in this case C<mylogo> has to be or an absolute
@@ -175,6 +176,11 @@ Use the LaTeX article class if toc is not present
 =item * notoc
 
 Never generate a table of contents
+
+=item * opening
+
+Page for starting a chapter: "any" or "right" or (at your own peril)
+"left"
 
 =back
 

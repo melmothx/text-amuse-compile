@@ -2,16 +2,17 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 127;
+use Test::More tests => 129;
 use Text::Amuse::Compile;
 use File::Spec;
+use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Utils qw/read_file/;
 
 my $extra = {
              site => "Test site",
              mainfont => "LModern",
              siteslogan => "Hello there!",
-             site => "http://mysite.org",
+             site => "http:mysite.org",
              sitename => "Another crappy test site",
              papersize => "a4paperwithears",
              division => 9,
@@ -31,7 +32,6 @@ my $compile = Text::Amuse::Compile->new(
                                        );
 
 my $extracopy = { %$extra };
-$extracopy->{coverwidth} = '0.5';
 is_deeply({ $compile->extra }, $extracopy, "extra options stored" );
 ok ($compile->cleanup);
 
@@ -47,6 +47,7 @@ $returned = {
              papersize => '210mm:11in',
              fontsize => 10,
              bcor => '0mm',
+             coverwidth => '0.5',
             };
 
 my @targets;
@@ -144,10 +145,38 @@ for (1..2) {
     unlink $texfile or die $!;
 }
 
-my $dirty = Text::Amuse::Compile->new(extra => {
-                                                pippo => '#x$x%x^x&x_x{x}x~x\\',
-                                                pluto => '#x$x%x^x&x_x{x}x~x\\',
-                                               });
-my %extra = $dirty->extra;
-is $extra{pippo}, 'xxxxxxxxx', "Special characters stripped out from extra";
-is $extra{pluto}, 'xxxxxxxxx', "Special characters stripped out from extra";
+
+my $dummy = Text::Amuse::Compile::File->new(
+                                            name => 'dummy',
+                                            suffix => '.muse',
+                                            templates => 'dummy',
+                                            options => {
+                                                        pippo => '[[http://test.org][test]]',
+                                                        prova => 'hello *there* & \stuff',
+                                                        ciao => 1,
+                                                        test => "Another great thing!",
+                                                       },
+                                           );
+
+my $html_options = $dummy->options('html');
+my $latex_options = $dummy->options;
+
+is_deeply($html_options, {
+                          pippo => '<a href="http://test.org">test</a>',
+                          prova => 'hello <em>there</em> &amp; \stuff',
+                          ciao => 1,
+                          test => "Another great thing!",
+                         }, "html escaped and interpreted ok");
+is_deeply($latex_options, {
+                           prova => 'hello \emph{there} \& \textbackslash{}stuff',
+                           pippo => '\href{http://test.org}{test}',
+                           ciao => 1,
+                           test => "Another great thing!",
+                          }, "latex escaped and interpreted ok");
+
+is_deeply($dummy->options('ltx'), $latex_options);
+
+eval {
+    my $die = $dummy->options('garbage');
+};
+ok ($@, "Incorrect usage leads to exception");

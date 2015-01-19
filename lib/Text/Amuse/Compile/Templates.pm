@@ -64,15 +64,15 @@ The built-in LaTeX template supports the following options, which are
 picked up from the C<extra> constructor of L<Text::Amuse::Compile>.
 
 The template itself uses two hashrefs with tokens: C<options> and
-C<safe_options>. The C<options> contains tokens which are passed
-verbatim from the C<extra> constructor. The C<safe_options> ones
-contains validate copies of the C<options> for places where it make
-sense, plus some internal things like the languages and additional
-strings to get the LaTeX code right.
+C<safe_options>. The C<options> contains tokens which are interpreted
+as L<Text::Amuse> strings from the C<extra> constructor. The
+C<safe_options> ones contains validate copies of the C<options> for
+places where it make sense, plus some internal things like the
+languages and additional strings to get the LaTeX code right.
 
-All the values from C<options> and C<safe_options> are stripped from
-the LaTeX reserved characters: C<\ $ & { } _ ^ % # ~>, which therefore
-can't be passed.
+All the values from C<options> and C<safe_options>, because of the
+markup interpretation, are (hopefully) safely escaped (so you can pass
+even LaTeX commands, and they will be escaped).
 
 =head4 Globals
 

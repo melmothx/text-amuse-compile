@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 130;
+plan tests => 136;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -215,6 +215,23 @@ unlike $outbody, qr/open=any/, "No opening found, it has no toc";
 $outbody = test_file($file_no_toc, { notoc => 0 });
 unlike $outbody, qr/tableofcontents/;
 
+my $siteslogan =<<'EXPECTED';
+\#x\$x\%x\^{}x\&x\_x\{x\}x\textasciitilde{}x\textbackslash{}
+EXPECTED
+chomp $siteslogan;
+
+my $sitename =<< 'EXPECTED';
+\emph{hello} t\textbar{}h\&r\textasciitilde{}\_\textbackslash{}
+EXPECTED
+chomp $sitename;
+
+$outbody = test_file($file_no_toc, {
+                                    siteslogan => '#x$x%x^x&x_x{x}x~x\\',
+                                    sitename => '*hello* t|h&r~_\\',
+                                   },
+                     qr/\Q$siteslogan\E/,
+                     qr/\Q$sitename\E/,
+                    );
 sub test_file {
     my ($file, $extra, @regexps) = @_;
     my $c = Text::Amuse::Compile->new(tex => 1, extra => $extra);

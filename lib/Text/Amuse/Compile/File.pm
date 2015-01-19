@@ -19,7 +19,8 @@ use IO::Pipe;
 # ours
 use PDF::Imposition;
 use Text::Amuse;
-use Text::Amuse::Functions qw/muse_fast_scan_header/;
+use Text::Amuse::Functions qw/muse_fast_scan_header
+                              muse_format_line/;
 
 =encoding utf8
 
@@ -114,10 +115,18 @@ sub virtual {
 }
 
 sub options {
-    my $self = shift;
+    my ($self, $format) = @_;
+    $format ||= 'ltx';
     my %out;
     if (my $ref = $self->{options}) {
-        %out = %$ref;
+        foreach my $k (keys %$ref) {
+            if (defined $ref->{$k}) {
+                $out{$k} = muse_format_line($format, $ref->{$k});
+            }
+            else {
+                $out{$k} = undef;
+            }
+        }
     }
     # return a copy
     return { %out };
@@ -298,7 +307,7 @@ sub html {
                              {
                               doc => $self->document,
                               css => ${ $self->templates->css },
-                              options => $self->options,
+                              options => $self->options('html'),
                              },
                              $outfile);
 }
@@ -310,7 +319,7 @@ sub bare_html {
     $self->_process_template($self->templates->bare_html,
                              {
                               doc => $self->document,
-                              options => $self->options,
+                              options => $self->options('html'),
                              },
                              $outfile);
 }
@@ -383,7 +392,7 @@ sub tex {
                      );
     }
 
-    my %params = %{ $self->options };
+    my %params = %{ $self->options('ltx') };
     # arguments can override the global options, so they don't mess up
     # too much when calling pdf-a4, for example. This will also
     # override twoside, oneside, bcor for default one.
@@ -561,7 +570,7 @@ sub epub {
                        {
                         title => $self->_remove_tags($header->{title}),
                         text => $titlepage,
-                        options => $self->options,
+                        options => $self->options('html'),
                        },
                        \$firstpage)
       or $self->log_fatal($self->tt->error);
@@ -585,7 +594,7 @@ sub epub {
         $self->tt->process($self->templates->minimal_html,
                            {
                             title => $self->_remove_tags($title),
-                            options => $self->options,
+                            options => $self->options('html'),
                             text => $fi,
                            },
                            \$xhtml)

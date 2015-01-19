@@ -114,7 +114,11 @@ This option can be repeated at will. The key/value pairs will be
 passed to every template we process, regardless of the type, even if
 only the built-in LaTeX template support them.
 
-The input is assumed to be UTF-8 (if you pass non-ascii characters)
+The input is assumed to be UTF-8 (if you pass non-ascii characters).
+The values, before being passed to the templates, are interpreted as
+L<Text::Amuse> strings. This normally doesn't have any side effects
+for simple strings, while for text this has the sane behaviour to
+escape special characters and to permit inline markup.
 
 Example:
 
@@ -135,9 +139,6 @@ found by C<kpsewhich> (or a file in the current directory, if you
 aren't doing a recursive compilation). Same applies for C<cover>.
 
 Supported extra keys (documented in L<Text::Amuse::Compile::Templates>):
-
-B<No validation is done, as it's supposed to be run by a trusted,
-local user>.
 
 =over 4
 

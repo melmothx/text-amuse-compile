@@ -1,5 +1,11 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.31 2015-01-19
+
+ - New option: opening (for chapter pages)
+ - Interpret (via Text::Amuse) and so escape all the strings passed
+   to the templates
+
 0.30 2015-01-18
 
  - Downgraded requirement from Template to Template::Tiny. This change

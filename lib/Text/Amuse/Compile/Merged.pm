@@ -87,6 +87,7 @@ sub new {
                 latex_headers => \%latex_headers,
                 files   => [ @$files ],
                 docs    => \@docs,
+                hyphenation => $docs[0]->hyphenation, # use the first
                 language      => $main_lang,
                 language_code => $main_lang_code,
                 other_languages => \%languages,
@@ -115,6 +116,10 @@ language names, undef otherwise.
 If it's a multilingual merged text, return an arrayref of the other
 language codes, undef otherwise.
 
+=head2 hyphenation
+
+Return the hyphenation of the first text.
+
 =cut
 
 sub language {
@@ -123,6 +128,10 @@ sub language {
 
 sub language_code {
     return shift->{language_code},
+}
+
+sub hyphenation {
+    return shift->{hyphenation},
 }
 
 sub other_language_codes {

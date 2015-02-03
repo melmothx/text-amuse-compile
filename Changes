@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.32 2015-02-03
+
+ - Support for #hyphenation tag in the header. Dependency of
+   Text::Amuse bumped because of needed hyphenation method.
+
 0.31 2015-01-19
 
  - New option: opening (for chapter pages)

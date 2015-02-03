@@ -680,6 +680,9 @@ sub latex {
 \subtitle{[% doc.header_as_latex.subtitle %]}
 
 \begin{document}
+[% IF doc.hyphenation %]
+\hyphenation{ [% doc.hyphenation %] }
+[% END %]
 
 [% IF options.cover %]
   \thispagestyle{empty}
@@ -778,6 +781,9 @@ sub bare_latex {
         return $ref;
     }
     my $latex =<<'LATEX';
+[% IF doc.hyphenation %]
+\hyphenation{ [% doc.hyphenation %] }
+[% END %]
 
 \cleardoublepage
 

@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 136;
+plan tests => 138;
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -41,6 +41,7 @@ test_file($file_no_toc, {
           qr/\\setmainfont\[Mapping=tex-text\]\{Linux Libertine O\}/,
           qr/paper=5.5in:8.5in/,
           qr/\\maketitle\s*\\cleardoublepage/s,
+          qr/document\}\s*\\hyphenation\{\s*a-no-ther\ste-st\s*}/s,
          );
 
 test_file($file_no_toc, {
@@ -181,6 +182,16 @@ test_file({
              selectlanguage\{croatian}.*
              selectlanguage\{russian}.*
              selectlanguage\{italian}/sx,
+          qr/\\begin\{document\}\s*
+             \\hyphenation\{\s*pal-li-no\s*pin-co\s*\}.*
+             \\hyphenation\{\s*pal-li-no\s*pin-co\s*\}.*
+             \\selectlanguage\{croatian\}\s*
+             \\hyphenation\{\s*a-no-ther\s*te-st\s*\}.*
+             \\selectlanguage\{russian\}\s*
+             \\hyphenation\{\s*pal-li-no\s*pin-co\s*\}.*
+             \\selectlanguage\{italian\}\s*
+             \\hyphenation\{\s*ju-st\s*th-is\s*\}
+            /sx,
           qr/\\setotherlanguages\{croatian,italian\}/,
           qr/textbf{TitleT.*
              textbf{SubtitleT.*

@@ -121,7 +121,13 @@ sub options {
     if (my $ref = $self->{options}) {
         foreach my $k (keys %$ref) {
             if (defined $ref->{$k}) {
-                $out{$k} = muse_format_line($format, $ref->{$k});
+                # filenames
+                if ($k eq 'logo' or $k eq 'cover') {
+                    $out{$k} = $self->_check_filename($ref->{$k});
+                }
+                else {
+                    $out{$k} = muse_format_line($format, $ref->{$k});
+                }
             }
             else {
                 $out{$k} = undef;
@@ -129,7 +135,7 @@ sub options {
         }
     }
     # return a copy
-    return { %out };
+    return \%out;
 }
 
 sub standalone {
@@ -923,5 +929,37 @@ sub _prepare_tex_tokens {
             doc => $doc,
            };
 }
+
+sub _check_filename {
+    my ($self, $filename) = @_;
+    return unless defined $filename;
+    # windows thing, in case
+    $filename =~ s!\\!/!g;
+    # is a path? test if it exists
+    if ($filename =~ m!/!) {
+        # non-ascii things will never match here
+        # because of the decoding. I see this as a feature
+        if (-f $filename and
+            $filename =~ m/^[a-zA-Z0-9\-\:\/]+\.(pdf|jpe?g|png)$/s) {
+            return $filename;
+        }
+        else {
+            return;
+        }
+    }
+    elsif ($filename =~ m/\A
+                          (
+                              [a-zA-Z0-9-]+
+                              (\.(pdf|jpe?g|png))?
+                          )
+                          \z/x) {
+        # sane filename;
+        return $1;
+    }
+    else {
+        return;
+    }
+}
+
 
 1;

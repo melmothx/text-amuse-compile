@@ -153,6 +153,11 @@ When this option is set to a true value, skip the creation of the
 title page with \maketitle, and instead build a custome one, with the
 cover placed in the middle of the page.
 
+The value can be an absolute path, or a bare filename, which can be
+found by C<kpsewhich>. If the path is not valid and sane (from the
+LaTeX point of view: no spaces, no strange chars), the value is
+ignored.
+
 =item safe_options.coverwidth
 
 Option to control the cover width, when is set (ignored otherwise).

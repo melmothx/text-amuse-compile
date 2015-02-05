@@ -1,5 +1,11 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.33 2015-02-05
+
+ - Fixed dumb validations for filename. This is still strict and
+   probably will create validation problems on some setups (passing
+   absolute filenames with spaces will fail miserably).
+
 0.32 2015-02-03
 
  - Support for #hyphenation tag in the header. Dependency of

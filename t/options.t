@@ -2,11 +2,14 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 129;
+use Test::More tests => 138;
 use Text::Amuse::Compile;
 use File::Spec;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Utils qw/read_file/;
+use Cwd;
+
+my $basepath = getcwd();
 
 my $extra = {
              site => "Test site",
@@ -180,3 +183,56 @@ eval {
     my $die = $dummy->options('garbage');
 };
 ok ($@, "Incorrect usage leads to exception");
+
+chdir $basepath or die $!;
+
+$dummy = Text::Amuse::Compile::File->new(
+                                         name => 'dummy',
+                                         suffix => '.muse',
+                                         templates => 'dummy',
+                                         options => {
+                                                     cover => 'prova.pdf',
+                                                     logo => 'c-i-a',
+                                                    },
+                                           );
+
+is $dummy->options->{cover}, 'prova.pdf';
+is $dummy->options->{logo}, 'c-i-a';
+
+my $testfile = File::Spec->rel2abs(File::Spec->catfile(qw/t manual logo.png/));
+ok (-f $testfile, "$testfile exists");
+
+SKIP: {
+    skip "Testfile $testfile doesn't look sane", 6
+      unless $testfile =~ m/^[a-zA-Z0-9\-\:\/\\]+\.(pdf|jpe?g|png)$/s;
+    $testfile =~ s/\\/\//g; # for tests on windows.
+    my $wintestfile = $testfile;
+    $wintestfile =~ s/\//\\/g;
+    $dummy = Text::Amuse::Compile::File->new(
+                                             name => 'dummy',
+                                             suffix => '.muse',
+                                             templates => 'dummy',
+                                             options => {
+                                                         cover => $testfile,
+                                                         logo => $wintestfile,
+                                                        },
+                                            );
+
+    ok $dummy->_check_filename($testfile), "$testfile is valid";
+    ok $dummy->_check_filename($wintestfile), "$wintestfile is valid";
+
+    is $dummy->options->{cover}, $testfile, "cover is $testfile";
+    is $dummy->options->{logo}, $testfile, "logo is $testfile";
+
+    $dummy = Text::Amuse::Compile::File->new(
+                                             name => 'dummy',
+                                             suffix => '.muse',
+                                             templates => 'dummy',
+                                             options => {
+                                                         cover => 'a bc.pdf',
+                                                         logo => 'c alsdkfl',
+                                                        },
+                                            );
+    is $dummy->options->{cover}, undef, "cover with spaces doesn't validate";
+    is $dummy->options->{logo}, undef, "logo with spaces doesn't validate";
+}

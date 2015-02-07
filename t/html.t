@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 45;
+plan tests => 54;
 
 my $file_no_toc = File::Spec->catfile(qw/t tex testing-no-toc.muse/);
 my $file_with_toc = File::Spec->catfile(qw/t tex testing.muse/);
@@ -71,6 +71,10 @@ sub test_file {
             foreach my $regexp (@regexps) {
                 like($body, $regexp, "$regexp matches the body") or $error++;
             }
+            like($body, qr/div#page\s*\{\s*margin:20px;\s*padding:20px;\s*\}/s,
+                 "Found the margins in the CSS");
+            unlike($body, qr/\@page/, "\@page not found");
+            unlike($body, qr/text-align: justify/, "No justify found in the body");
         }
         if (ref($file)) {
             my $index = 0;

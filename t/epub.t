@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 16;
+use Test::More tests => 19;
 use File::Spec;
 use Text::Amuse::Compile;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
@@ -47,4 +47,14 @@ foreach my $file (qw/piece1.xhtml
     else {
         die "No title on $file";
     }
+}
+
+{
+    my $css = read_file(File::Spec->catfile($tmpdir->dirname,
+                                            'stylesheet.css'));
+    unlike($css, qr/div#page\s*\{\s*margin:20px;\s*padding:20px;\s*\}/s,
+                 "Found the margins in the CSS");
+    like($css, qr/\@page/, "\@page found");
+    like($css, qr/text-align: justify/, "Justify found in the body");
+
 }

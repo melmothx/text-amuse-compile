@@ -39,7 +39,7 @@ return.
 
 =head3 css
 
-(not actually a template, it's the default CSS).
+The default CSS, with some minor templating.
 
 =head3 bare_html
 
@@ -345,8 +345,11 @@ sub css {
     if (my $ref = $self->ttref('css')) {
         return $ref;
     }
-    # not a template, just a static file
-        my $css = <<'EOF';
+    my $css = <<'EOF';
+[% IF epub %]
+@page { margin: 5pt; }
+[% END %]
+
 html,body {
 	margin:0;
 	padding:0;
@@ -355,10 +358,33 @@ html,body {
 	font-family: serif;
 	font-size: 10pt;
 }
+
+[% IF epub %]
+div#page > p {
+   margin: 0;
+   text-indent: 1em;
+   text-align: justify;
+}
+
+blockquote > p, li > p {
+   margin-top: 5pt;
+   text-indent: 0em;
+   text-align: justify;
+}
+
+a {
+   color:#000000;
+   text-decoration: underline
+}
+[%  END %]
+
+[% IF html %]
 div#page {
    margin:20px;
    padding:20px;
 }
+[% END %]
+
 pre, code {
     font-family: Consolas, courier, monospace;
 }

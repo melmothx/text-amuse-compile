@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.34 UNRELEASED
+
+ - Table of contents for EPUB now is properly nested
+
 0.33 2015-02-05
 
  - Fixed dumb validations for filename. This is still strict and

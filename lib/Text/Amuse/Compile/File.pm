@@ -509,13 +509,13 @@ sub epub {
     # print Dumper(\@toc);
 
     if ($missing > 1 or $missing < 0) {
-        $self->log_info(Dumper(\@pieces), Dumper(\@toc));
+        # $self->log_info(Dumper(\@pieces), Dumper(\@toc));
         $self->log_fatal("This shouldn't happen: missing pieces: $missing");
     }
     elsif ($missing == 1) {
         unshift @toc, {
                        index => 0,
-                       level => 0,
+                       level => 1,
                        string => "start body",
                       };
     }
@@ -583,19 +583,23 @@ sub epub {
 
     my $tpid = $epub->add_xhtml("titlepage.xhtml", $firstpage);
     my $order = 0;
-    $epub->add_navpoint(label => "titlepage",
-                        id => $tpid,
-                        content => "titlepage.xhtml",
-                        play_order => ++$order);
 
     # main loop
+    my @navpoints = ({
+                      label => "titlepage",
+                      id => $tpid,
+                      content => "titlepage.xhtml",
+                      play_order => ++$order,
+                      level => 1,
+                     });
     while (@pieces) {
         my $fi =    shift @pieces;
         my $index = shift @toc;
         my $xhtml = "";
         # print Dumper($index);
         my $filename = "piece" . $index->{index} . '.xhtml';
-        my $title = $index->{level} . " " . $index->{string};
+        my $prefix = '*' x $index->{level};
+        my $title = $prefix . " " . $index->{string};
 
         $self->tt->process($self->templates->minimal_html,
                            {
@@ -607,12 +611,15 @@ sub epub {
           or $self->log_fatal($self->tt->error);
 
         my $id = $epub->add_xhtml($filename, $xhtml);
-
-        $epub->add_navpoint(label => $self->_clean_html($index->{string}),
-                            content => $filename,
-                            id => $id,
-                            play_order => ++$order);
+        push @navpoints, {
+                          label => $self->_clean_html($index->{string}),
+                          content => $filename,
+                          id => $id,
+                          play_order => ++$order,
+                          level => $index->{level},
+                         };
     }
+    $self->_epub_create_toc($epub, \@navpoints);
 
     # attachments
     foreach my $att ($text->attachments) {
@@ -633,6 +640,41 @@ sub epub {
     # finish
     $epub->pack_zip($epubname);
     return $epubname;
+}
+
+sub _epub_create_toc {
+    my ($self, $epub, $navpoints) = @_;
+    my %levelnavs;
+    # print Dumper($navpoints);
+  NAVPOINT:
+    foreach my $navpoint (@$navpoints) {
+        my %nav = %$navpoint;
+        my $level = delete $nav{level};
+        die "Shouldn't happen: false level: $level" unless $level;
+        die "Shouldn't happen either: $level not 1-4" unless $level =~ m/\A[1-4]\z/;
+        my $checklevel = $level - 1;
+
+        my $current;
+        while ($checklevel > 0) {
+            if (my $parent = $levelnavs{$checklevel}) {
+                $current = $parent->add_navpoint(%nav);
+                last;
+            }
+            $checklevel--;
+        }
+        unless ($current) {
+            $current = $epub->add_navpoint(%nav);
+        }
+        for my $clear ($level..4) {
+            delete $levelnavs{$clear};
+        }
+        $levelnavs{$level} = $current;
+    }
+    # probably not needed, but let's be sure we don't leave circular
+    # refs.
+    foreach my $k (keys %levelnavs) {
+        delete $levelnavs{$k};
+    }
 }
 
 sub _remove_tags {

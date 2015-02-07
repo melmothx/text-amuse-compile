@@ -16,6 +16,7 @@ t/compile-merged.t
 t/compile.t
 t/concurrency.t
 t/coverpage.t
+t/epub-toc.t
 t/epub.t
 t/failures.t
 t/html.t

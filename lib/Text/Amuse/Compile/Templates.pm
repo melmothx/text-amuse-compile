@@ -509,33 +509,27 @@ div.right {
     text-align: right;
 }
 
-div#tableofcontents{
-    padding:20px;
-}
-
-#tableofcontents p {
-    margin: 3px 1em;
-    text-indent: -1em;
-}
-
 .toclevel1 {
 	font-weight: bold;
-	font-size:11pt
+	font-size:11pt;
 }	
 
 .toclevel2 {
 	font-weight: bold;
 	font-size: 10pt;
+    padding-left: 1em;
 }
 
 .toclevel3 {
 	font-weight: normal;
 	font-size: 9pt;
+    padding-left: 2em;
 }
 
 .toclevel4 {
 	font-weight: normal;
 	font-size: 8pt;
+    padding-left: 3em;
 }
 
 

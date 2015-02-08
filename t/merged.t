@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 37;
+use Test::More tests => 42;
 
 use File::Spec;
 use Data::Dumper;
@@ -112,6 +112,7 @@ is (scalar($doc->raw_html_toc), scalar(@html_frags), "Number of entries match");
 my @attachments = $doc->attachments;
 ok (scalar(@attachments), "Found attachments " . join(" ", @attachments));
 
+is_deeply(\@attachments, ['logo-1.png', 'logo.png']);
 
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Templates;
@@ -140,4 +141,6 @@ like $outtex, qr/\\title\{Title is Bla \\emph\{bla\} bla\}/, "Doc title found";
 $compile->purge_all;
 
 my $epub = $compile->epub;
-ok (-f $epub);
+ok ($epub, "EPUB produced");
+ok (-f $epub, "$epub exists");
+$compile->purge_all;

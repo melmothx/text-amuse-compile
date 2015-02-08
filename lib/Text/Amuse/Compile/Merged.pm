@@ -222,6 +222,22 @@ sub raw_html_toc {
     return @out;
 }
 
+=head2 attachments
+
+Implement the C<attachments> methods from C<Text::Amuse::Document>
+
+=cut
+
+sub attachments {
+    my $self = shift;
+    my %out;
+    foreach my $doc ($self->docs) {
+        foreach my $attachment ($doc->attachments) {
+            $out{$attachment} = 1;
+        }
+    }
+    return sort keys %out;
+}
 
 =head2 as_latex
 

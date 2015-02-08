@@ -6,4 +6,10 @@
 
 Second file *text*
 
+[[logo-1.png]]
 
+[[logo.png]]
+
+[[logo.png]]
+
+[[logo-1.png]]

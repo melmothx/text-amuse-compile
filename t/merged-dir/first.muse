@@ -6,4 +6,4 @@
 
 First *file* text
 
-
+[[logo.png]]

@@ -237,6 +237,28 @@ sub header_as_html {
     return { %{ shift->{html_headers} } };
 }
 
+=head2 header_defined
+
+Implements the C<header_defined> method of L<Text::Amuse>.
+
+=cut
+
+sub header_defined {
+    my $self = shift;
+    unless (defined $self->{_header_defined_hashref}) {
+        my %fields;
+        my %headers = $self->headers;
+        foreach my $k (keys %headers) {
+            if (defined($headers{$k}) and length($headers{$k})) {
+                $fields{$k} = 1;
+            }
+        }
+        $self->{_header_defined_hashref} = \%fields;
+    }
+    return { %{ $self->{_header_defined_hashref} } };
+}
+
+
 
 =head1 INTERNALS
 

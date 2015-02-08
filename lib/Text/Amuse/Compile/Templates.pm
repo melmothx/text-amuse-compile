@@ -580,6 +580,41 @@ EOF
     return \$html;
 }
 
+sub title_page_html {
+    my $self = shift;
+    if (my $ref = $self->ttref('title_page_html')) {
+        return $ref;
+    }
+    my $html = <<'EOF';
+<div id="first-page-title-page">
+  [% IF doc.header_defined.author %]
+  <h2 class="amw-text-author">[% doc.header_as_html.author %]</h2>
+  [% END %]
+  <h1 class="amw-text-title">[% doc.header_as_html.title %]</h1>
+  [% IF doc.header_defined.subtitle %]
+  <h2>[% doc.header_as_html.subtitle %]</h2>
+  [% END  %]
+  [% IF doc.header_defined.date %]
+  <h3 class="amw-text-date">[% doc.header_as_html.date %]</h3>
+  [% END  %]
+</div>
+<hr />
+<div id="impressum-title-page">
+  [% IF doc.header_defined.source %]
+  <div class="amw-text-source" id="source">
+  [% doc.header_as_html.source %]
+  </div>
+  [% END %]
+  [% IF doc.header_defined.notes %]
+  <div class="amw-text-notes" id="notes">
+  [% doc.header_as_html.notes %]
+  </div>
+  [% END %]
+</div>
+EOF
+    return \$html;
+}
+
 sub minimal_html {
     my $self = shift;
     if (my $ref = $self->ttref('minimal_html')) {

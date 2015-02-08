@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 25;
+use Test::More tests => 37;
 
 use File::Spec;
 use Data::Dumper;
@@ -66,6 +66,52 @@ is_deeply $doc->header_as_html,
   }, "Header as latex OK";
 
 
+ok $doc->header_defined->{author}, "Found author in the header";
+ok $doc->header_defined->{title}, "Found title in the header";
+ok !$doc->header_defined->{subtitles}, "Subtitle not found";
+
+my @html_frags = $doc->as_splat_html;
+ok (scalar(@html_frags), "Found splat HTML fragments");
+my $html = join("\n", @html_frags);
+
+like $html, qr{First <em>file</em> text}, "Found the first file body";
+like $html, qr{Second file <em>text</em>}, "Found the second file body";
+like $html, qr{Pallino Pinco}, "Found the first author";
+like $html, qr{First file subtitle}, "Found the first text subtitle";
+like $html, qr{<h2.*?>Pallone Ponchi</h2>}, "Found the second file author";
+like $html, qr{<h2>Second file subtitle</h2>}, "Found the title of the second file";
+
+ok $doc->raw_html_toc, "Found the toc";
+
+is_deeply([$doc->raw_html_toc],
+          [
+           {
+             'index' => 0,
+             'level' => 1,
+             'string' => 'First file'
+           },
+           {
+             'index' => 1,
+             'level' => 2,
+             'string' => 'start body'
+           },
+           {
+             'level' => 1,
+             'index' => 2,
+             'string' => 'Second file'
+           },
+           {
+             'string' => 'start body',
+             'index' => 3,
+             'level' => 2
+           }
+         ], "Toc looks ok");
+
+is (scalar($doc->raw_html_toc), scalar(@html_frags), "Number of entries match");
+
+my @attachments = $doc->attachments;
+ok (scalar(@attachments), "Found attachments " . join(" ", @attachments));
+
 
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Templates;
@@ -92,3 +138,6 @@ like $outtex, qr/\\title\{Title is Bla \\emph\{bla\} bla\}/, "Doc title found";
 
 # my $outpdf = $compile->pdf;
 $compile->purge_all;
+
+my $epub = $compile->epub;
+ok (-f $epub);

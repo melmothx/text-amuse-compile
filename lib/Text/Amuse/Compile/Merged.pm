@@ -156,6 +156,73 @@ sub other_languages {
     }
 }
 
+
+=head2 as_splat_html
+
+Return a list of HTML fragments.
+
+=cut
+
+sub as_splat_html {
+    my $self = shift;
+    my @out;
+    foreach my $doc ($self->docs) {
+        # we need to add a title page for each fragment
+        my $title_page = '';
+        $self->tt->process($self->templates->title_page_html,
+                           { doc => $doc },
+                           \$title_page);
+        push @out, $title_page, $doc->as_splat_html;
+    }
+    return @out;
+}
+
+=head2 raw_html_toc
+
+Implements the C<raw_html_toc> from L<Text::Amuse>
+
+=cut
+
+sub raw_html_toc {
+    my $self = shift;
+    my @out;
+    my $index = 0;
+    foreach my $doc ($self->docs) {
+
+        # push the title page
+        push @out, {
+                    index => $index++,
+                    level => 1,
+                    string => $doc->header_as_html->{title},
+                   };
+
+        # do the same thing we do in the File.pm
+        my @pieces = $doc->as_splat_html;
+        my @toc = $doc->raw_html_toc;
+        my $missing = scalar(@pieces) - scalar(@toc);
+        if ($missing > 1 or $missing < 0) {
+            die "This shouldn't happen: missing pieces: $missing";
+        }
+        elsif ($missing == 1) {
+            push @out, {
+                        index => $index++,
+                        level => 2,
+                        string => "start body",
+                       };
+        }
+        # main loop
+        foreach my $entry (@toc) {
+            push @out, {
+                        index => $index++,
+                        level => $entry->{level},
+                        string => $entry->{string},
+                       };
+        }
+    }
+    return @out;
+}
+
+
 =head2 as_latex
 
 Return the latex body

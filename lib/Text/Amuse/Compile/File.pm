@@ -605,7 +605,7 @@ sub epub {
         my $index = shift @toc;
         my $xhtml = "";
         # print Dumper($index);
-        my $filename = "piece" . $index->{index} . '.xhtml';
+        my $filename = sprintf('piece%06d.xhtml', $index->{index});
         my $prefix = '*' x $index->{level};
         my $title = $prefix . " " . $index->{string};
 

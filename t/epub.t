@@ -31,9 +31,9 @@ diag "Using " .$tmpdir->dirname;
 
 $zip->extractTree('OPS', $tmpdir->dirname);
 
-foreach my $file (qw/piece1.xhtml
-                     piece2.xhtml
-                     piece3.xhtml
+foreach my $file (qw/piece000001.xhtml
+                     piece000002.xhtml
+                     piece000003.xhtml
                      titlepage.xhtml/) {
     my $page = read_file(File::Spec->catfile($tmpdir->dirname,
                                              $file));

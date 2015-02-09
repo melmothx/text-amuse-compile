@@ -183,7 +183,7 @@ foreach my $muses (@tests) {
     my $piececounter = 1 - $muses->{out_of_sec};
     my @files = ('titlepage.xhtml');
     while ($piececounter < $countpart) {
-        push @files, 'piece' . $piececounter . '.xhtml';
+        push @files, sprintf('piece%06d.xhtml', $piececounter);
         $piececounter++;
     }
 

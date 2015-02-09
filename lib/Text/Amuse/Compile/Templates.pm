@@ -592,7 +592,7 @@ sub title_page_html {
   [% END %]
   <h1 class="amw-text-title">[% doc.header_as_html.title %]</h1>
   [% IF doc.header_defined.subtitle %]
-  <h2>[% doc.header_as_html.subtitle %]</h2>
+  <h2 class="amw-text-subtitle">[% doc.header_as_html.subtitle %]</h2>
   [% END  %]
   [% IF doc.header_defined.date %]
   <h3 class="amw-text-date">[% doc.header_as_html.date %]</h3>

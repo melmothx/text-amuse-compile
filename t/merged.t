@@ -2,11 +2,12 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 42;
+use Test::More tests => 43;
 
 use File::Spec;
 use Data::Dumper;
 use Text::Amuse::Compile::Utils qw/write_file read_file/;
+use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 
 my $builder = Test::More->builder;
 binmode $builder->output,         ":utf8";
@@ -79,7 +80,7 @@ like $html, qr{Second file <em>text</em>}, "Found the second file body";
 like $html, qr{Pallino Pinco}, "Found the first author";
 like $html, qr{First file subtitle}, "Found the first text subtitle";
 like $html, qr{<h2.*?>Pallone Ponchi</h2>}, "Found the second file author";
-like $html, qr{<h2>Second file subtitle</h2>}, "Found the title of the second file";
+like $html, qr{<h2.*?>Second file subtitle</h2>}, "Found the title of the second file";
 
 ok $doc->raw_html_toc, "Found the toc";
 
@@ -143,4 +144,34 @@ $compile->purge_all;
 my $epub = $compile->epub;
 ok ($epub, "EPUB produced");
 ok (-f $epub, "$epub exists");
+my $epub_html = _get_epub_xhtml($epub);
+diag $epub_html;
+like ($epub_html, qr{author.*Pallino\sPinco.*
+                     title.*First\sfile.*
+                     subtitle.*First\sfile\ssubtitle.*
+                     notes.*This\sis\sthe\sfirst\sfile.*
+                     First\s<em>file</em>\stext.*
+                     author.*Pallone\sPonchi.*
+                     title.*Second\sfile.*
+                     subtitle.*Second\sfile\ssubtitle.*
+                     notes.*This\sis\sthe\ssecond\sfile.*
+                     Second\sfile\s<em>text</em>}xs,
+      "HTML looks ok");
+
 $compile->purge_all;
+
+sub _get_epub_xhtml {
+    my $epub = shift;
+    my $zip = Archive::Zip->new;
+    die "Couldn't read $epub" if $zip->read($epub) != AZ_OK;
+    my $tmpdir = File::Temp->newdir(CLEANUP => 1);
+    $zip->extractTree('', $tmpdir->dirname);
+    my $ops = File::Spec->catdir($tmpdir->dirname, 'OPS');
+    opendir (my $dh, $ops) or die $!;
+    my @pieces = sort grep { /\Apiece\d+\.xhtml\z/ } readdir($dh);
+    my @html;
+    foreach my $piece ('toc.ncx', 'titlepage.xhtml', @pieces) {
+        push @html, read_file(File::Spec->catfile($ops, $piece));
+    }
+    return join('', @html);
+}

@@ -145,7 +145,7 @@ my $epub = $compile->epub;
 ok ($epub, "EPUB produced");
 ok (-f $epub, "$epub exists");
 my $epub_html = _get_epub_xhtml($epub);
-diag $epub_html;
+# diag $epub_html;
 like ($epub_html, qr{author.*Pallino\sPinco.*
                      title.*First\sfile.*
                      subtitle.*First\sfile\ssubtitle.*
@@ -171,7 +171,8 @@ sub _get_epub_xhtml {
     my @pieces = sort grep { /\Apiece\d+\.xhtml\z/ } readdir($dh);
     my @html;
     foreach my $piece ('toc.ncx', 'titlepage.xhtml', @pieces) {
-        push @html, read_file(File::Spec->catfile($ops, $piece));
+        push @html, "<!-- $piece -->",
+          read_file(File::Spec->catfile($ops, $piece));
     }
     return join('', @html);
 }

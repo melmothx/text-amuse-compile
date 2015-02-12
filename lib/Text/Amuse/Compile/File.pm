@@ -304,11 +304,10 @@ switches.
 
 =cut
 
-sub css_for_type {
-    my ($self, $type) = @_;
-    die unless $type;
+sub _render_css {
+    my ($self, %tokens) = @_;
     my $out = '';
-    $self->tt->process($self->templates->css, { $type => 1 }, \$out);
+    $self->tt->process($self->templates->css, \%tokens, \$out);
     return $out;
 }
 
@@ -320,7 +319,7 @@ sub html {
     $self->_process_template($self->templates->html,
                              {
                               doc => $self->document,
-                              css => $self->css_for_type('html'),
+                              css => $self->_render_css(html => 1),
                               options => $self->options('html'),
                              },
                              $outfile);
@@ -531,7 +530,7 @@ sub epub {
     my $epub = EBook::EPUB->new;
 
     # embedded CSS
-    $epub->add_stylesheet("stylesheet.css" => $self->css_for_type('epub'));
+    $epub->add_stylesheet("stylesheet.css" => $self->_render_css(epub => 1));
 
     # build the title page and some metadata
     my $header = $text->header_as_html;

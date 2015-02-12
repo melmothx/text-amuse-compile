@@ -2,9 +2,11 @@ use strict;
 use warnings;
 
 use Test::More;
+use Text::Amuse;
 use Text::Amuse::Compile;
 use File::Spec;
 use Text::Amuse::Compile::Utils qw/write_file read_file/;
+use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 
 my $builder = Test::More->builder;
 binmode $builder->output,         ":utf8";
@@ -13,7 +15,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-my $testnum = 20;
+my $testnum = 81;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
@@ -85,9 +87,81 @@ foreach my $l (qw/russian english russian/) {
     like shift(@chunks), qr/\\selectlanguage\{\Q$l\E\}/, "Found $l";
 }
 
-foreach my $ext (qw/aux log pdf tex toc status/) {
+$c = Text::Amuse::Compile->new(epub => 1);
+
+ok(! -f "$base.epub", "target dir clean");
+
+my @texts = (qw/first second third forth
+                forth third second first/);
+
+$c->compile({
+             path  => File::Spec->catdir(qw/t merged-dir/),
+             files => [ @texts ],
+             name  => 'my-new-test',
+             title => 'My new shiny test',
+             subtitle => 'Another one',
+             date => 'Today!',
+             source => 'Text::Amuse::Compile',
+            });
+
+ok(-f "$base.epub", "$base.epub created");
+
+my $epub_html = _get_epub_xhtml($base . '.epub');
+my $htmlindex = 0;
+foreach my $text (@texts) {
+    my $file = File::Spec->catfile(qw/t merged-dir/, $text . '.muse');
+    my $museobj = Text::Amuse->new(file => $file);
+    foreach my $piece ($museobj->as_splat_html) {
+        my $current = index($epub_html, $piece, $htmlindex);
+        ok($current > $htmlindex, "$current is greater than $htmlindex")
+          or diag "$piece was not found in the output";
+        # diag substr($epub_html, $htmlindex, $current - $htmlindex);
+        $htmlindex = $current + length($piece);
+    }
+    # here we check the toc, if the pieces are there and are in the
+    # correct order. First we check the sorting of the playOrder, then
+    # the pieces.
+
+}
+
+{
+    my $toc = substr($epub_html, 0, index($epub_html, '</ncx'));
+    # diag $toc;
+    my $current_toc = 0;
+    while ($toc =~ m/playOrder="(\d+)"/g) {
+        my $playorder = $1;
+        is ($playorder, $current_toc + 1, "Order ok: $playorder");
+        $current_toc = $playorder;
+    }
+    $current_toc = -1;
+    while ($toc =~ m/src="piece0*(\d+).xhtml/g) {
+        my $playorder = $1;
+        is ($playorder, $current_toc + 1, "Order of pieces ok: $playorder");
+        $current_toc = $playorder;
+    }
+
+}
+
+foreach my $ext (qw/aux log pdf tex toc status epub/) {
     my $remove = "$base.$ext";
     if (-f $remove) {
         unlink $remove or warn $!;
     }
+}
+
+sub _get_epub_xhtml {
+    my $epub = shift;
+    my $zip = Archive::Zip->new;
+    die "Couldn't read $epub" if $zip->read($epub) != AZ_OK;
+    my $tmpdir = File::Temp->newdir(CLEANUP => 1);
+    $zip->extractTree('', $tmpdir->dirname);
+    my $ops = File::Spec->catdir($tmpdir->dirname, 'OPS');
+    opendir (my $dh, $ops) or die $!;
+    my @pieces = sort grep { /\Apiece\d+\.xhtml\z/ } readdir($dh);
+    my @html;
+    foreach my $piece ('toc.ncx', 'titlepage.xhtml', @pieces) {
+        push @html, "<!-- $piece -->\n",
+          read_file(File::Spec->catfile($ops, $piece));
+    }
+    return join('', @html);
 }

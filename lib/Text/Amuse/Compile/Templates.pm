@@ -51,6 +51,10 @@ Muse headers).
 Minimal (but valid) XHTML template, with a link to C<stylesheet.css>.
 Meant to be used in the EPUB generation.
 
+=head3 title_page_html
+
+Minimal XHTML template for a title page in the EPUB generation.
+
 =head3 bare_latex
 
 Minimal and uncomplete LaTeX chunck, meant to be used when merging

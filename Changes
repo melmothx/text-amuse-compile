@@ -1,8 +1,12 @@
 Revision history for perl module Text::Amuse::Compile
 
-0.34 UNRELEASED
+0.34 2015-02-12
 
  - Table of contents for EPUB now is properly nested
+
+ - The compiler now can merge multiple texts into an EPUB. Merging
+   into a single HTML document would require rewriting the footnotes
+   reference and honestly doesn't make much sense.
 
 0.33 2015-02-05
 

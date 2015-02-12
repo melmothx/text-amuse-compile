@@ -15,7 +15,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-my $testnum = 81;
+my $testnum = 84;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
@@ -98,9 +98,9 @@ $c->compile({
              path  => File::Spec->catdir(qw/t merged-dir/),
              files => [ @texts ],
              name  => 'my-new-test',
-             title => 'My new shiny test',
-             subtitle => 'Another one',
-             date => 'Today!',
+             title => 'My *new* shiny test',
+             subtitle => 'Another *one*',
+             date => '*Today*!',
              source => 'Text::Amuse::Compile',
             });
 
@@ -141,6 +141,9 @@ foreach my $text (@texts) {
     }
 
 }
+like $epub_html, qr{My <em>new</em> shiny test}, "Found the title";
+like $epub_html, qr{Another <em>one</em>}, "Found the author";
+like $epub_html, qr{<em>Today</em>!}, "Found the date";
 
 foreach my $ext (qw/aux log pdf tex toc status epub/) {
     my $remove = "$base.$ext";

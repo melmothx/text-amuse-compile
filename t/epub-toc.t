@@ -138,7 +138,7 @@ my @tests = (
 
 foreach my $muses (@tests) {
     my $body = $muses->{body};
-    my $tmpdir = File::Temp->newdir(CLEANUP => 0);
+    my $tmpdir = File::Temp->newdir(CLEANUP => 1);
     my $tmpdirname = $tmpdir->dirname;
 
     my $c = Text::Amuse::Compile->new(epub => 1);

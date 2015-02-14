@@ -1,0 +1,6 @@
+family Test
+regular R.ttf
+italic I.ttf
+bold B.ttf
+bolditalic BI.ttf
+size 12

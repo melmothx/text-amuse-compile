@@ -8,6 +8,9 @@ Revision history for perl module Text::Amuse::Compile
    this, though. 1.30 is shipped by debian, so we have to support
    this. Relevant tests updated.
 
+ - Added support in the class and in the script for embedding fonts in
+   the EPUB (--webfontsdir)
+
 0.34 2015-02-12
 
  - Table of contents for EPUB now is properly nested

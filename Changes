@@ -1,5 +1,13 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.35 2015-02-14
+
+ - It looks like Archive::Zip 1.30 fails to extract the whole zip with
+   the syntax $zip->extractTree('', $dest). This appears to work at
+   least on 1.37 and 1.45 (latest). Changes file doesn't talk about
+   this, though. 1.30 is shipped by debian, so we have to support
+   this. Relevant tests updated.
+
 0.34 2015-02-12
 
  - Table of contents for EPUB now is properly nested

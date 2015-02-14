@@ -162,8 +162,9 @@ foreach my $muses (@tests) {
     my $zip = Archive::Zip->new;
     die "Couldn't read $epub" if $zip->read($epub) != AZ_OK;
 
-    $zip->extractTree('', $tmpdirname);
-    my $indexfile = File::Spec->catfile($tmpdirname, OPS => 'toc.ncx');
+    $zip->extractTree('OPS', $tmpdirname) == AZ_OK
+      or die "Couldn't extract $epub OPS into $tmpdirname" ;
+    my $indexfile = File::Spec->catfile($tmpdirname, 'toc.ncx');
     ok (-f $indexfile, "$indexfile found");
     my $toc = read_file($indexfile);
 

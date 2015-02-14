@@ -157,14 +157,15 @@ sub _get_epub_xhtml {
     my $zip = Archive::Zip->new;
     die "Couldn't read $epub" if $zip->read($epub) != AZ_OK;
     my $tmpdir = File::Temp->newdir(CLEANUP => 1);
-    $zip->extractTree('', $tmpdir->dirname);
-    my $ops = File::Spec->catdir($tmpdir->dirname, 'OPS');
-    opendir (my $dh, $ops) or die $!;
+    $zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
+      or die "Couldn't extract $epub OPS into $tmpdir";
+    opendir (my $dh, $tmpdir->dirname) or die $!;
     my @pieces = sort grep { /\Apiece\d+\.xhtml\z/ } readdir($dh);
+    closedir $dh;
     my @html;
     foreach my $piece ('toc.ncx', 'titlepage.xhtml', @pieces) {
         push @html, "<!-- $piece -->\n",
-          read_file(File::Spec->catfile($ops, $piece));
+          read_file(File::Spec->catfile($tmpdir->dirname, $piece));
     }
     return join('', @html);
 }

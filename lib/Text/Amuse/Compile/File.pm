@@ -60,6 +60,10 @@ When set to true, the tex output will obey bcor and twoside/oneside.
 An hashref with the options to pass to the templates. It's returned as
 an hash, not as a reference, to protect it from mangling.
 
+=item webfonts
+
+The L<Text::Amuse::Compile::Webfonts> object (or undef).
+
 =back
 
 =head1 INTERNALS
@@ -850,7 +854,7 @@ sub _prepare_tex_tokens {
             $parsed{papersize} = $1;
         }
         else {
-            warn "Unrecognized paper size $size, usign the default\n";
+            warn "Unrecognized paper size $size, using the default\n";
         }
     }
 

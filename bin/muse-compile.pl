@@ -26,6 +26,7 @@ GetOptions (\%options,
                pdf
                zip
                ttdir=s
+               webfontsdir=s
                output-templates
                log=s
                extra=s%
@@ -93,7 +94,32 @@ As above, but on Letter paper.
 
 =item --ttdir
 
-The directory with the templates.
+The directory with the templates. Optional and somehow discouraged for
+normal usage.
+
+=item --webfontsdir
+
+For EPUB output, embed the fonts in that directory.
+
+In this directory the program expects to find 4 fonts, a regular, an
+italic, a bold and a bold italic one. Given that the names are
+arbitrary, we need an hint. For this you have to provide a file, in
+the very same directory, with the specifications. The file B<must> be
+named C<spec.txt> and need the following content:
+
+E.g., for Droid fonts:
+
+  family Droid Serif
+  regular DroidSerif-Regular.ttf
+  italic DroidSerif-Italic.ttf
+  bold DroidSerif-Bold.ttf
+  bolditalic DroidSerif-Bold.ttf
+  size 10
+
+The four TTF files must be placed in this directory as well. The
+formats supported are TTF, OTF and WOFF.
+
+The C<family> and C<size> specs are optional.
 
 =item --output-templates
 

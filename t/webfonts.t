@@ -3,11 +3,14 @@
 use strict;
 use warnings;
 
-use Test::More tests => 21;
+use Test::More tests => 32;
 use Text::Amuse::Compile::Utils qw/read_file write_file/;
+use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use File::Spec;
+use File::Temp;
 
 use_ok('Text::Amuse::Compile::Webfonts', "use is ok");
+use_ok('Text::Amuse::Compile', "compiler class ok");
 
 my $dir = File::Spec->catdir(qw/t webfonts/);
 
@@ -55,6 +58,26 @@ ok($webfonts, "Object created (no errors)");
 isnt $webfonts->srcdir, $dir, "srcdir is not the same as dir";
 
 my %files = $webfonts->files;
+
+my $c = Text::Amuse::Compile->new(epub => 1,
+                                  webfontsdir => $dir);
+
+my $target_base = File::Spec->catfile(qw/t testfile for-epub/);
+$c->compile($target_base . '.muse');
+my $epub = $target_base . '.epub';
+ok (-f $epub);
+my $tmpdir = File::Temp->newdir(CLEANUP => 1);
+my $zip = Archive::Zip->new;
+die "Couldn't read $epub" if $zip->read($epub) != AZ_OK;
+$zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
+  or die "Couldn't extract $epub OPS into " . $tmpdir->dirname ;
+my $css = read_file(File::Spec->catfile($tmpdir->dirname, "stylesheet.css"));
+like $css, qr/font-family: "Test"/, "Found font-family";
+foreach my $file (keys %files) {
+    my $epubfile = File::Spec->catfile($tmpdir->dirname, $file);
+    ok (-f $epubfile, "$epubfile embedded");
+    like $css, qr/src: url\("\Q$file\E"\)/, "Found the css rules for $file";
+}
 
 foreach my $accessor (qw/family regular italic bold bolditalic size format mimetype/) {
     ok ($webfonts->$accessor, "$accessor is ok: " . $webfonts->$accessor);

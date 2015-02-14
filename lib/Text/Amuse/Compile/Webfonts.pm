@@ -11,6 +11,31 @@ use File::Spec;
 
 Text::Amuse::Compile::Webfonts - Class to parse and validate webfonts for Text::Amuse::Compile
 
+=head1 SYNOPSIS
+
+This class only takes a single parameter, with the directory where to
+find the fonts. Anyway, the content of the directory is very specific.
+
+The class expects to find 4 fonts, a regular, an italic, a bold and a
+bold italic one. Given that the names are arbitrary, we need an hint.
+For this you have to provide a file, in the very same directory, with
+the specifications. The file B<must> be named C<spec.txt> and need the
+following content:
+
+E.g., for Droid fonts:
+
+  family Droid Serif
+  regular DroidSerif-Regular.ttf
+  italic DroidSerif-Italic.ttf
+  bold DroidSerif-Bold.ttf
+  bolditalic DroidSerif-Bold.ttf
+  size 10
+
+The four TTF files must be placed in this directory as well. The
+formats supported are TTF, OTF and WOFF.
+
+The C<family> and C<size> specs are optional.
+
 =head1 CONSTRUCTOR OPTIONS
 
 =head2 new (webfontsdir => "./webfonts")
@@ -80,6 +105,10 @@ The mimetype of the fonts.
 
 The size of the fonts in pt to be used on display.
 
+=item format
+
+The format to feed the src description in the CSS.
+
 =item files
 
 Return an hash with where the keys are the filenames without the path,
@@ -120,7 +149,12 @@ sub _parse_dir_and_spec {
     if (-f $specfile) {
         open (my $fh, '<', $specfile) or die "Cannot open specfile $!";
         while (<$fh>) {
-            if (m/^\s*(family|regular|italic|bold|bolditalic|size)\s+([\w\.-]+)\s*$/) {
+            if (m/^\s*
+                  (family|regular|italic|bold|bolditalic|size)
+                  \s+
+                  (\w[\w\.\ -]*?)
+                  \s*
+                  $/x) {
                 $data{$1} = $2;
             }
             elsif (m/^#/) {

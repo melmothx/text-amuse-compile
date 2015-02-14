@@ -180,6 +180,10 @@ sub logger {
     return shift->{logger};
 }
 
+sub webfonts {
+    return shift->{webfonts};
+}
+
 sub document {
     my $self = shift;
     # prevent parsing of deleted, bad file
@@ -1018,23 +1022,6 @@ sub _check_filename {
     else {
         return;
     }
-}
-
-sub webfonts {
-    my $self = shift;
-    return undef;
-#     my %struc = (
-#                  srcdir => '/usr/share/fonts/truetype/droid/',
-#                  bold => 'DroidSerif-Bold.ttf',
-#                  italic => 'DroidSerif-Italic.ttf',
-#                  bolditalic => 'DroidSerif-BoldItalic.ttf',
-#                  regular => 'DroidSerif-Regular.ttf',
-#                  family => 'Droid Serif',
-#                  format => 'ttf',
-#                  mimetype => 'application/x-font-ttf',
-#                  size => 9,
-#                 );
-#     return \%struc;
 }
 
 

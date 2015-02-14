@@ -10,6 +10,7 @@ use File::Find;
 use File::Spec;
 
 use Text::Amuse::Compile::Templates;
+use Text::Amuse::Compile::Webfonts;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Merged;
 
@@ -49,6 +50,12 @@ Format options (by default all of them are activated);
 =item cleanup
 
 Remove auxiliary files after compilation (.status)
+
+=item webfontsdir
+
+If you want to embed fonts in the EPUB, pass the directory with the
+fonts and the specification file (see
+L<Text::Amuse::Compile::Webfonts>) in this option.
 
 =item tex
 
@@ -150,6 +157,9 @@ sub new {
     $self->{templates} =
       Text::Amuse::Compile::Templates->new(ttdir => delete($params{ttdir}));
 
+    $self->{webfonts} =
+      Text::Amuse::Compile::Webfonts->new(webfontsdir => delete($params{webfontsdir}));
+
     $self->{report_failure_sub} = delete $params{report_failure_sub};
     $self->{logger} = delete $params{logger};
     $self->{debug} = delete  $params{debug};
@@ -205,6 +215,10 @@ sub templates {
     return shift->{templates};
 }
 
+sub webfonts {
+    return shift->{webfonts};
+}
+
 sub cleanup {
     return shift->{cleanup};
 }
@@ -238,6 +252,11 @@ sub extra {
 
 The L<Text::Amuse::Compile::Templates> object, which will provide the
 templates string references.
+
+=head3 webfonts
+
+The L<Text::Amuse::Compile::Webfonts> object, constructed from the the
+C<webfontsdir> option.
 
 =head3 version
 
@@ -467,6 +486,7 @@ sub _compile_virtual_file {
                                                logger => $self->logger,
                                                virtual => 1,
                                                standalone => $self->standalone,
+                                               webfonts => $self->webfonts,
                                               );
     $self->_muse_compile($muse);
 }
@@ -491,6 +511,7 @@ sub _compile_file {
                 options => { $self->extra },
                 logger => $self->logger,
                 standalone => $self->standalone,
+                webfonts => $self->webfonts,
                );
 
     my $muse = Text::Amuse::Compile::File->new(%args);

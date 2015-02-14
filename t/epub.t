@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 19;
+use Test::More tests => 22;
 use File::Spec;
 use Text::Amuse::Compile;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
@@ -56,5 +56,8 @@ foreach my $file (qw/piece000001.xhtml
                  "Found the margins in the CSS");
     like($css, qr/\@page/, "\@page found");
     like($css, qr/text-align: justify/, "Justify found in the body");
+    unlike($css, qr/\@font-face/, "\@font-face not found");
+    like($css, qr/font-size: 10pt;/, "Found the correct font size");
+    like($css, qr/font-family:\s*serif;/, "Found the serif font family");
 
 }

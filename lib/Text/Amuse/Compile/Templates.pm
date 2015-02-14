@@ -354,13 +354,42 @@ sub css {
 @page { margin: 5pt; }
 [% END %]
 
+[% IF webfonts %]
+
+@font-face {
+  font-family: "[% webfonts.family %]";
+  font-weight: normal;
+  font-style: normal;
+  src: url("[% webfonts.regular %]") format("[% webfonts.format %]");
+}
+@font-face {
+  font-family: "[% webfonts.family %]";
+  font-weight: normal;
+  font-style: italic;
+  src: url("[% webfonts.italic %]") format("[% webfonts.format %]");
+}
+@font-face {
+  font-family: "[% webfonts.family %]";
+  font-weight: bold;
+  font-style: normal;
+  src: url("[% webfonts.bold %]") format("[% webfonts.format %]");
+}
+@font-face {
+  font-family: "[% webfonts.family %]";
+  font-weight: bold;
+  font-style: italic;
+  src: url("[% webfonts.bolditalic %]") format("[% webfonts.format %]");
+}
+
+[% END %]
+
 html,body {
 	margin:0;
 	padding:0;
 	border: none;
  	background: transparent;
-	font-family: serif;
-	font-size: 10pt;
+	font-family: [% IF webfonts %]"[% webfonts.family %]",[% END %] serif;
+	font-size: [% IF webfonts %][% webfonts.size %][% ELSE %]10[% END %]pt;
 }
 
 [% IF epub %]

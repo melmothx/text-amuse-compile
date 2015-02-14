@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 54;
+plan tests => 63;
 
 my $file_no_toc = File::Spec->catfile(qw/t tex testing-no-toc.muse/);
 my $file_with_toc = File::Spec->catfile(qw/t tex testing.muse/);
@@ -73,6 +73,9 @@ sub test_file {
             }
             like($body, qr/div#page\s*\{\s*margin:20px;\s*padding:20px;\s*\}/s,
                  "Found the margins in the CSS");
+            unlike($body, qr/\@font-face/, "\@font-face not found");
+            like($body, qr/font-size: 10pt;/, "Found the correct font size");
+            like($body, qr/font-family:\s*serif;/, "Found the serif font family");
             unlike($body, qr/\@page/, "\@page not found");
             unlike($body, qr/text-align: justify/, "No justify found in the body");
         }

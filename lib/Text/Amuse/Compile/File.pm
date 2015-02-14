@@ -530,7 +530,9 @@ sub epub {
     my $epub = EBook::EPUB->new;
 
     # embedded CSS
-    $epub->add_stylesheet("stylesheet.css" => $self->_render_css(epub => 1));
+    my $css = $self->_render_css(epub => 1,
+                                 webfonts => $self->webfonts );
+    $epub->add_stylesheet("stylesheet.css" => $css);
 
     # build the title page and some metadata
     my $header = $text->header_as_html;
@@ -642,6 +644,14 @@ sub epub {
             $self->log_fatal("Unrecognized attachment $att!");
         }
         $epub->copy_file($att, $att, $mime);
+    }
+    if (my $fonts = $self->webfonts) {
+        foreach my $style (qw/regular italic bold bolditalic/) {
+            $epub->copy_file(File::Spec->catfile($fonts->{srcdir},
+                                                 $fonts->{$style}),
+                             $fonts->{$style},
+                             $fonts->{mimetype});
+        }
     }
 
     # finish
@@ -1008,6 +1018,23 @@ sub _check_filename {
     else {
         return;
     }
+}
+
+sub webfonts {
+    my $self = shift;
+    return undef;
+#     my %struc = (
+#                  srcdir => '/usr/share/fonts/truetype/droid/',
+#                  bold => 'DroidSerif-Bold.ttf',
+#                  italic => 'DroidSerif-Italic.ttf',
+#                  bolditalic => 'DroidSerif-BoldItalic.ttf',
+#                  regular => 'DroidSerif-Regular.ttf',
+#                  family => 'Droid Serif',
+#                  format => 'ttf',
+#                  mimetype => 'application/x-font-ttf',
+#                  size => 9,
+#                 );
+#     return \%struc;
 }
 
 

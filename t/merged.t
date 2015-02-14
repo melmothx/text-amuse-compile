@@ -166,7 +166,7 @@ sub _get_epub_xhtml {
     die "Couldn't read $epub" if $zip->read($epub) != AZ_OK;
     my $tmpdir = File::Temp->newdir(CLEANUP => 1);
     $zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
-      or "Cannot extract $epub OPS into $tmpdir";
+      or die "Cannot extract $epub OPS into $tmpdir";
     opendir (my $dh, $tmpdir->dirname) or die $!;
     my @pieces = sort grep { /\Apiece\d+\.xhtml\z/ } readdir($dh);
     closedir $dh;

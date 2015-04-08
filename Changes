@@ -1,5 +1,11 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.36 2015-04-08
+
+ - Adjusted definition of \forcelinebreak preventing a pagebreak after
+   that. This could have some unwanted side effects in some corner
+   case (like poetry overflowing).
+
 0.35 2015-02-14
 
  - It looks like Archive::Zip 1.30 fails to extract the whole zip with

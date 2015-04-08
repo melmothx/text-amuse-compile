@@ -729,7 +729,7 @@ sub latex {
 \addtokomafont{caption}{\centering}
 
 % avoid breakage on multiple <br><br> and avoid the next [] to be eaten
-\newcommand*{\forcelinebreak}{\strut\\{}}
+\newcommand*{\forcelinebreak}{\strut\\*{}}
 
 \newcommand*{\hairline}{%
   \bigskip%

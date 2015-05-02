@@ -773,15 +773,21 @@ sub parse_tex_log_file {
         # in half, producing invalid utf8 octects.
         open (my $fh, '<:raw', $logfile)
           or $self->log_fatal("Couldn't open $logfile $!");
+
+        my %errors;
+
         while (my $line = <$fh>) {
             if ($line =~ m/^missing character/i) {
                 chomp $line;
                 # if we get the warning, nothing we can do about it,
                 # but shouldn't happen.
-                $self->log_info(decode_utf8($line) . "...\n");
+                $errors{decode_utf8($line) . "...\n"} = 1;
             }
         }
         close $fh;
+        if (%errors) {
+            $self->log_info(join '', sort keys %errors);
+        }
     }
 }
 

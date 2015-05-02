@@ -781,12 +781,14 @@ sub parse_tex_log_file {
                 chomp $line;
                 # if we get the warning, nothing we can do about it,
                 # but shouldn't happen.
-                $errors{decode_utf8($line) . "...\n"} = 1;
+                $errors{$line} = 1;
             }
         }
         close $fh;
         if (%errors) {
-            $self->log_info(join '', sort keys %errors);
+            foreach my $error (sort keys %errors) {
+                $self->log_info(decode_utf8($error) . "...\n");
+            }
         }
     }
 }

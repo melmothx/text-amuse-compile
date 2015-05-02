@@ -687,10 +687,10 @@ sub latex {
                {[% safe_options.class %]}
 \usepackage{fontspec}
 \usepackage{polyglossia}
-\setmainfont[Mapping=tex-text]{[% safe_options.mainfont %]}
+\setmainfont{[% safe_options.mainfont %]}
 % these are not used but prevents XeTeX to barf
-\setsansfont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans}
-\setmonofont[Mapping=tex-text,Scale=MatchLowercase]{DejaVu Sans Mono}
+\setsansfont[Scale=MatchLowercase]{DejaVu Sans}
+\setmonofont[Scale=MatchLowercase]{DejaVu Sans Mono}
 \setmainlanguage{[% safe_options.lang %]}
 [% safe_options.mainlanguage_script %]
 

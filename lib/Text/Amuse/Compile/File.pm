@@ -785,10 +785,8 @@ sub parse_tex_log_file {
             }
         }
         close $fh;
-        if (%errors) {
-            foreach my $error (sort keys %errors) {
-                $self->log_info(decode_utf8($error) . "...\n");
-            }
+        foreach my $error (sort keys %errors) {
+            $self->log_info(decode_utf8($error) . "...\n");
         }
     }
 }

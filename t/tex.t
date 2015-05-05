@@ -38,7 +38,7 @@ test_file($file_no_toc, {
           qr/DIV=9/,
           qr/fontsize=11pt/,
           qr/mainlanguage\{croatian\}/,
-          qr/\\setmainfont\[Mapping=tex-text\]\{Linux Libertine O\}/,
+          qr/\\setmainfont\{Linux Libertine O\}/,
           qr/paper=5.5in:8.5in/,
           qr/\\maketitle\s*\\cleardoublepage/s,
           qr/document\}\s*\\hyphenation\{\s*a-no-ther\ste-st\s*}/s,
@@ -65,7 +65,7 @@ test_file($file_no_toc, {
                          twoside => 1,
                         },
           qr/\\maketitle\s*\w/,
-          qr/\\setmainfont\[Mapping=tex-text\]\{Gentium\}/,
+          qr/\\setmainfont\{Gentium\}/,
           qr/^\s+twoside,%$/m,
           qr/BCOR=0mm/,
          );

@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.37 2015-05-10
+
+ - Added --luatex option to use lualatex instead of xelatex
+
 0.36 2015-04-08
 
  - Adjusted definition of \forcelinebreak preventing a pagebreak after

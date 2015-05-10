@@ -10,18 +10,20 @@ use Cwd;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
-    diag "Using XeLaTeX for testing";
-    plan tests => 18;
+    diag "Using (Xe|Lua)LaTeX for testing";
+    plan tests => 38;
 }
 else {
     plan skip_all => "No TEST_WITH_LATEX env found! skipping tests\n";
     exit;
 }
 
+for my $luatex (0..1) {
 
 my $c = Text::Amuse::Compile->new(
                                   pdf => 1,
                                   cleanup => 0,
+                                  luatex => $luatex,
                                   report_failure_sub => sub {
                                       my @msg = @_;
                                       diag join(" ", @msg);
@@ -77,6 +79,13 @@ like $statusline, qr/^FAILED/, "Status file reported correctly: $statusline";
 diag "In " . getcwd();
 
 like $logged, qr/Undefined control sequence/, "Logged ok";
+if ($luatex) {
+    like $logged, qr/lualatex/i, "executable reported (lualatex)";;
+}
+else {
+    like $logged, qr/xelatex/i, "executable reported (xelatex)";
+}
+
 ok($c->errors);
 
 
@@ -144,3 +153,4 @@ ok($c->errors);
 $c->compile($target);
 ok(!$c->errors);
 
+}

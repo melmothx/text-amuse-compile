@@ -33,6 +33,7 @@ GetOptions (\%options,
                no-cleanup
                recursive=s
                dry-run
+               luatex
                help/) or die "Bad option passed!\n";
 
 if ($options{help}) {
@@ -223,6 +224,10 @@ No target files can be specified.
 
 For recursive compile, you can pass this option to just list the files
 which would be compiled.
+
+=item --luatex
+
+Use lualatex instead of xelatex.
 
 =back
 

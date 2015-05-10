@@ -57,9 +57,14 @@ If you want to embed fonts in the EPUB, pass the directory with the
 fonts and the specification file (see
 L<Text::Amuse::Compile::Webfonts>) in this option.
 
+=item luatex
+
+Use lualatex instead of xelatex.
+
 =item tex
 
-LaTeX output
+LaTeX output. Compatible with C<xelatex> and C<lualatex> (see below
+for the packages needed).
 
 =item pdf
 
@@ -160,17 +165,16 @@ sub new {
     $self->{webfonts} =
       Text::Amuse::Compile::Webfonts->new(webfontsdir => delete($params{webfontsdir}));
 
-    $self->{report_failure_sub} = delete $params{report_failure_sub};
-    $self->{logger} = delete $params{logger};
-    $self->{debug} = delete  $params{debug};
+    foreach my $k (qw/report_failure_sub logger debug
+                      luatex cleanup/) {
+        $self->{$k} = delete $params{$k};
+    }
     if (exists $params{standalone}) {
         $self->{standalone} = delete $params{standalone};
     }
     if (my $extraref = delete $params{extra}) {
         $self->{extra} = { %$extraref };
     }
-
-    $self->{cleanup} = delete $params{cleanup};
 
     # options passed, null out and reparse the params
     if (%params) {
@@ -183,6 +187,10 @@ sub new {
     }
 
     bless $self, $class;
+}
+
+sub luatex {
+    return shift->{luatex};
 }
 
 sub zip {
@@ -480,6 +488,7 @@ sub _compile_virtual_file {
     my $muse = Text::Amuse::Compile::File->new(
                                                name => $name,
                                                suffix => $suffix,
+                                               luatex => $self->luatex,
                                                templates => $self->templates,
                                                options => { $self->extra },
                                                document => $doc,
@@ -512,6 +521,7 @@ sub _compile_file {
                 logger => $self->logger,
                 standalone => $self->standalone,
                 webfonts => $self->webfonts,
+                luatex => $self->luatex,
                );
 
     my $muse = Text::Amuse::Compile::File->new(%args);
@@ -671,6 +681,18 @@ sub errors {
     }
 }
 
+
+
+=head1 TeX live packages needed.
+
+You need the xetex scheme plus the following packages: fontspec,
+polyglossia, pzdr, wrapfig, footmisc, ulem, microtype, zapfding.
+
+For the luatex options, same as above plus luatex (and the lualatex
+format), luatexbase, luaotfload.
+
+The luatex option could give better microtypography results but is
+slower (x4) and requires more memory (x2).
 
 =head1 AUTHOR
 

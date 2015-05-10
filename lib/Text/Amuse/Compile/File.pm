@@ -96,6 +96,10 @@ The logger subroutine set in the constructor.
 
 Remove auxiliary files (like the complete file and the status file)
 
+=item luatex
+
+Use luatex instead of xetex
+
 =back
 
 =cut
@@ -108,6 +112,10 @@ sub new {
         die "Missing $k" unless $self->{$k};
     }
     bless $self, $class;
+}
+
+sub luatex {
+    return shift->{luatex};
 }
 
 sub name {
@@ -444,7 +452,9 @@ sub pdf {
     foreach my $i (1..3) {
         my $pipe = IO::Pipe->new;
         # parent swallows the output
-        $pipe->reader(xelatex => '-interaction=nonstopmode', $source);
+        my $latexname = $self->luatex ? 'LuaLaTeX' : 'XeLaTeX';
+        my $latex = $self->luatex ? 'lualatex' : 'xelatex';
+        $pipe->reader($latex, '-interaction=nonstopmode', $source);
         $pipe->autoflush(1);
         my $shitout;
         while (<$pipe>) {
@@ -459,7 +469,7 @@ sub pdf {
         wait;
         my $exit_code = $? >> 8;
         if ($exit_code != 0) {
-            $self->log_info("XeLaTeX compilation failed with exit code $exit_code\n");
+            $self->log_info("$latexname compilation failed with exit code $exit_code\n");
             if (-f $self->name  . '.log') {
                 # if we have a .pdf file, this means something was
                 # produced. Hence, remove the .pdf

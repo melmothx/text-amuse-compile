@@ -2,11 +2,11 @@
 
 set -e
 
-/usr/bin/perl -I lib -I ../PDF-Imposition/lib -I ../Text-Amuse/lib -I ~/amw/EBook-EPUB/lib t/merged.t
+perl -I lib -I ../PDF-Imposition/lib -I ../Text-Amuse/lib -I ~/amw/EBook-EPUB-Lite/lib t/merged.t
 
-/usr/bin/perl -I lib -I ../PDF-Imposition/lib -I ../Text-Amuse/lib -I ~/amw/EBook-EPUB/lib t/epub-toc.t
+perl -I lib -I ../PDF-Imposition/lib -I ../Text-Amuse/lib -I ~/amw/EBook-EPUB-Lite/lib t/epub-toc.t
 
-/usr/bin/perl -I lib -I ../PDF-Imposition/lib -I ../Text-Amuse/lib -I ~/amw/EBook-EPUB/lib t/compile-merged.t
+perl -I lib -I ../PDF-Imposition/lib -I ../Text-Amuse/lib -I ~/amw/EBook-EPUB-Lite/lib t/compile-merged.t
 
 
 perl Makefile.PL

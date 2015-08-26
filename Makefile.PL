@@ -22,10 +22,10 @@ WriteMakefile(
         # ours
         'Text::Amuse' => 0.32,
         'PDF::Imposition' => 0.14,
+        'EBook::EPUB::Lite' => 0.7,
         # needed
         'Template::Tiny' => 1.12, # version in wheezy
         'IO::Pipe' => 0,
-        'EBook::EPUB' => 0.6,
         'Archive::Zip' => 0, # alread a requirement of EBook::EPUB
     },
     EXE_FILES => [ 'bin/muse-compile.pl' ],

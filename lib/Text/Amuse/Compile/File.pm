@@ -12,6 +12,7 @@ use Encode qw/decode_utf8/;
 # needed
 use Template::Tiny;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
+use EBook::EPUB::Lite;
 use File::Copy;
 use File::Spec;
 use IO::Pipe;
@@ -544,8 +545,7 @@ sub epub {
                        string => "start body",
                       };
     }
-    require EBook::EPUB;
-    my $epub = EBook::EPUB->new;
+    my $epub = EBook::EPUB::Lite->new;
 
     # embedded CSS
     my $css = $self->_render_css(epub => 1,

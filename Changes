@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.38 2015-08-26
+
+ - Replaced EBook::EPUB with EBook::EPUB::Lite (to lighten up the
+   dependecies, no XS).
+
 0.37 2015-05-10
 
  - Added --luatex option to use lualatex instead of xelatex

@@ -16,7 +16,6 @@ my @avail = $c->available_methods;
 is_deeply(\@avail, [
                     qw/bare_html html
                        epub
-                       sl_pdf
                        a4_pdf lt_pdf
                        tex zip
                        pdf/

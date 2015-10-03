@@ -44,6 +44,10 @@ Constructor. Accepts the following named parameters:
 
 =item name
 
+=item noslides
+
+Do not create slides when calling c<pdf>
+
 =item virtual
 
 If it's a virtual file which doesn't exit on the disk (a merged one)
@@ -121,6 +125,10 @@ sub luatex {
 
 sub name {
     return shift->{name};
+}
+
+sub noslides {
+    return shift->{noslides};
 }
 
 sub virtual {
@@ -244,13 +252,21 @@ Remove the files associated with this file, by extension.
 
 =cut
 
+sub _slides_extensions {
+    return qw/.sl.tex .sl.pdf
+              .sl.log .sl.nav .sl.toc .sl.aux
+              .sl.nav .sl.snm .sl.out/;
+
+}
+
 sub purged_extensions {
     my $self = shift;
     my @exts = (qw/.pdf .a4.pdf .lt.pdf
                    .tex .log .aux .toc .ok
                    .html .bare.html .epub
                    .zip
-                  /);
+                  /,
+                $self->_slides_extensions);
     return @exts;
 }
 
@@ -277,7 +293,10 @@ sub purge_latex {
     $self->purge(qw/.log .aux .toc .pdf/);
 }
 
-
+sub purge_slides {
+    my $self = shift;
+    $self->purge($self->_slides_extensions);
+}
 
 sub _write_file {
     my ($self, $target, @strings) = @_;
@@ -370,7 +389,7 @@ sub _compile_imposed {
     # the trick: first call tex with an argument, then pdf, then
     # impose, then rename.
     $self->tex(papersize => "half-$size");
-    my $pdf = $self->pdf;
+    my $pdf = $self->pdf(noslides => 1);
     my $outfile = $self->name . ".$size.pdf";
     if ($pdf) {
         my $imposer = PDF::Imposition->new(
@@ -437,15 +456,68 @@ sub tex {
                              $texfile);
 }
 
-sub pdf {
+sub tex_beamer {
+    my ($self) = @_;
+    if ($self->noslides || $self->virtual) {
+        return;
+    }
+    # no slides for virtual files
+    return if $self->virtual;
+    if (my $header = muse_fast_scan_header($self->muse_file)) {
+        if ($header->{slides} and $header->{slides} !~ /^\s*no\s*$/si) {
+            my $texfile = $self->name . '.sl.tex';
+            $self->purge('.sl.tex');
+            return $self->_process_template($self->templates->slides,
+                                            $self->_prepare_tex_tokens($self->document),
+                                            $texfile);
+        }
+    }
+    return;
+}
+
+
+sub sl_pdf {
     my $self = shift;
+    $self->purge_slides;
+    if ($self->noslides || $self->virtual) {
+        return;
+    }
+    if (my $source = $self->tex_beamer) {
+        if (my $out = $self->_compile_pdf($source)) {
+            $self->log_info("* Created $out\n");
+            return $out;
+        }
+    }
+    return;
+}
+
+sub pdf {
+    my ($self, %opts) = @_;
+    # create the slides, if needed.
+    unless ($opts{noslides}) {
+        $self->sl_pdf;
+    }
     my $source = $self->name . '.tex';
-    my $output = $self->name . '.pdf';
     unless (-f $source) {
         $self->tex;
     }
     $self->log_fatal("Missing source file $source!") unless -f $source;
     $self->purge_latex;
+    $self->_compile_pdf($source);
+}
+
+sub _compile_pdf {
+    my ($self, $source) = @_;
+    my ($output, $logfile);
+    if ($source =~ m/(.+)\.tex$/) {
+        die "Missing $source!" unless $source;
+        my $name = $1;
+        $output = $name . '.pdf';
+        $logfile = $name . '.log';
+    }
+    else {
+        die "Source must be a source file\n";
+    }
     # maybe a check on the toc if more runs are needed?
     # 1. create the toc
     # 2. insert the toc
@@ -471,10 +543,10 @@ sub pdf {
         my $exit_code = $? >> 8;
         if ($exit_code != 0) {
             $self->log_info("$latexname compilation failed with exit code $exit_code\n");
-            if (-f $self->name  . '.log') {
+            if (-f $logfile) {
                 # if we have a .pdf file, this means something was
                 # produced. Hence, remove the .pdf
-                unlink $self->name . '.pdf';
+                unlink $output;
                 $self->log_fatal("Bailing out\n");
             }
             else {
@@ -483,7 +555,7 @@ sub pdf {
             }
         }
     }
-    $self->parse_tex_log_file;
+    $self->parse_tex_log_file($logfile);
     return $output;
 }
 
@@ -747,7 +819,7 @@ Otherwise print to the standard output.
 
 Calls C<log_info>, remove the lock and dies.
 
-=item parse_tex_log_file
+=item parse_tex_log_file($logfile)
 
 (Internal) Parse the produced logfile for missing characters.
 
@@ -773,8 +845,8 @@ sub log_fatal {
 }
 
 sub parse_tex_log_file {
-    my $self = shift;
-    my $logfile = $self->name . '.log';
+    my ($self, $logfile) = @_;
+    die "Missing file argument!" unless $logfile;
     if (-f $logfile) {
         # if you're wandering why we open this in raw mode: The log
         # file produced by XeLaTeX is utf8, but it splits the output

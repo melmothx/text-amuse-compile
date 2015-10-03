@@ -23,6 +23,7 @@ GetOptions (\%options,
                a4-pdf
                lt-pdf
                tex
+               noslides
                pdf
                zip
                ttdir=s
@@ -83,7 +84,13 @@ file.
 
 =item --pdf
 
-PDF output.
+PDF output. If the muse file has the header C<slides> set to something
+that doesn't look like a false boolean (empty, 0, "no"), also produces
+the slides.
+
+=item --noslides
+
+Never produce slides.
 
 =item --a4-pdf
 

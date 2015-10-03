@@ -23,7 +23,7 @@ binmode STDERR, ':encoding(utf-8)';
 my $targetdir = File::Spec->catfile('t', 'testfile');
 chdir $targetdir or die $!;
 
-my $testnum = 73;
+my $testnum = 109;
 
 # check if there is xelatex installed
 my $xelatex = $ENV{TEST_WITH_LATEX};

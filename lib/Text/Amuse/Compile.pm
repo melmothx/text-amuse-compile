@@ -68,7 +68,31 @@ for the packages needed).
 
 =item pdf
 
-Plain PDF without any imposition
+Plain PDF without any imposition.
+
+Additionally, if if the header has a C<#slides> header with some value
+(e.g., 1, yes, ok, whatever) and if there some sectioning, create a
+pdf presentation out of it.
+
+E.g., the following will no produce slides:
+
+  #title Foo
+  #slides
+
+But this would
+
+  #title Foo
+  #slides 1
+
+The value of the header is totally insignificant.
+
+Sections which contain the comment C<; noslide> are ignored. LaTeX
+source is left in the tree with .sl.tex extension, and the output will
+have .sl.pdf extension.
+
+=item noslides
+
+Do not create slides even if the muse file says so.
 
 =item a4_pdf
 
@@ -166,6 +190,7 @@ sub new {
       Text::Amuse::Compile::Webfonts->new(webfontsdir => delete($params{webfontsdir}));
 
     foreach my $k (qw/report_failure_sub logger debug
+                      noslides
                       luatex cleanup/) {
         $self->{$k} = delete $params{$k};
     }
@@ -202,6 +227,9 @@ sub tex {
 }
 sub pdf {
     return shift->{pdf};
+}
+sub noslides {
+    return shift->{noslides};
 }
 sub a4_pdf {
     return shift->{a4_pdf};
@@ -486,6 +514,7 @@ sub _compile_virtual_file {
     my @filelist = map { $_ . $suffix } @$files;
     my $doc = Text::Amuse::Compile::Merged->new(files => \@filelist, %virtual);
     my $muse = Text::Amuse::Compile::File->new(
+                                               noslides => 1, # virtual files don't want slides
                                                name => $name,
                                                suffix => $suffix,
                                                luatex => $self->luatex,
@@ -522,6 +551,7 @@ sub _compile_file {
                 standalone => $self->standalone,
                 webfonts => $self->webfonts,
                 luatex => $self->luatex,
+                noslides => $self->noslides,
                );
 
     my $muse = Text::Amuse::Compile::File->new(%args);

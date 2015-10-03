@@ -868,6 +868,92 @@ EOF
     return \$latex;
 }
 
+sub slides {
+    my $self = shift;
+    if (my $ref = $self->ttref('slides')) {
+        return $ref;
+    }
+    my $slides =<<'LATEX';
+\documentclass[ignorenonframetext]{beamer}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainfont{CMU Serif}
+\setsansfont[Scale=MatchLowercase]{CMU Sans Serif}
+\setmonofont[Scale=MatchLowercase]{CMU Typewriter Text}
+\setmainlanguage{[% safe_options.lang %]}
+[% safe_options.mainlanguage_script %]
+[% IF safe_options.mainlanguage_toc_name %]
+\renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}
+[% END %]
+\usepackage{graphicx}
+\usepackage{alltt}
+\usepackage{verbatim}
+\usepackage[stable]{footmisc}
+\usepackage{enumerate}
+\usepackage{tabularx}
+\usepackage[normalem]{ulem}
+\usepackage{wrapfig}
+% remove the numbering
+\setcounter{secnumdepth}{-2}
+
+% avoid breakage on multiple <br><br> and avoid the next [] to be eaten
+\newcommand*{\forcelinebreak}{\strut\\*{}}
+
+\newcommand*{\hairline}{%
+  \bigskip%
+  \noindent \hrulefill%
+  \bigskip%
+}
+
+% reverse indentation for biblio and play
+
+\newenvironment*{amusebiblio}{
+  \leftskip=\parindent
+  \parindent=-\parindent
+  \smallskip
+  \indent
+}{\smallskip}
+
+\newenvironment*{amuseplay}{
+  \leftskip=\parindent
+  \parindent=-\parindent
+  \smallskip
+  \indent
+}{\smallskip}
+
+\newcommand*{\Slash}{\slash\hspace{0pt}}
+
+\title{[% doc.header_as_latex.title %]}
+\date{[% doc.header_as_latex.date %]}
+\author{[% doc.header_as_latex.author %]}
+\subtitle{[% doc.header_as_latex.subtitle %]}
+\begin{document}
+[% IF doc.hyphenation %]
+\hyphenation{ [% doc.hyphenation %] }
+[% END %]
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+[% doc.as_beamer %]
+
+\begin{frame}
+
+[% doc.header_as_latex.source     %]
+
+[% doc.header_as_latex.notes      %]
+
+\end{frame}
+
+\end{document}
+
+LATEX
+    return \$slides;
+}
+
+
 sub bare_latex {
     my $self = shift;
     if (my $ref = $self->ttref('bare_latex')) {

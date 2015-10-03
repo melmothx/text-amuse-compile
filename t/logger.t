@@ -52,7 +52,7 @@ my $muse = Text::Amuse::Compile::File->new(%options);
 my @warnings;
 INTERCEPT: {
     local $SIG{__WARN__} = sub { push @warnings, @_};
-    $muse->parse_tex_log_file;
+    $muse->parse_tex_log_file(File::Spec->catfile(qw/t log-encoding.log/));
 }
 
 ok (!@warnings, "No warnings") or diag Dumper(\@warnings);

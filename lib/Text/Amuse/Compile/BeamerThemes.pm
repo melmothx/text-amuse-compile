@@ -10,6 +10,10 @@ use warnings;
 
 Text::Amuse::Compile::BeamerThemes - Validate Beamer themes and color themes.
 
+=head2 DESCRIPTION
+
+Implements L<https://www.hartwork.org/beamer-theme-matrix/>
+
 =head1 SYNOPSIS
 
  my $themes = Text::Amuse::Compile::BeamerThemes->new(theme => 'default', color_theme => 'default');
@@ -40,17 +44,32 @@ The selected theme.
 
 The selected color theme.
 
+=head2 default_theme
+
+The default theme.
+
+=head2 default_color_theme
+
+The default color theme.
+
 =head2 as_latex
 
 LaTeX code for the preamble.
 
 =cut
 
+use constant {
+    DEFAULT_THEME => 'default',
+    DEFAULT_COLOR_THEME => 'dove',
+};
+
+
+
 sub new {
     my ($class, %opts) = @_;
     my $self = {
-                theme => 'default',
-                color_theme => 'default',
+                theme => DEFAULT_THEME,
+                color_theme => DEFAULT_COLOR_THEME,
                };
     foreach my $key (%$self) {
         if ($opts{$key}) {
@@ -60,24 +79,61 @@ sub new {
     bless $self, $class;
 }
 
+sub default_color_theme {
+    return DEFAULT_COLOR_THEME;
+}
+
+sub default_theme {
+    return DEFAULT_THEME;
+}
+
 sub themes {
     return qw//;
 }
 
 sub color_themes {
-    return qw//;
+    my @themes = (qw/default
+                     albatross
+                     beetle
+                     crane
+                     dove
+                     fly
+                     monarca
+                     seagull
+                     wolverine
+                     beaver
+                     spruce
+                     lily
+                     orchid
+                     rose
+                     whale
+                     seahorse
+                     dolphin/);
+    return @themes;
 }
 
 sub theme {
     my $self = shift;
-    my $theme = $self->{theme};
-    return $theme;
+    my $theme = $self->{theme} || DEFAULT_THEME;
+    my @match = grep { $theme eq $_ } $self->themes;
+    if (@match) {
+        return $theme;
+    }
+    else {
+        return DEFAULT_THEME;
+    }
 }
 
 sub color_theme {
     my $self = shift;
-    my $color_theme = $self->{color_theme};
-    return $color_theme;
+    my $theme = $self->{color_theme} || DEFAULT_COLOR_THEME;
+    my @match = grep { $theme eq $_ } $self->color_themes;
+    if (@match) {
+        return $theme;
+    }
+    else {
+        return DEFAULT_THEME;
+    }
 }
 
 sub as_latex {

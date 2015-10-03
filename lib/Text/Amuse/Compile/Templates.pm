@@ -195,6 +195,17 @@ At the bottom of the page
 
 =back
 
+=head3 slides
+
+The Beamer template. It shares the same tokens (when it makes sense)
+with the LaTeX template.
+
+Theme and color theme selection is done via the
+Text::Amuse::Compile::BeamerThemes class, calling C<as_latex> on the
+object. The relevant token is C<options.beamer_theme>, picked up from
+the C<beamertheme> and C<beamercolortheme> from the C<extra>
+constructor.
+
 =head2 INTERNALS
 
 =head3 ttref($name)
@@ -880,6 +891,7 @@ sub slides {
 \setmainfont{CMU Serif}
 \setsansfont[Scale=MatchLowercase]{CMU Sans Serif}
 \setmonofont[Scale=MatchLowercase]{CMU Typewriter Text}
+[% options.beamer_theme.as_latex %]
 \setmainlanguage{[% safe_options.lang %]}
 [% safe_options.mainlanguage_script %]
 [% IF safe_options.mainlanguage_toc_name %]
@@ -938,14 +950,6 @@ sub slides {
 \end{frame}
 
 [% doc.as_beamer %]
-
-\begin{frame}
-
-[% doc.header_as_latex.source     %]
-
-[% doc.header_as_latex.notes      %]
-
-\end{frame}
 
 \end{document}
 

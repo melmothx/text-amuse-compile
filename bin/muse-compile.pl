@@ -217,6 +217,17 @@ Never generate a table of contents
 Page for starting a chapter: "any" or "right" or (at your own peril)
 "left"
 
+=item * beamertheme
+
+The theme to use with beamer, if and when the slides are produced. See
+the beamer manual or L<https://www.hartwork.org/beamer-theme-matrix/>.
+Defaults to the default one.
+
+=item * beamercolortheme
+
+Same as above, but for the color theme. Defaults to "dove" (b/w theme,
+can't see the default purple).
+
 =back
 
 =item --recursive <directory>

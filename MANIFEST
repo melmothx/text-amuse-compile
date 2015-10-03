@@ -1,6 +1,7 @@
 bin/muse-compile.pl
 Changes
 lib/Text/Amuse/Compile.pm
+lib/Text/Amuse/Compile/BeamerThemes.pm
 lib/Text/Amuse/Compile/File.pm
 lib/Text/Amuse/Compile/Merged.pm
 lib/Text/Amuse/Compile/Templates.pm
@@ -11,6 +12,8 @@ MANIFEST			This list of files
 README
 t/00-load.t
 t/bcor-sides.t
+t/beamer-themes.t
+t/beamer.t
 t/changes.t
 t/compile-file.t
 t/compile-merged.t

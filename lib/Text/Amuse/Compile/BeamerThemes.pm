@@ -88,7 +88,35 @@ sub default_theme {
 }
 
 sub themes {
-    return qw//;
+    my @themes = (qw/default
+                     Bergen
+                     Boadilla
+                     Madrid
+                     AnnArbor
+                     CambridgeUS
+                     EastLansing
+                     Pittsburgh
+                     Rochester
+                     Antibes
+                     JuanLesPins
+                     Montpellier
+                     Berkeley
+                     PaloAlto
+                     Goettingen
+                     Marburg
+                     Hannover
+                     Berlin
+                     Ilmenau
+                     Dresden
+                     Darmstadt
+                     Frankfurt
+                     Singapore
+                     Szeged
+                     Copenhagen
+                     Luebeck
+                     Malmoe
+                     Warsaw/);
+    return @themes;
 }
 
 sub color_themes {
@@ -145,3 +173,5 @@ sub as_latex {
 }
 
 1;
+
+__END__

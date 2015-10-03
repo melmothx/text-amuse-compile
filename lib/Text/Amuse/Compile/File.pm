@@ -23,6 +23,8 @@ use Text::Amuse;
 use Text::Amuse::Functions qw/muse_fast_scan_header
                               muse_format_line/;
 
+use Text::Amuse::Compile::BeamerThemes;
+
 =encoding utf8
 
 =head1 NAME
@@ -467,8 +469,12 @@ sub tex_beamer {
         if ($header->{slides} and $header->{slides} !~ /^\s*no\s*$/si) {
             my $texfile = $self->name . '.sl.tex';
             $self->purge('.sl.tex');
+            my %params = %{ $self->options('ltx') };
+            $params{beamer_theme} = Text::Amuse::Compile::BeamerThemes
+              ->new(theme => $params{beamertheme} || '',
+                    color_theme => $params{beamercolortheme} || '');
             return $self->_process_template($self->templates->slides,
-                                            $self->_prepare_tex_tokens($self->document),
+                                            $self->_prepare_tex_tokens($self->document, %params),
                                             $texfile);
         }
     }

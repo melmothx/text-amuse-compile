@@ -136,21 +136,28 @@ sub _build_document {
 
 sub _build_tex_options {
     my $self = shift;
-    return $self->_escape_hashref(ltx => $self->options);
+    return $self->_escape_options_hashref(ltx => $self->options);
 }
 
 sub _build_html_options {
     my $self = shift;
-    return $self->_escape_hashref(html => $self->options);
+    return $self->_escape_options_hashref(html => $self->options);
 }
 
-sub _escape_hashref {
+sub _escape_options_hashref {
     my ($self, $format, $ref) = @_;
     die "Wrong usage of internal method" unless $format && $ref;
     my %out;
     foreach my $k (keys %$ref) {
         if (defined $ref->{$k}) {
-            $out{$k} = muse_format_line($format, $ref->{$k});
+            if ($k eq 'logo' or $k eq 'cover') {
+                if (my $checked = $self->_looks_like_a_sane_name($ref->{$k})) {
+                    $out{$k} = $checked;
+                }
+            }
+            else {
+                $out{$k} = muse_format_line($format, $ref->{$k});
+            }
         }
         else {
             $out{$k} = undef;
@@ -842,7 +849,7 @@ sub _prepare_tex_tokens {
     my ($self, %args) = @_;
     my $doc = $self->document;
     my %tokens = %{ $self->tex_options };
-    my $escaped_args = $self->_escape_hashref(ltx => \%args);
+    my $escaped_args = $self->_escape_options_hashref(ltx => \%args);
     foreach my $k (keys %$escaped_args) {
         $tokens{$k} = $escaped_args->{$k};
     }
@@ -1025,31 +1032,14 @@ sub _prepare_tex_tokens {
            };
 }
 
-sub _check_filename {
-    my ($self, $filename) = @_;
-    return unless defined $filename;
+sub _looks_like_a_sane_name {
+    my ($self, $name) = @_;
+    return unless defined $name;
     # windows thing, in case
-    $filename =~ s!\\!/!g;
-    # is a path? test if it exists
-    if ($filename =~ m!/!) {
-        # non-ascii things will never match here
-        # because of the decoding. I see this as a feature
-        if (-f $filename and
-            $filename =~ m/^[a-zA-Z0-9\-\:\/]+\.(pdf|jpe?g|png)$/s) {
-            return $filename;
-        }
-        else {
-            return;
-        }
-    }
-    elsif ($filename =~ m/\A
-                          (
-                              [a-zA-Z0-9-]+
-                              (\.(pdf|jpe?g|png))?
-                          )
-                          \z/x) {
-        # sane filename;
-        return $1;
+    $name =~ s!\\!/!g;
+    # is it a sensible path? those chars are not special for latex or html
+    if ($name =~ m/\A[a-zA-Z0-9\-\:\/]+(\.(pdf|jpe?g|png))?\z/) {
+        return $name;
     }
     else {
         return;

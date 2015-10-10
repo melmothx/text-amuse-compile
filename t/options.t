@@ -223,8 +223,8 @@ SKIP: {
                                                         },
                                             );
 
-    ok $dummy->_check_filename($testfile), "$testfile is valid";
-    ok $dummy->_check_filename($wintestfile), "$wintestfile is valid";
+    ok $dummy->_looks_like_a_sane_name($testfile), "$testfile is valid";
+    ok $dummy->_looks_like_a_sane_name($wintestfile), "$wintestfile is valid";
 
     is $dummy->tex_options->{cover}, $testfile, "cover is $testfile";
     is $dummy->tex_options->{logo}, $testfile, "logo is $testfile";

@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 203;
+use Test::More tests => 211;
 use Text::Amuse::Compile;
 use File::Spec;
 use Text::Amuse::Compile::File;
@@ -304,7 +304,16 @@ foreach my $test ({ name => 'fontsize',
                    good => '16cm',
                    bad => '16m',
                   },
-
+                  {
+                   name => 'beamertheme',
+                   bad => 'Pula',
+                   good => 'Copenhagen',
+                  },
+                  {
+                   name => 'beamercolortheme',
+                   bad => 'vrabac',
+                   good => 'seagull',
+                  },
                  ) {
     my $method = $test->{name};
     eval {

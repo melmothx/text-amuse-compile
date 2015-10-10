@@ -388,8 +388,66 @@ can't see the default purple).
 
 =cut
 
-has beamertheme => (is => 'rw', isa => Str, default => sub { '' });
-has beamercolortheme => (is => 'rw', isa => Str, default => sub { '' });
+sub beamer_themes {
+    my @themes = (qw/default
+                     Bergen
+                     Boadilla
+                     Madrid
+                     AnnArbor
+                     CambridgeUS
+                     EastLansing
+                     Pittsburgh
+                     Rochester
+                     Antibes
+                     JuanLesPins
+                     Montpellier
+                     Berkeley
+                     PaloAlto
+                     Goettingen
+                     Marburg
+                     Hannover
+                     Berlin
+                     Ilmenau
+                     Dresden
+                     Darmstadt
+                     Frankfurt
+                     Singapore
+                     Szeged
+                     Copenhagen
+                     Luebeck
+                     Malmoe
+                     Warsaw/);
+    return @themes;
+}
+
+has beamertheme => (is => 'rw',
+                    isa => enum([ __PACKAGE__->beamer_themes ]),
+                    default => sub { 'default' });
+
+sub beamer_colorthemes {
+    my @themes = (qw/default
+                     albatross
+                     beetle
+                     crane
+                     dove
+                     fly
+                     monarca
+                     seagull
+                     wolverine
+                     beaver
+                     spruce
+                     lily
+                     orchid
+                     rose
+                     whale
+                     seahorse
+                     dolphin/);
+    return @themes;
+}
+
+has beamercolortheme => (is => 'rw',
+                         isa => enum([ __PACKAGE__->beamer_colorthemes ]),
+                         default => sub { 'dove' });
 
 =head1 METHODS
 

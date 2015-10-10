@@ -858,12 +858,12 @@ sub _prepare_tex_tokens {
     my $parsed = eval { Text::Amuse::Compile::TemplateOptions->new(%options) };
     unless ($parsed) {
         $parsed = Text::Amuse::Compile::TemplateOptions->new;
-        warn "Validation failed: $@, setting one by one\n";
+        print "Validation failed: $@, setting one by one\n";
         foreach my $method ($parsed->config_setters) {
             if (exists $options{$method}) {
                 eval { $parsed->$method($options{$method}) };
                 if ($@) {
-                    warn "Error on $method: $@\n";
+                    print "Error on $method: $@\n";
                 }
             }
         }

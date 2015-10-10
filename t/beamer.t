@@ -103,7 +103,7 @@ foreach my $comp (@compile) {
     unlike ($texbody, qr/Ignored section/, "No ignore part found");
     unlike ($texbody, qr/This is ignored/, "No ignore part found");
     unlike ($texbody, qr/Text ignored/, "No ignore part found");
-    like ($texbody, qr/begin{frame}.+end{frame}/s);
+    like ($texbody, qr/begin\{frame\}.+end\{frame\}/s);
     if ($ENV{TEST_WITH_LATEX}) {
         ok($file->sl_pdf, "Slides generated for $comp");
         ok($file->pdf, "PDF generated");

@@ -48,7 +48,7 @@ is($file->suffix, '.muse');
 ok($file->templates->html);
 ok(!$file->is_deleted);
 is($file->status_file, 'test.status');
-like $file->document->as_latex, qr/\\& Ćao! \\emph{another}/;
+like $file->document->as_latex, qr/\\& Ćao! \\emph\{another\}/;
 like $file->document->as_html, qr{<em>test</em> &amp; Ćao! <em>another</em>};
 ok($file->tt);
 

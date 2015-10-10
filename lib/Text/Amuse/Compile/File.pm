@@ -23,7 +23,9 @@ use Text::Amuse;
 use Text::Amuse::Functions qw/muse_fast_scan_header
                               muse_format_line/;
 
-use Text::Amuse::Compile::BeamerThemes;
+use Text::Amuse::Compile::TemplateOptions;
+use Types::Standard qw/Str Bool Object Maybe CodeRef HashRef/;
+use Moo;
 
 =encoding utf8
 
@@ -111,66 +113,49 @@ Use luatex instead of xetex
 
 =cut
 
-sub new {
-    my ($class, @args) = @_;
-    die "Wrong number or args" if @args % 2;
-    my $self = { @args };
-    foreach my $k (qw/name suffix templates/) {
-        die "Missing $k" unless $self->{$k};
-    }
-    bless $self, $class;
+has luatex => (is => 'ro', isa => Bool, default => sub { 0 });
+has noslides => (is => 'ro', isa => Bool, default => sub { 0 });
+has name => (is => 'ro', isa => Str, required => 1);
+has suffix => (is => 'ro', isa => Str, required => 1);
+has templates => (is => 'ro', isa => Object, required => 1);
+has virtual => (is => 'ro', isa => Bool, default => sub { 0 });
+has standalone => (is => 'ro', isa => Bool, default => sub { 0 });
+has is_deleted => (is => 'rwp', isa => Bool, default => sub { 0 });
+has tt => (is => 'ro', isa => Object, default => sub { Template::Tiny->new });
+has logger => (is => 'ro', isa => Maybe[CodeRef]);
+has webfonts => (is => 'ro', isa => Maybe[Object]);
+has document => (is => 'lazy', isa => Object);
+has options => (is => 'ro', isa => HashRef, default => sub { +{} });
+has tex_options => (is => 'lazy', isa => HashRef);
+has html_options => (is => 'lazy', isa => HashRef);
+
+sub _build_document {
+    my $self = shift;
+    return Text::Amuse->new(file => $self->muse_file);
 }
 
-sub luatex {
-    return shift->{luatex};
+sub _build_tex_options {
+    return shift->_build_escaped_options('ltx');
 }
 
-sub name {
-    return shift->{name};
+sub _build_html_options {
+    return shift->_build_escaped_options('html');
 }
 
-sub noslides {
-    return shift->{noslides};
-}
-
-sub virtual {
-    return shift->{virtual};
-}
-
-sub options {
+sub _build_escaped_options {
     my ($self, $format) = @_;
-    $format ||= 'ltx';
+    die "Bad usage of internal method!" unless $format;
     my %out;
-    if (my $ref = $self->{options}) {
-        foreach my $k (keys %$ref) {
-            if (defined $ref->{$k}) {
-                # filenames
-                if ($k eq 'logo' or $k eq 'cover') {
-                    $out{$k} = $self->_check_filename($ref->{$k});
-                }
-                else {
-                    $out{$k} = muse_format_line($format, $ref->{$k});
-                }
-            }
-            else {
-                $out{$k} = undef;
-            }
+    my $ref = $self->options;
+    foreach my $k (keys %$ref) {
+        if (defined $ref->{$k}) {
+            $out{$k} = muse_format_line($format, $ref->{$k});
+        }
+        else {
+            $out{$k} = undef;
         }
     }
-    # return a copy
     return \%out;
-}
-
-sub standalone {
-    return shift->{standalone}
-}
-
-sub suffix {
-    return shift->{suffix};
-}
-
-sub templates {
-    return shift->{templates};
 }
 
 sub muse_file {
@@ -180,49 +165,6 @@ sub muse_file {
 
 sub status_file {
     return shift->name . '.status';
-}
-
-sub is_deleted {
-    return shift->{is_deleted};
-}
-
-sub _set_is_deleted {
-    my $self = shift;
-    $self->{is_deleted} = shift;
-}
-
-sub tt {
-    my $self = shift;
-    unless ($self->{tt}) {
-        $self->{tt} = Template::Tiny->new;
-    }
-    return $self->{tt};
-}
-
-sub logger {
-    return shift->{logger};
-}
-
-sub webfonts {
-    return shift->{webfonts};
-}
-
-sub document {
-    my $self = shift;
-    # prevent parsing of deleted, bad file
-    return if $self->is_deleted;
-    # return Text::Amuse->new(file => $self->muse_file);
-
-    # this implements caching. Does really makes sense? Maybe it's
-    # better to have a fresh instance for each one. Speed is not an
-    # issue. For a 4Mb document, it would take 4 seconds to produce
-    # the output, and some minutes for LaTeXing.
-
-    unless ($self->{document}) {
-        my $doc = Text::Amuse->new(file => $self->muse_file);
-        $self->{document} = $doc;
-    }
-    return $self->{document};
 }
 
 sub check_status {
@@ -236,7 +178,7 @@ sub check_status {
         # TODO maybe use storable?
     }
     $self->purge_all if $deleted;
-    $self->_set_is_deleted($deleted);
+    $self->_set_is_deleted(!!$deleted);
 }
 
 
@@ -358,7 +300,7 @@ sub html {
                              {
                               doc => $self->document,
                               css => $self->_render_css(html => 1),
-                              options => $self->options('html'),
+                              options => { %{$self->html_options} },
                              },
                              $outfile);
 }
@@ -370,7 +312,7 @@ sub bare_html {
     $self->_process_template($self->templates->bare_html,
                              {
                               doc => $self->document,
-                              options => $self->options('html'),
+                              options => { %{$self->html_options} },
                              },
                              $outfile);
 }
@@ -434,27 +376,16 @@ sub tex {
     my $texfile = $self->name . '.tex';
     $self->log_fatal("Wrong usage") if @args % 2;
     my %arguments = @args;
-
-    unless (scalar(@args) || $self->standalone) {
+    unless (@args || $self->standalone) {
         %arguments = (
                       twoside => 0,
                       oneside => 1,
                       bcor    => '0mm',
                      );
     }
-
-    my %params = %{ $self->options('ltx') };
-    # arguments can override the global options, so they don't mess up
-    # too much when calling pdf-a4, for example. This will also
-    # override twoside, oneside, bcor for default one.
-
-    foreach my $k (keys %arguments) {
-        $params{$k} = $arguments{$k};
-    }
-
     $self->purge('.tex');
     $self->_process_template($self->templates->latex,
-                             $self->_prepare_tex_tokens($self->document, %params),
+                             $self->_prepare_tex_tokens(%arguments),
                              $texfile);
 }
 
@@ -469,12 +400,8 @@ sub tex_beamer {
         if ($header->{slides} and $header->{slides} !~ /^\s*no\s*$/si) {
             my $texfile = $self->name . '.sl.tex';
             $self->purge('.sl.tex');
-            my %params = %{ $self->options('ltx') };
-            $params{beamer_theme} = Text::Amuse::Compile::BeamerThemes
-              ->new(theme => $params{beamertheme} || '',
-                    color_theme => $params{beamercolortheme} || '');
             return $self->_process_template($self->templates->slides,
-                                            $self->_prepare_tex_tokens($self->document, %params),
+                                            $self->_prepare_tex_tokens,
                                             $texfile);
         }
     }
@@ -681,7 +608,7 @@ sub epub {
                        {
                         title => $self->_remove_tags($header->{title}),
                         text => $titlepage,
-                        options => $self->options('html'),
+                        options => { %{$self->html_options} },
                        },
                        \$firstpage)
       or $self->log_fatal($self->tt->error);
@@ -709,7 +636,7 @@ sub epub {
         $self->tt->process($self->templates->minimal_html,
                            {
                             title => $self->_remove_tags($title),
-                            options => $self->options('html'),
+                            options => { %{$self->html_options} },
                             text => $fi,
                            },
                            \$xhtml)
@@ -743,10 +670,10 @@ sub epub {
     }
     if (my $fonts = $self->webfonts) {
         foreach my $style (qw/regular italic bold bolditalic/) {
-            $epub->copy_file(File::Spec->catfile($fonts->{srcdir},
-                                                 $fonts->{$style}),
-                             $fonts->{$style},
-                             $fonts->{mimetype});
+            $epub->copy_file(File::Spec->catfile($fonts->srcdir,
+                                                 $fonts->$style),
+                             $fonts->$style,
+                             $fonts->mimetype);
         }
     }
 
@@ -910,8 +837,9 @@ sub _process_template {
 
 # method for options to pass to the tex template
 sub _prepare_tex_tokens {
-    my ($self, $doc, %tokens) = @_;
-
+    my ($self, %args) = @_;
+    my $doc = $self->document;
+    my %tokens = %{ $self->tex_options };
     # defaults
     my %parsed = (
                   papersize => '210mm:11in', # the generic

@@ -24,6 +24,8 @@ WriteMakefile(
         'PDF::Imposition' => 0.14,
         'EBook::EPUB::Lite' => 0.71,
         # needed
+        'Moo' => 1,
+        'Type::Tiny' => 1,
         'Template::Tiny' => 1.12, # version in wheezy
         'IO::Pipe' => 0,
         'Archive::Zip' => 0, # alread a requirement of EBook::EPUB

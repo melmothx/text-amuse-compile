@@ -115,9 +115,5 @@ foreach my $comp (@compile) {
     }
 }
 
-
-
-
-
 chdir $home or die $!;
 

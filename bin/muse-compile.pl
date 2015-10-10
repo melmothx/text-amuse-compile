@@ -172,13 +172,22 @@ filename (not recommended, because the full path will remain in the
 found by C<kpsewhich> (or a file in the current directory, if you
 aren't doing a recursive compilation). Same applies for C<cover>.
 
-Supported extra keys (documented in L<Text::Amuse::Compile::Templates>):
+Supported extra keys (documented in L<Text::Amuse::Compile::TemplateOptions>):
 
 =over 4
 
 =item * papersize (common values: a4, a5, letter)
 
 =item * mainfont (grep fc-list -l for the correct name)
+
+=item * sansfont
+
+The sans serif font to use. This option has some effects only on
+slides.
+
+=item * monofont
+
+The monospace font to use.
 
 =item * fontsize (9, 10, 11, 12) as integer, meaning points (pt)
 

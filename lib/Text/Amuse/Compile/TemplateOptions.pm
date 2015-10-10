@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use Types::Standard qw/Str Bool/;
 use Type::Utils qw/enum/;
 use Moo;
-use Text::Amuse::Compile::BeamerThemes;
+
 use constant {
     TEX_MEASURE => qr{[0-9]+(\.[0-9]+)?(cm|mm|in|pt)},
 };

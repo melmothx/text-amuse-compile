@@ -7,7 +7,9 @@ use Test::More tests => 8;
 use Data::Dumper;
 use File::Spec;
 use Text::Amuse::Compile::File;
+use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile;
+
 
 my $builder = Test::More->builder;
 binmode $builder->output,         ":utf8";
@@ -42,7 +44,7 @@ my @report;
 my %options = (
                name => File::Spec->catfile(qw/t log-encoding/),
                suffix => '.muse',
-               templates => 1,
+               templates => Text::Amuse::Compile::Templates->new,
                logger => sub {
                    push @report, @_;
                },

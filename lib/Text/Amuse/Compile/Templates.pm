@@ -78,6 +78,8 @@ All the values from C<options> and C<safe_options>, because of the
 markup interpretation, are (hopefully) safely escaped (so you can pass
 even LaTeX commands, and they will be escaped).
 
+See L<Text::Amuse::Compile::TemplateOptions>
+
 =head4 Globals
 
 =over 4

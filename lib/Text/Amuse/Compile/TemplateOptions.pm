@@ -69,7 +69,7 @@ sub _get_papersize {
             return $paper;
         }
         else {
-            die "papersize is invalid";
+            die "papersize $paper is invalid";
         }
     }
     else {
@@ -91,7 +91,7 @@ sub tex_papersize {
 
 has bcor => (is => 'rw',
              isa => sub {
-                 die "Bcor must be a measure like 11mm"
+                 die "Bcor $_[0] must be a measure like 11mm"
                    unless $_[0] =~ TEX_MEASURE;                 
              },
              default => sub { '0mm' });
@@ -127,7 +127,7 @@ The monospace font to use.
 =back
 
 Additionally, the following methods are provided, which can be called
-on the class:
+on the class and return the list of fonts
 
 =over 4
 
@@ -360,7 +360,7 @@ sub _check_coverwidth {
           unless ($width <= 1 && $width > 0);
     }
     else {
-        die "coverwidth should be a number minor or equal to 1"
+        die "coverwidth $width should be a number minor or equal to 1"
     }
 }
 
@@ -371,7 +371,9 @@ has coverwidth => (is => 'rw',
 has nocoverpage => (is => 'rw', isa => Bool, default => sub { 0 });
 has notoc       => (is => 'rw', isa => Bool, default => sub { 0 });
 
-has opening => (is => 'rw', isa => enum([qw/any right left/]));
+has opening => (is => 'rw',
+                isa => enum([qw/any right left/]),
+                default => sub { 'right' });
 
 =item * beamertheme
 
@@ -480,6 +482,31 @@ sub paging {
     else {
         return $default;
     }
+}
+
+sub config_setters {
+    return (qw/papersize bcor division oneside twoside
+               mainfont sansfont monofont fontsize
+               sitename siteslogan site logo
+               cover coverwidth nocoverpage notoc
+               opening beamertheme beamercolortheme/);
+}
+
+sub config_output {
+    my $self = shift;
+    my %out = (
+               paging => $self->paging,
+              );
+    my %replace = (papersize => 'tex_papersize');
+    foreach my $method ($self->config_setters) {
+        if (my $alias = $replace{$method}) {
+            $out{$method} = $self->$alias;
+        }
+        else {
+            $out{$method} = $self->$method;
+        }
+    }
+    return \%out;
 }
 
 1;

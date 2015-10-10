@@ -18,18 +18,18 @@ my $basepath = getcwd();
 
 my $extra = {
              site => "Test site",
-             mainfont => "LModern",
+             mainfont => "CMU Serif",
              siteslogan => "Hello there!",
              site => "http:mysite.org",
              sitename => "Another crappy test site",
              papersize => "a4paperwithears",
              division => 9,
              fontsize => 48,
-             twoside => "true",
+             twoside => 1,
              bcor => "23",
              logo => "pallinopinco",
              cover => "mycover.pdf",
-             coverwidth => "\\0.5", # given the filtering, the \\ will  be stripped
+             coverwidth => "\\0.5", # validation here will fail, so 1
             };
 
 my $compile = Text::Amuse::Compile->new(
@@ -55,7 +55,7 @@ $returned = {
              papersize => '210mm:11in',
              fontsize => 10,
              bcor => '0mm',
-             coverwidth => '0.5',
+             coverwidth => '1',
             };
 
 my @targets;
@@ -100,7 +100,7 @@ for (1..2) {
         like $c, qr/oneside/, "oneside enforced on single pdf";
         like $c, qr/BCOR=0mm/, "BCOR validated and enforced";
         unlike $c, qr/\\maketitle/;
-        like $c, qr/includegraphics\[width=0\.5\\textwidth\]\{mycover.pdf\}/;
+        like $c, qr/includegraphics\[width=1\\textwidth\]\{mycover.pdf\}/;
         like $c, qr/\\tableofcontents/;
     }
 
@@ -148,7 +148,7 @@ for (1..2) {
     unlike $c, qr/oneside/, "oneside not enforced";
     like $c, qr/BCOR=0mm/, "BCOR enforced";
     unlike $c, qr/\\maketitle/;
-    like $c, qr/includegraphics\[width=0\.5\\textwidth\]\{mycover.pdf\}/;
+    like $c, qr/includegraphics\[width=1\\textwidth\]\{mycover.pdf\}/;
     like $c, qr/\\tableofcontents/;
     unlink $texfile or die $!;
 }

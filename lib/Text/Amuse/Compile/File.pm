@@ -66,8 +66,7 @@ When set to true, the tex output will obey bcor and twoside/oneside.
 
 =item options
 
-An hashref with the options to pass to the templates. It's returned as
-an hash, not as a reference, to protect it from mangling.
+An hashref with the options to pass to the templates.
 
 =item webfonts
 
@@ -853,121 +852,43 @@ sub _prepare_tex_tokens {
     foreach my $k (keys %$escaped_args) {
         $tokens{$k} = $escaped_args->{$k};
     }
+    # now tokens have the unparsed options
+    # now validate the options against the new shiny module
+    my %options = (%{ $self->options }, %args);
+    my $parsed = eval { Text::Amuse::Compile::TemplateOptions->new(%options) };
+    unless ($parsed) {
+        $parsed = Text::Amuse::Compile::TemplateOptions->new;
+        warn "Validation failed: $@, setting one by one\n";
+        foreach my $method ($parsed->config_setters) {
+            if (exists $options{$method}) {
+                eval { $parsed->$method($options{$method}) };
+                if ($@) {
+                    warn "Error on $method: $@\n";
+                }
+            }
+        }
+    }
+    my $safe_options =
+      $self->_escape_options_hashref(ltx => $parsed->config_output);
+
     # defaults
-    my %parsed = (
-                  papersize => '210mm:11in', # the generic
+    my %parsed = (%$safe_options,
                   class => 'scrbook',
-                  division => 12,
-                  fontsize => 10,
-                  mainfont => 'Linux Libertine O',
-                  paging => 'oneside',
-                  bcor => '0mm',
-                  cover => '',
-                  coverwidth => 1,
                   lang => 'english',
                   mainlanguage_script => '',
                   wants_toc => 0,
                  );
-
-    my $tex_measure = qr{[0-9]+(\.[0-9]+)?(cm|mm|in|pt)};
-
-    # paper size parsing
-    if (my $size = $tokens{papersize}) {
-        my %sizes = (
-                     'half-a4' => 'a5',
-                     'half-lt' => '5.5in:8.5in',
-                     generic => '210mm:11in',
-                     a4 => 'a4',
-                     a5 => 'a5',
-                     a6 => 'a6',
-                     letter => 'letter',
-                    );
-        if (my $real_size = $sizes{$size}) {
-            $parsed{papersize} = $real_size;
-        }
-        elsif ($size =~ m/($tex_measure:$tex_measure)/) {
-            $parsed{papersize} = $1;
-        }
-        else {
-            warn "Unrecognized paper size $size, using the default\n";
-        }
-    }
 
     # no cover page
     unless ($doc->wants_toc) {
         if ($doc->header_as_latex->{nocoverpage} || $tokens{nocoverpage}) {
             $parsed{nocoverpage} = 1;
             $parsed{class} = 'scrartcl';
-        }
-    }
-    if ($parsed{class} eq 'scrbook') {
-        if (my $opening = $tokens{opening}) {
-            my %openings = (
-                            right => 1,
-                            left => 1,
-                            any => 1,
-                           );
-            if ($openings{$opening}) {
-                $parsed{opening} = $opening;
-            }
-            else {
-                warn "Unrecognized opening (right|left|any) $opening\n";
-                $parsed{opening} = 'right';
-            }
-        }
-    }
-    # division
-    if (my $div = $tokens{division}) {
-        my %divs = map { $_ => 1 } (9..15);
-        if ($divs{$div}) {
-            $parsed{division} = $div;
-        }
-        else {
-            warn "Bad value for division: $div\n";
-        }
-    }
-    # fontsize
-    if (my $fontsize = $tokens{fontsize}) {
-        my %sizes = map { $_ => 1 } (9..12);
-        if ($sizes{$fontsize}) {
-            $parsed{fontsize} = $fontsize;
-        }
-    }
-    if ($tokens{mainfont}) {
-        # just copy it over, we can't know which fonts we have
-        # installed.
-        $parsed{mainfont} = $tokens{mainfont};
-    }
-
-    # oneside or twoside
-    if ($tokens{oneside} && $tokens{twoside}) {
-        warn "Passed oneside and twoside at the same time, using oneside (default)\n";
-        $parsed{paging} = 'oneside';
-    }
-    elsif ($tokens{oneside}) {
-        $parsed{paging} = 'oneside';
-    }
-    elsif ($tokens{twoside}) {
-        $parsed{paging} = 'twoside';
-    }
-
-    # bcor
-    if ($tokens{bcor}) {
-        if ($tokens{bcor} =~ m/($tex_measure)/) {
-            $parsed{bcor} = $1;
+            delete $parsed{opening}; # not needed for article.
         }
     }
 
-    if (my $coverwidth = $tokens{coverwidth}) {
-        if ($coverwidth =~ m/([01](\.[0-9]+)?)/) {
-            $parsed{coverwidth} = $1;
-        }
-        else {
-            warn "Wrong value for coverwidth $coverwidth\n";
-        }
-    }
-
-    unless ($tokens{notoc}) {
+    unless ($parsed{notoc}) {
         if ($doc->wants_toc) {
             $parsed{wants_toc} = 1;
         }

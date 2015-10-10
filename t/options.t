@@ -6,10 +6,13 @@ use Test::More tests => 211;
 use Text::Amuse::Compile;
 use File::Spec;
 use Text::Amuse::Compile::File;
+use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::Utils qw/read_file/;
 use Cwd;
 
 use_ok('Text::Amuse::Compile::TemplateOptions');
+
+my $templates = Text::Amuse::Compile::Templates->new;
 
 my $basepath = getcwd();
 
@@ -154,7 +157,7 @@ for (1..2) {
 my $dummy = Text::Amuse::Compile::File->new(
                                             name => 'dummy',
                                             suffix => '.muse',
-                                            templates => 'dummy',
+                                            templates => $templates,
                                             options => {
                                                         pippo => '[[http://test.org][test]]',
                                                         prova => 'hello *there* & \stuff',
@@ -163,8 +166,8 @@ my $dummy = Text::Amuse::Compile::File->new(
                                                        },
                                            );
 
-my $html_options = $dummy->options('html');
-my $latex_options = $dummy->options;
+my $html_options = $dummy->html_options;
+my $latex_options = $dummy->tex_options;
 
 is_deeply($html_options, {
                           pippo => '<a href="http://test.org">test</a>',
@@ -179,7 +182,7 @@ is_deeply($latex_options, {
                            test => "Another great thing!",
                           }, "latex escaped and interpreted ok");
 
-is_deeply($dummy->options('ltx'), $latex_options);
+is_deeply($dummy->tex_options, $latex_options);
 
 eval {
     my $die = $dummy->options('garbage');
@@ -191,15 +194,15 @@ chdir $basepath or die $!;
 $dummy = Text::Amuse::Compile::File->new(
                                          name => 'dummy',
                                          suffix => '.muse',
-                                         templates => 'dummy',
+                                         templates => $templates,
                                          options => {
                                                      cover => 'prova.pdf',
                                                      logo => 'c-i-a',
                                                     },
                                            );
 
-is $dummy->options->{cover}, 'prova.pdf';
-is $dummy->options->{logo}, 'c-i-a';
+is $dummy->tex_options->{cover}, 'prova.pdf';
+is $dummy->tex_options->{logo}, 'c-i-a';
 
 my $testfile = File::Spec->rel2abs(File::Spec->catfile(qw/t manual logo.png/));
 ok (-f $testfile, "$testfile exists");
@@ -213,7 +216,7 @@ SKIP: {
     $dummy = Text::Amuse::Compile::File->new(
                                              name => 'dummy',
                                              suffix => '.muse',
-                                             templates => 'dummy',
+                                             templates => $templates,
                                              options => {
                                                          cover => $testfile,
                                                          logo => $wintestfile,
@@ -223,20 +226,20 @@ SKIP: {
     ok $dummy->_check_filename($testfile), "$testfile is valid";
     ok $dummy->_check_filename($wintestfile), "$wintestfile is valid";
 
-    is $dummy->options->{cover}, $testfile, "cover is $testfile";
-    is $dummy->options->{logo}, $testfile, "logo is $testfile";
+    is $dummy->tex_options->{cover}, $testfile, "cover is $testfile";
+    is $dummy->tex_options->{logo}, $testfile, "logo is $testfile";
 
     $dummy = Text::Amuse::Compile::File->new(
                                              name => 'dummy',
                                              suffix => '.muse',
-                                             templates => 'dummy',
+                                             templates => $templates,
                                              options => {
                                                          cover => 'a bc.pdf',
                                                          logo => 'c alsdkfl',
                                                         },
                                             );
-    is $dummy->options->{cover}, undef, "cover with spaces doesn't validate";
-    is $dummy->options->{logo}, undef, "logo with spaces doesn't validate";
+    is $dummy->tex_options->{cover}, undef, "cover with spaces doesn't validate";
+    is $dummy->tex_options->{logo}, undef, "logo with spaces doesn't validate";
 }
 
 my $opts = Text::Amuse::Compile::TemplateOptions->new(twoside => 1);

@@ -135,18 +135,19 @@ sub _build_document {
 }
 
 sub _build_tex_options {
-    return shift->_build_escaped_options('ltx');
+    my $self = shift;
+    return $self->_escape_hashref(ltx => $self->options);
 }
 
 sub _build_html_options {
-    return shift->_build_escaped_options('html');
+    my $self = shift;
+    return $self->_escape_hashref(html => $self->options);
 }
 
-sub _build_escaped_options {
-    my ($self, $format) = @_;
-    die "Bad usage of internal method!" unless $format;
+sub _escape_hashref {
+    my ($self, $format, $ref) = @_;
+    die "Wrong usage of internal method" unless $format && $ref;
     my %out;
-    my $ref = $self->options;
     foreach my $k (keys %$ref) {
         if (defined $ref->{$k}) {
             $out{$k} = muse_format_line($format, $ref->{$k});
@@ -157,6 +158,7 @@ sub _build_escaped_options {
     }
     return \%out;
 }
+
 
 sub muse_file {
     my $self = shift;
@@ -840,6 +842,10 @@ sub _prepare_tex_tokens {
     my ($self, %args) = @_;
     my $doc = $self->document;
     my %tokens = %{ $self->tex_options };
+    my $escaped_args = $self->_escape_hashref(ltx => \%args);
+    foreach my $k (keys %$escaped_args) {
+        $tokens{$k} = $escaped_args->{$k};
+    }
     # defaults
     my %parsed = (
                   papersize => '210mm:11in', # the generic

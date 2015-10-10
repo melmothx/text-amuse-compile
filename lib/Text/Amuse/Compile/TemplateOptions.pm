@@ -354,17 +354,13 @@ has cover      => (is => 'rw',
 
 sub _check_coverwidth {
     my $width = $_[0];
-    if (defined $width) {
-        if ($width == 1 or
-            $width =~ m/\A0\.[0-9]+\z/) {
-            return sprintf('%.2f', $width);
-        }
-        else {
-            die "coverwidth should be a number minor or equal to 1"
-        }
+    die "$width should be a number" unless $width;
+    if ($width =~ m/\A[01](\.[0-9][0-9]?)?\z/) {
+        die "coverwidth should be a number minor or equal to 1"
+          unless ($width <= 1 && $width > 0);
     }
     else {
-        return 1;
+        die "coverwidth should be a number minor or equal to 1"
     }
 }
 

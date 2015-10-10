@@ -2,12 +2,14 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 138;
+use Test::More tests => 203;
 use Text::Amuse::Compile;
 use File::Spec;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Utils qw/read_file/;
 use Cwd;
+
+use_ok('Text::Amuse::Compile::TemplateOptions');
 
 my $basepath = getcwd();
 
@@ -236,3 +238,109 @@ SKIP: {
     is $dummy->options->{cover}, undef, "cover with spaces doesn't validate";
     is $dummy->options->{logo}, undef, "logo with spaces doesn't validate";
 }
+
+my $opts = Text::Amuse::Compile::TemplateOptions->new(twoside => 1);
+is $opts->paging, 'twoside', "paging ok twoside";
+$opts->oneside(1);
+is $opts->paging, 'oneside', "paging ok oneside";
+$opts->twoside(0);
+is $opts->paging, 'oneside', "paging ok oneside";;
+$opts = Text::Amuse::Compile::TemplateOptions->new;
+is $opts->paging, 'oneside', "paging ok oneside";;
+foreach my $method (qw/mainfont sansfont monofont/) {
+    my $last;
+    for my $good_font ('PT Sans', 'CMU Serif') {
+        $opts->$method($good_font);
+        is $opts->$method, $good_font, "$good_font is ok";
+        $last = $good_font;
+    }
+    eval {
+        $opts->$method("Random font name");
+    };
+
+    ok $@, "random font name doesn't pass the validation";
+    is $opts->$method, $last, "font is still $last";
+}
+foreach my $test ({ name => 'fontsize',
+                    good => 11,
+                    bad => 10.5 },
+                  {
+                   name => 'division',
+                   good => 9,
+                   bad => 'asdf',
+                  },
+                  {
+                   name => 'coverwidth',
+                   good => 0.91,
+                   bad => 'asdf',
+                  },
+                  {
+                   name => 'coverwidth',
+                   good => 1,
+                   bad => 1.01,
+                  },
+                  {
+                   name => 'coverwidth',
+                   good => 0.2,
+                   bad => -1,
+                  },
+                  {
+                   name => 'papersize',
+                   good => 'a4',
+                   bad => 'random',
+                  },
+                  {
+                   name => 'papersize',
+                   good => 'half-lt',
+                   bad => 'half-a6',
+                  },
+                  {
+                   name => 'papersize',
+                   good => '16cm:12in',
+                   bad => '16mx15cm',
+                  },
+                  {
+                   name => 'bcor',
+                   good => '16cm',
+                   bad => '16m',
+                  },
+
+                 ) {
+    my $method = $test->{name};
+    eval {
+        $opts->$method($test->{good});
+    };
+    ok !$@, "Setting $method to $test->{good} is fine";
+    is $opts->$method, $test->{good}, "Option picked up";
+    eval {
+        $opts->$method($test->{bad});
+    };
+    ok $@, "Setting $method to $test->{bad} raises an exception $@";
+    is $opts->$method, $test->{good}, "Option still the $test->{good}";
+}
+  
+foreach my $method (qw/logo cover/) {
+    eval {
+        $opts->$method($testfile);
+    };
+    ok !$@, "$method set to $testfile";
+    is $opts->$method, $testfile, "$method set to $testfile";
+    eval {
+        $opts->$method('/lakl/laksdjf/alksdfl\alksdjf/');
+    };
+    ok $@, "Random filename for $method fails";
+    eval {
+        $opts->$method('prova.pdf');
+    };
+    ok !$@, "$method for prova.pdf is ok";
+}
+
+$opts->papersize('half-a4');
+is $opts->tex_papersize, 'a5', "half-a4 papersize is fine";
+$opts->papersize('');
+is $opts->tex_papersize, '210mm:11in', "false papersize is fine";
+$opts->papersize('a4');
+is $opts->tex_papersize, 'a4', "tex papersize is fine";
+$opts->papersize('15cm:10in');
+is $opts->tex_papersize, '15cm:10in', "custom tex papersize is fine";
+

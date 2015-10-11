@@ -114,7 +114,6 @@ has suffix => (is => 'ro', isa => Str, required => 1);
 has templates => (is => 'ro', isa => Object, required => 1);
 has virtual => (is => 'ro', isa => Bool, default => sub { 0 });
 has standalone => (is => 'ro', isa => Bool, default => sub { 0 });
-has is_deleted => (is => 'rwp', isa => Bool, default => sub { 0 });
 has tt => (is => 'ro', isa => Object, default => sub { Template::Tiny->new });
 has logger => (is => 'ro', isa => Maybe[CodeRef]);
 has webfonts => (is => 'ro', isa => Maybe[Object]);
@@ -122,6 +121,35 @@ has document => (is => 'lazy', isa => Object);
 has options => (is => 'ro', isa => HashRef, default => sub { +{} });
 has tex_options => (is => 'lazy', isa => HashRef);
 has html_options => (is => 'lazy', isa => HashRef);
+has wants_slides => (is => 'lazy', isa => Bool);
+has is_deleted => (is => 'lazy', isa => Bool);
+has file_header => (is => 'lazy', isa => HashRef);
+
+sub _build_file_header {
+    my $self = shift;
+    return {} if $self->virtual;
+    my $header = muse_fast_scan_header($self->muse_file);
+    $self->log_fatal("Not a muse file!") unless $header && %$header;
+    return $header;
+}
+
+sub _build_is_deleted {
+    my $self = shift;
+    return 0 if $self->virtual;
+    return !!$self->file_header->{DELETED};
+}
+
+sub _build_wants_slides {
+    my $self = shift;
+    my $slides = $self->file_header->{slides};
+    if ($slides and $slides !~ /^\s*(no|false)\s*$/si) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
 
 sub _build_document {
     my $self = shift;
@@ -169,21 +197,6 @@ sub muse_file {
 sub status_file {
     return shift->name . '.status';
 }
-
-sub check_status {
-    my $self = shift;
-    my $deleted;
-    # it could be virtual
-    if (!$self->virtual) {
-        my $header = muse_fast_scan_header($self->muse_file);
-        $self->log_fatal("Not a muse file!") unless $header && %$header;
-        $deleted = $header->{DELETED};
-        # TODO maybe use storable?
-    }
-    $self->purge_all if $deleted;
-    $self->_set_is_deleted(!!$deleted);
-}
-
 
 =head2 purge_all
 
@@ -396,18 +409,13 @@ sub tex_beamer {
     my ($self) = @_;
     # no slides for virtual files
     return if $self->virtual;
-    if (my $header = muse_fast_scan_header($self->muse_file)) {
-        if ($header->{slides} and $header->{slides} !~ /^\s*no\s*$/si) {
-            my $texfile = $self->name . '.sl.tex';
-            $self->purge('.sl.tex');
-            return $self->_process_template($self->templates->slides,
-                                            $self->_prepare_tex_tokens,
-                                            $texfile);
-        }
-    }
-    return;
+    return unless $self->wants_slides;
+    my $texfile = $self->name . '.sl.tex';
+    $self->purge('.sl.tex');
+    return $self->_process_template($self->templates->slides,
+                                    $self->_prepare_tex_tokens,
+                                    $texfile);
 }
-
 
 sub sl_pdf {
     my $self = shift;

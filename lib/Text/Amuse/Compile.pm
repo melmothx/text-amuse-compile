@@ -9,6 +9,7 @@ use File::Temp;
 use File::Find;
 use File::Spec;
 
+use Text::Amuse::Functions qw/muse_fast_scan_header/;
 use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::Webfonts;
 use Text::Amuse::Compile::File;
@@ -152,18 +153,25 @@ Return the list of the methods which are going to be used.
 =cut
 
 sub available_methods {
-    return (qw/bare_html html
+    return (qw/bare_html
+               html
                epub
-               a4_pdf lt_pdf
+               a4_pdf
+               lt_pdf
                tex zip
-               pdf/);
+               pdf
+               sl_pdf
+              /);
 }
 
 sub compile_methods {
     my $self = shift;
     my @out;
     foreach my $m ($self->available_methods) {
-        if ($self->$m) {
+        if ($m eq 'sl_pdf') {
+            push @out, $m if $self->slides;
+        }
+        elsif ($self->$m) {
             push @out, $m;
         }
     }
@@ -175,7 +183,7 @@ sub new {
     # available options by default
     die "Wrong usage" if @args % 2;
 
-    my $self = { map { $_ => 1 } $class->available_methods };
+    my $self = { map { $_ => 1 } $class->available_methods, 'slides' };
 
     my %params = @args;
 
@@ -198,7 +206,7 @@ sub new {
 
     # options passed, null out and reparse the params
     if (%params) {
-        foreach my $k ($class->available_methods) {
+        foreach my $k ($class->available_methods, 'slides') {
             $self->{$k} = delete $params{$k};
         }
 
@@ -207,6 +215,10 @@ sub new {
     }
 
     bless $self, $class;
+}
+
+sub slides {
+    return shift->{slides};
 }
 
 sub luatex {
@@ -575,24 +587,28 @@ sub _muse_compile {
         sleep 5;
     }
     my @fatals;
-    $muse->check_status;
     if ($muse->is_deleted) {
+        $muse->purge_all;
         $self->_write_status_file($fhlock, 'DELETED');
         return;
     }
-    else {
-        foreach my $method ($self->compile_methods) {
-            eval {
-                $muse->$method;
-            };
-            if ($@) {
-                push @fatals, $@;
-                last;
+    foreach my $method ($self->compile_methods) {
+        if ($method eq 'sl_pdf') {
+            unless ($muse->wants_slides) {
+                $self->logger->("* Slides not required");
+                next;
             }
-            else {
-                my $output = $muse->name . $self->_suffix_for_method($method);
-                $self->logger->("* Created $output\n");
-            }
+        }
+        my $output = eval { $muse->$method };
+        if ($@) {
+            push @fatals, $@;
+            last;
+        }
+        elsif ($output) {
+            $self->logger->("* Created $output\n");
+        }
+        else {
+            $self->logger->("* $method skipped\n");
         }
     }
     if (@fatals) {

@@ -109,7 +109,7 @@ foreach my $ext ($file->purged_extensions) {
 
 
 diag "Calling check_status";
-$file->check_status;
+$file->purge_all if $file->is_deleted;
 foreach my $ext ($file->purged_extensions) {
     ok(! -f "deleted$ext", "deleted$ext purged by mark_as_open");
 }

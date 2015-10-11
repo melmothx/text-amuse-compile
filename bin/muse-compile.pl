@@ -24,7 +24,7 @@ GetOptions (\%options,
                a4-pdf
                lt-pdf
                tex
-               noslides
+               slides
                pdf
                zip
                ttdir=s
@@ -94,13 +94,16 @@ file.
 
 =item --pdf
 
-PDF output. If the muse file has the header C<slides> set to something
-that doesn't look like a false boolean (empty, 0, "no"), also produces
-the slides.
+PDF output.
 
-=item --noslides
+=item --slides
 
-Never produce slides.
+PDF output. Extension is .sl.pdf and it is a Beamer PDF. File .sl.tex
+is left in place.
+
+Please note that the muse file must say that the slides are required.
+The header for that is C<#slides> set to a value other than empty,
+C<0>, C<no>, C<false>.
 
 =item --a4-pdf
 

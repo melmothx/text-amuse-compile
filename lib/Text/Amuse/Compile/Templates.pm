@@ -664,6 +664,7 @@ sub latex {
 % global style
 \pagestyle{plain}
 \addtokomafont{disposition}{\rmfamily}
+\addtokomafont{descriptionlabel}{\rmfamily}
 % forbid widows/orphans
 \frenchspacing
 \sloppy

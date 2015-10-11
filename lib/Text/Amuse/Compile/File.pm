@@ -387,8 +387,6 @@ logic: if you have some imposed format, they are ignored for the
 standalone PDF but applied for the imposed ones. If you have only
 the standalone PDF, they are applied to it.
 
-=back
-
 =cut
 
 sub tex {
@@ -418,6 +416,8 @@ If the source muse file doesn't require slides, do nothing.
 
 Compiles the file produced by C<tex_beamer> (if any) and generate the
 slides.
+
+=back
 
 =cut
 

@@ -457,11 +457,9 @@ sub compile {
     foreach my $file (@files) {
         chdir $cwd or die "Couldn't chdir into $cwd $!";
         if (ref($file)) {
-            $self->logger->("Working on virtual file in " . getcwd(). "\n");
             eval { $self->_compile_virtual_file($file); };
         }
         else {
-            $self->logger->("Working on $file in " . getcwd() . "\n");
             eval { $self->_compile_file($file); };
         }
         my $fatal = $@;
@@ -490,7 +488,7 @@ sub _compile_virtual_file {
     chdir $path or die "Couldn't chdir into $path $!";
     my $suffix = delete($virtual{suffix}) || '.muse';
     my $name =   delete($virtual{name})   || 'virtual';
-
+    $self->logger->("Working on virtual file in " . getcwd(). "\n");
     my @filelist = map { $_ . $suffix } @$files;
     my $doc = Text::Amuse::Compile::Merged->new(files => \@filelist, %virtual);
     my $muse = Text::Amuse::Compile::File->new(
@@ -520,6 +518,7 @@ sub _compile_file {
     };
 
     my $filename = $name . $suffix;
+    $self->logger->("Working on $filename file in " . getcwd(). "\n");
 
     my %args = (
                 name => $name,
@@ -655,6 +654,10 @@ Add an error. [Internal]
 
 Reset the errors
 
+=head3 has_errors
+
+Return the number of errors (handy to use as a boolean).
+
 =cut
 
 sub add_errors {
@@ -665,6 +668,10 @@ sub add_errors {
 sub reset_errors {
     my $self = shift;
     $self->_set_errors([]);
+}
+
+sub has_errors {
+    return scalar(@{ shift->errors });
 }
 
 =head1 TeX live packages needed.

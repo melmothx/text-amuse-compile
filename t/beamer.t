@@ -84,7 +84,7 @@ foreach my $noc (@nocompile) {
     ok (!$file->tex_beamer, "No slides generated for $noc");
     ok (! -f $noc . '.sl.tex', "No tex file for slides for $noc");
     if ($ENV{TEST_WITH_LATEX}) {
-        ok(!$file->sl_pdf, "No slide pdf generated for $noc");
+        ok(!$file->slides, "No slide pdf generated for $noc");
         ok (! -f $noc . '.sl.pdf', "No pdf file for slides for $noc");
     }
 }
@@ -104,7 +104,7 @@ foreach my $comp (@compile) {
     unlike ($texbody, qr/Text ignored/, "No ignore part found");
     like ($texbody, qr/begin\{frame\}.+end\{frame\}/s);
     if ($ENV{TEST_WITH_LATEX}) {
-        ok($file->sl_pdf, "Slides generated for $comp");
+        ok($file->slides, "Slides generated for $comp");
         ok (-f $comp . '.sl.pdf', "Pdf file for slides for $comp exists");
         # and check a garbaged file
         write_file('garbage.tex', 'lalksdflkjlakjsdflkjaòlksdjf');

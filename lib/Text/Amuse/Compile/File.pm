@@ -202,6 +202,10 @@ sub status_file {
 
 Remove all the output files related to basename
 
+=head2 purge_slides
+
+Remove all the files produces by the C<slides> call (C<*.sl.*>)
+
 =head2 purge_latex
 
 Remove files left by previous latex compilation
@@ -404,6 +408,18 @@ sub tex {
                              $self->_prepare_tex_tokens(%arguments),
                              $texfile);
 }
+
+=item tex_beamer
+
+Produce a file with extension .sl.tex, a LaTeX Beamer source file.
+If the source muse file doesn't require slides, do nothing.
+
+=item slides
+
+Compiles the file produced by C<tex_beamer> (if any) and generate the
+slides.
+
+=cut
 
 sub tex_beamer {
     my ($self) = @_;

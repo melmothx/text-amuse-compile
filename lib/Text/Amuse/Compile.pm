@@ -117,10 +117,20 @@ The bare HTML, non <head>
 
 The zipped sources
 
-=item extra
+=item slides
+
+The Beamer PDF output, if the muse headers say so.
+
+=item extra_opts
 
 An hashref of key/value pairs to pass to each template in the
-C<options> namespace.
+C<options> namespace. This is internal
+
+=item extra
+
+In the constructor arguments, a shallow copy will be stored in
+C<extra_opts>. Using it as an accessor will return an hash with the
+copy of C<extra_opts>
 
 =item standalone
 
@@ -256,6 +266,14 @@ has report_failure_sub => (is => 'rw',
                            });
 has errors => (is => 'rwp', isa => ArrayRef, default => sub { [] });
 
+
+=head2 BUILDARGS routine
+
+The C<extra> key is passed instead to C<extra_opts>. Directories are
+made absolute. If no formats are required explicitely, set them all to
+true.
+
+=cut
 
 =head2 METHODS
 

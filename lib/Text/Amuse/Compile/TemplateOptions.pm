@@ -485,20 +485,24 @@ has beamercolortheme => (is => 'rw',
 
 =head1 METHODS
 
-=head2 as_latex($doc)
-
-Return an hashref with parsed options for LaTeX output.
-
-=cut
-
-sub as_latex {
-    
-}
-
 =head2 paging
 
 This merges C<oneside> and C<twoside>. If both or none
 are set, defaults to C<oneside>.
+
+=head2 tex_papersize
+
+The real name of the papersize, unaliased (so, e.g. C<half-a4> will be
+C<a5>).
+
+=head2 config_setters
+
+The list of the values which should be passed to the constructor
+
+=head2 config_output
+
+Return a validated hashref of the options. This is basically the
+purpose of this module.
 
 =cut
 
@@ -556,6 +560,10 @@ sub show_options {
 
 =head2 Available fonts listing
 
+They return a list of hashrefs, with two keys, C<name> and C<desc>.
+The first is the system font name, the second is the description. They
+can be called on the class.
+
 =over 4
 
 =item sans_fonts
@@ -568,8 +576,24 @@ sub show_options {
 
 =back
 
-They return a list of hashrefs, with two keys, C<name> and C<desc>.
-The first is the system font name, the second is the description.
+=head2 Themes listing
+
+The following methods can be called on the class and return lists with
+the available Beamer themes and color themes:
+
+=over 4
+
+=item beamer_colorthemes
+
+=item beamer_themes
+
+=back
+
+=head2 Help
+
+=head3 show_options
+
+Print out the relevant stanza of the POD.
 
 =cut
 

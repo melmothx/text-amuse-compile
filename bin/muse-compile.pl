@@ -10,6 +10,7 @@ use File::Path qw/mkpath/;
 use File::Spec::Functions qw/catfile/;
 use Pod::Usage;
 use Text::Amuse::Compile::Utils qw/append_file/;
+use Text::Amuse::Compile::TemplateOptions;
 use Encode;
 
 binmode STDOUT, ':encoding(utf-8)';
@@ -35,13 +36,22 @@ GetOptions (\%options,
                recursive=s
                dry-run
                luatex
+               version
+               verbose
                help/) or die "Bad option passed!\n";
 
 if ($options{help}) {
-    pod2usage("Using Text::Amuse::Compile version " .
-              $Text::Amuse::Compile::VERSION . "\n");
+    pod2usage({ -exitval => 'NOEXIT' });
+    if ($options{verbose}) {
+        Text::Amuse::Compile::TemplateOptions->show_options;
+    }
     exit 2;
 }
+if ($options{version}) {
+    print Text::Amuse::Compile->version;
+    exit 0;
+}
+
 
 =encoding utf8
 
@@ -156,88 +166,18 @@ escape special characters and to permit inline markup.
 
 Example:
 
-  muse-compile --extra site=http://anarhija.net \
-               --extra papersize=a6 --extra division=15 --extra twoside=true \
-               --extra bcor=10mm --extra mainfont="Charis SIL" \
-               --extra sitename="Testsite" \
-               --extra siteslogan="Anticopyright" \
-               --extra logo=mylogo \
-               --extra cover=mycover.pdf \
-               --extra opening=any \
-               file.muse
+  muse-compile.pl --extra site=http://anarhija.net \
+                  --extra papersize=a6 --extra division=15 --extra twoside=true \
+                  --extra bcor=10mm --extra mainfont="Charis SIL" \
+                  --extra sitename="Testsite" \
+                  --extra siteslogan="Anticopyright" \
+                  --extra logo=mylogo \
+                  --extra cover=mycover.pdf \
+                  --extra opening=any \
+                  file.muse
 
-Keep in mind that in this case C<mylogo> has to be or an absolute
-filename (not recommended, because the full path will remain in the
-.tex source), or a basename (even without extension) which can be
-found by C<kpsewhich> (or a file in the current directory, if you
-aren't doing a recursive compilation). Same applies for C<cover>.
-
-Supported extra keys (documented in L<Text::Amuse::Compile::TemplateOptions>):
-
-=over 4
-
-=item * papersize (common values: a4, a5, letter)
-
-=item * mainfont (grep fc-list -l for the correct name)
-
-=item * sansfont
-
-The sans serif font to use. This option has some effects only on
-slides.
-
-=item * monofont
-
-The monospace font to use.
-
-=item * fontsize (9, 10, 11, 12) as integer, meaning points (pt)
-
-=item * oneside (true or false)
-
-=item * twoside (true or false)
-
-=item * bcor (binding correction for inner margins)
-
-=item * sitename
-
-=item * siteslogan
-
-=item * site
-
-=item * logo (filename)
-
-=item * cover (filename for front cover)
-
-=item * coverwidth (dimension ratio with the text width, eg. '0.85')
-
-It requires a float, where 1 is the full text-width, 0.5 half, etc.
-
-=item * division (the DIV factor for margin control)
-
-=item * nocoverpage
-
-Use the LaTeX article class if toc is not present
-
-=item * notoc
-
-Never generate a table of contents
-
-=item * opening
-
-Page for starting a chapter: "any" or "right" or (at your own peril)
-"left"
-
-=item * beamertheme
-
-The theme to use with beamer, if and when the slides are produced. See
-the beamer manual or L<https://www.hartwork.org/beamer-theme-matrix/>.
-Defaults to the default one.
-
-=item * beamercolortheme
-
-Same as above, but for the color theme. Defaults to "dove" (b/w theme,
-can't see the default purple).
-
-=back
+See muse-compile.pl --help --verbose for the full description of
+meaning of these options.
 
 =item --recursive <directory>
 
@@ -270,6 +210,7 @@ if ($options{extra}) {
     foreach my $k (keys %$extras) {
         $extras->{$k} = decode('utf-8', $extras->{$k});
     }
+    # also handle the booleans here
     $args{extra} = $extras;
 }
 

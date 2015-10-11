@@ -5,6 +5,7 @@ use strict;
 use warnings FATAL => 'all';
 use Types::Standard qw/Str Bool/;
 use Type::Utils qw/enum/;
+use Pod::Usage qw//;
 use Moo;
 
 use constant {
@@ -25,9 +26,8 @@ Text::Amuse::Compile::TemplateOptions - parse and validate options for templates
 
 =head1 ACCESSORS
 
-The follow accessors are read only and should be set in the
-contructor. The same settings can be passed to the C<muse-compile.pl>
-script.
+The follow accessors are read-write. The same settings can be passed
+to the C<muse-compile.pl> script.
 
 =head2 Paper
 
@@ -35,15 +35,42 @@ script.
 
 =item * papersize (common values: a4, a5, letter)
 
+Paper size, like a4, a5 or 210mm:11in. The width and heigth are
+swapped in some komascript version. Just keep this in mind and do some
+trial and error if you need custom dimensions.
+
 =item * bcor (binding correction for inner margins)
 
+The BCOR of the C<typearea> package. Defaults to 0mm. Go and read the doc.
+It expects a TeX dimension like 10mm or 1in or 1.2cm.
+
+B<Please note that this has no effect on the plain PDF output when an
+imposed version is also required>, because we force BCOR=0mm
+and oneside=true for the planin version in this case.
+
 =item * division (the DIV factor for margin control)
+
+The DIV of the C<typearea> package. Defaults to 12. Go and read the
+doc. Sensible values are from 9 to 15. 15 has narrow margins, while in
+9 they are pretty generous.
 
 =item * oneside (boolean)
 
 This is the default. Actually, this option doesn't have any use.
 
 =item * twoside (boolean)
+
+Set it to a true value to have a twosided document. Default is false.
+
+B<Please note that this has no effect on the plain PDF output when an
+imposed version is also required>, because we force BCOR=0mm
+and oneside=true for the planin version in this case.
+
+=item * opening
+
+On which pages the chapters should open: right, left, any. Default:
+right. The left one will probably lead to unexpected results (the PDF
+will start with an empty page), so use it at your own peril.
 
 =back
 
@@ -106,6 +133,10 @@ has division   => (is => 'rw',
                   );
 has oneside => (is => 'rw', isa => Bool);
 has twoside => (is => 'rw', isa => Bool);
+has opening => (is => 'rw',
+                isa => enum([qw/any right left/]),
+                default => sub { 'right' });
+
 
 =head2 Fonts
 
@@ -113,36 +144,25 @@ has twoside => (is => 'rw', isa => Bool);
 
 =item * mainfont (grep fc-list -l for the correct name)
 
+The system font name, such as C<Linux Libertine O> or C<Charis SIL>.
+This implementation uses XeLaTeX, so we can use system fonts. Defaults
+to C<CMU Serif>.
+
 =item * sansfont 
 
 The sans serif font to use. This option has some effects only on
-slides.
+slides. Defaults to C<CMU Sans Serif>
 
 =item * monofont 
 
-The monospace font to use.
+The monospace font to use. Defaults to C<CMU Typewriter Text>.
 
-=item * fontsize (9, 10, 11, 12) as integer, meaning points (pt)
+=item * fontsize
 
-=back
-
-Additionally, the following methods are provided, which can be called
-on the class and return the list of fonts
-
-=over 4
-
-=item sans_fonts
-
-=item mono_fonts
-
-=item serif_fonts
-
-=item all_fonts
+The size of the body font (9, 10, 11, 12) as integer, meaning points
+(pt), defaulting to 10.
 
 =back
-
-They return a list of hashrefs, with two keys, C<name> and C<desc>.
-The first is the system font name, the second is the description.
 
 =cut
 
@@ -269,13 +289,28 @@ has fontsize   => (is => 'rw',
                   );
 
 
+
+=head2 Colophon
+
+=over 4
+
 =item * sitename
+
+At the top of the page
 
 =item * siteslogan
 
-=item * site
+At the top, under sitename
 
 =item * logo (filename)
+
+At the top, under siteslogan
+
+=item * site
+
+At the bottom of the page
+
+=back
 
 =cut
 
@@ -317,6 +352,11 @@ has logo       => (is => 'rw',
                    default => sub { '' },
                   );
 
+
+=head2 Cover
+
+=over 4
+
 =item * cover (filename for front cover)
 
 When this option is set to a true value, skip the creation of the
@@ -330,20 +370,22 @@ ignored.
 
 =item * coverwidth (dimension ratio with the text width, eg. '0.85')
 
-It requires a float, where 1 is the full text-width, 0.5 half, etc.
+Option to control the cover width, when is set (ignored otherwise).
+Defaults to the full text width (i.e., 1). You have to pass a float
+here with the ratio to the text width, like C<0.5>, C<1>.
 
 =item * nocoverpage
 
-Use the LaTeX article class if ToC is not present
+Use the LaTeX article class if ToC is not present. If the text doesn't
+require a toc, this options set the class to komascript's article.
+Ignored if there is a toc.
 
 =item * notoc
 
-Never generate a table of contents
+Do not generate a table of contents, even if the document requires
+one.
 
-=item * opening
-
-Page for starting a chapter: "any" or "right" or (at your own peril)
-"left"
+=back
 
 =cut
 
@@ -371,9 +413,10 @@ has coverwidth => (is => 'rw',
 has nocoverpage => (is => 'rw', isa => Bool, default => sub { 0 });
 has notoc       => (is => 'rw', isa => Bool, default => sub { 0 });
 
-has opening => (is => 'rw',
-                isa => enum([qw/any right left/]),
-                default => sub { 'right' });
+
+=head2 Slides
+
+=over 4
 
 =item * beamertheme
 
@@ -508,6 +551,38 @@ sub config_output {
     }
     return \%out;
 }
+
+sub show_options {
+    Pod::Usage::pod2usage({ -sections => [qw(ACCESSORS/Paper
+                                             ACCESSORS/Fonts
+                                             ACCESSORS/Colophon
+                                             ACCESSORS/Cover
+                                             ACCESSORS/Slides
+                                           )],
+                            -input => __FILE__,
+                            -verbose => 99,
+                            -message => "Template extra options to use with --extra option_name=value\n",
+                            -exitval => 'NOEXIT' });
+}
+
+=head2 Available fonts listing
+
+=over 4
+
+=item sans_fonts
+
+=item mono_fonts
+
+=item serif_fonts
+
+=item all_fonts
+
+=back
+
+They return a list of hashrefs, with two keys, C<name> and C<desc>.
+The first is the system font name, the second is the description.
+
+=cut
 
 1;
 

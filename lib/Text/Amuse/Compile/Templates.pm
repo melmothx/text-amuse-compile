@@ -62,10 +62,7 @@ files.
 
 =head3 latex
 
-The LaTeX template, with dimension conditional.
-
-The built-in LaTeX template supports the following options, which are
-picked up from the C<extra> constructor of L<Text::Amuse::Compile>.
+The LaTeX template.
 
 The template itself uses two hashrefs with tokens: C<options> and
 C<safe_options>. The C<options> contains tokens which are interpreted
@@ -74,128 +71,15 @@ C<safe_options> ones contains validate copies of the C<options> for
 places where it make sense, plus some internal things like the
 languages and additional strings to get the LaTeX code right.
 
-All the values from C<options> and C<safe_options>, because of the
-markup interpretation, are (hopefully) safely escaped (so you can pass
-even LaTeX commands, and they will be escaped).
+We use only the C<safe_options> tokens, while the C<options> should be
+used only by custom templates which in this way can receive random
+stuff.
 
 See L<Text::Amuse::Compile::TemplateOptions>
 
-=head4 Globals
-
-=over 4
-
-=item safe_options.nocoverpage
-
-If the text doesn't require a toc, this options set the class to
-komascript's article. Ignored if there is a toc.
-
-=item safe_options.notoc
-
-Do not generate a table of contents, even if the document requires
-one.
-
-=item safe_options.papersize
-
-Paper size, like a4, a5 or 210mm:11in. The width and heigth are
-swapped in some komascript version. Just keep this in mind and do some
-trial and error if you need custom dimensions.
-
-=item safe_options.division
-
-The DIV of the C<typearea> package. Defaults to 12. Go and read the doc.
-
-=item safe_options.opening
-
-On which pages the chapters should open: right, left, any. Default:
-right. The left one will probably lead to unexpected results (the PDF
-will start with an empty page), so use it at your own peril.
-
-=item safe_options.bcor
-
-The BCOR of the C<typearea> package. Defaults to 0mm. Go and read the doc.
-It expects a TeX dimension like 10mm or 1in or 1.2cm.
-
-B<Please note that this has no effect on the plain PDF output>, as we,
-opinionately, force BCOR=0mm and oneside=true for this kind of output.
-But, of course, it does affect the imposed output.
-
-=item safe_options.fontsize
-
-The font size in point (should be an integer). Defaults to 10.
-
-=item safe_options.mainfont
-
-The system font name, such as C<Linux Libertine O> or C<Charis SIL>.
-This implementation uses XeLaTeX, so we can use system fonts. Defaults
-to C<Linux Libertine O>. This is just a copy of C<options.mainfont>,
-as we can't know which font is installed.
-
-=item options.oneside
-
-Set it to a true value to have a oneside document. Default is true.
-
-=item options.twoside
-
-Set it to a true value to have a twosided document. Default is false.
-
-B<Please note that this has no effect on the plain PDF output>, as we,
-opinionately, force BCOR=0mm and oneside=true for this kind of output.
-But, of course, it does affect the imposed output.
-
-=item safe_options.paging
-
-The merging of C<options.oneside> and C<options.twoside> results in
-this token. If both or none are true, will default to C<oneside>.
-
-=back
-
-=head4 Cover
-
-=over 4
-
-=item options.cover
-
-When this option is set to a true value, skip the creation of the
-title page with \maketitle, and instead build a custome one, with the
-cover placed in the middle of the page.
-
-The value can be an absolute path, or a bare filename, which can be
-found by C<kpsewhich>. If the path is not valid and sane (from the
-LaTeX point of view: no spaces, no strange chars), the value is
-ignored.
-
-=item safe_options.coverwidth
-
-Option to control the cover width, when is set (ignored otherwise).
-Defaults to the full text width (i.e., 1). You have to pass a float
-here with the ratio to the text width, like C<0.5>, C<1>.
-
-=back
-
-
-=head4 Colophon
-
-In the last page the built in template supports the following options
-
-=over 4
-
-=item options.sitename
-
-At the top of the page
-
-=item options.siteslogan
-
-At the top, under sitename
-
-=item options.logo
-
-At the top, under siteslogan
-
-=item options.site
-
-At the bottom of the page
-
-=back
+Anyway, all the values from C<options> and C<safe_options>, because of the
+markup interpretation, are (hopefully) safely escaped (so you can pass
+even LaTeX commands, and they will be escaped).
 
 =head3 slides
 

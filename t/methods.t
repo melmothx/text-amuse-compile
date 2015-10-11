@@ -18,7 +18,8 @@ is_deeply(\@avail, [
                        epub
                        a4_pdf lt_pdf
                        tex zip
-                       pdf sl_pdf/
+                       pdf
+                       slides/
                    ]);
 
 is_deeply([$c->compile_methods], [ qw/pdf/ ]);

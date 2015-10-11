@@ -156,7 +156,7 @@ sub new {
             }
         }
         else {
-            die "$self->{ttdir} is not a directory!\n";
+            die "<$self->{ttdir}> is not a directory!";
         }
     }
     bless $self, $class;

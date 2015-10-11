@@ -315,7 +315,7 @@ else {
     $compiler->compile(@ARGV);
 }
 
-if ($compiler->errors) {
+if (@{$compiler->errors}) {
     $logfile ||= "above";
     die "Compilation finished with errors, see $logfile!\n";
 }

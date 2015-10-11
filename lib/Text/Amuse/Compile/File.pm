@@ -417,7 +417,7 @@ sub tex_beamer {
                                     $texfile);
 }
 
-sub sl_pdf {
+sub slides {
     my $self = shift;
     $self->purge_slides;
     if (my $source = $self->tex_beamer) {

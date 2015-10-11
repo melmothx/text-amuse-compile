@@ -586,8 +586,8 @@ sub latex {
 \usepackage{polyglossia}
 \setmainfont{[% safe_options.mainfont %]}
 % these are not used but prevents XeTeX to barf
-\setsansfont[Scale=MatchLowercase]{DejaVu Sans}
-\setmonofont[Scale=MatchLowercase]{DejaVu Sans Mono}
+\setsansfont[Scale=MatchLowercase]{[% safe_options.sansfont %]}
+\setmonofont[Scale=MatchLowercase]{[% safe_options.monofont %]}
 \setmainlanguage{[% safe_options.lang %]}
 [% safe_options.mainlanguage_script %]
 
@@ -674,7 +674,7 @@ sub latex {
 \hyphenation{ [% doc.hyphenation %] }
 [% END %]
 
-[% IF options.cover %]
+[% IF safe_options.cover %]
   \thispagestyle{empty}
   \strut\bigskip
   \begin{center}
@@ -686,7 +686,7 @@ sub latex {
       {\Large\textbf{[% doc.header_as_latex.subtitle %]}\\[\baselineskip]}
     [% END %]
     \vfill
-    \includegraphics[width=[% safe_options.coverwidth %]\textwidth]{[% options.cover %]}
+    \includegraphics[width=[% safe_options.coverwidth %]\textwidth]{[% safe_options.cover %]}
     \vfill
     [% IF doc.header_defined.date %]
     {\large [% doc.header_as_latex.date %]}
@@ -714,18 +714,18 @@ sub latex {
 \thispagestyle{empty}
 
 \begin{center}
-[% IF options.sitename %]
-[% options.sitename %]
+[% IF safe_options.sitename %]
+[% safe_options.sitename %]
 [% END %]
 
-[% IF options.siteslogan %]
+[% IF safe_options.siteslogan %]
 \smallskip
-[% options.siteslogan %]
+[% safe_options.siteslogan %]
 [% END %]
 
-[% IF options.logo %]
+[% IF safe_options.logo %]
 \bigskip
-\includegraphics[width=0.25\textwidth]{[% options.logo %]}
+\includegraphics[width=0.25\textwidth]{[% safe_options.logo %]}
 \bigskip
 [% ELSE %]
 \strut
@@ -752,9 +752,9 @@ sub latex {
 
 [% doc.header_as_latex.notes      %]
 
-[% IF options.site %]
+[% IF safe_options.site %]
 \bigskip
-\textbf{[% options.site %]}
+\textbf{[% safe_options.site %]}
 [% END %]
 
 \end{center}
@@ -774,10 +774,11 @@ sub slides {
 \documentclass[ignorenonframetext]{beamer}
 \usepackage{fontspec}
 \usepackage{polyglossia}
-\setmainfont{CMU Serif}
-\setsansfont[Scale=MatchLowercase]{CMU Sans Serif}
-\setmonofont[Scale=MatchLowercase]{CMU Typewriter Text}
-[% options.beamer_theme.as_latex %]
+\setmainfont{[% safe_options.mainfont %]}
+\setsansfont{[% safe_options.sansfont %]}
+\setmonofont[Scale=MatchLowercase]{[% safe_options.monofont %]}
+\usetheme{[% safe_options.beamertheme %]}
+\usecolortheme{[% safe_options.beamercolortheme %]}
 \setmainlanguage{[% safe_options.lang %]}
 [% safe_options.mainlanguage_script %]
 [% IF safe_options.mainlanguage_toc_name %]

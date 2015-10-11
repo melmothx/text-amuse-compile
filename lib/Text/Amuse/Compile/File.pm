@@ -48,10 +48,6 @@ Constructor. Accepts the following named parameters:
 
 =item name
 
-=item noslides
-
-Do not create slides when calling c<pdf>
-
 =item virtual
 
 If it's a virtual file which doesn't exit on the disk (a merged one)
@@ -113,7 +109,6 @@ Use luatex instead of xetex
 =cut
 
 has luatex => (is => 'ro', isa => Bool, default => sub { 0 });
-has noslides => (is => 'ro', isa => Bool, default => sub { 0 });
 has name => (is => 'ro', isa => Str, required => 1);
 has suffix => (is => 'ro', isa => Str, required => 1);
 has templates => (is => 'ro', isa => Object, required => 1);
@@ -341,7 +336,7 @@ sub _compile_imposed {
     # the trick: first call tex with an argument, then pdf, then
     # impose, then rename.
     $self->tex(papersize => "half-$size");
-    my $pdf = $self->pdf(noslides => 1);
+    my $pdf = $self->pdf;
     my $outfile = $self->name . ".$size.pdf";
     if ($pdf) {
         my $imposer = PDF::Imposition->new(
@@ -399,9 +394,6 @@ sub tex {
 
 sub tex_beamer {
     my ($self) = @_;
-    if ($self->noslides || $self->virtual) {
-        return;
-    }
     # no slides for virtual files
     return if $self->virtual;
     if (my $header = muse_fast_scan_header($self->muse_file)) {
@@ -420,12 +412,8 @@ sub tex_beamer {
 sub sl_pdf {
     my $self = shift;
     $self->purge_slides;
-    if ($self->noslides || $self->virtual) {
-        return;
-    }
     if (my $source = $self->tex_beamer) {
         if (my $out = $self->_compile_pdf($source)) {
-            $self->log_info("* Created $out\n");
             return $out;
         }
     }
@@ -434,10 +422,6 @@ sub sl_pdf {
 
 sub pdf {
     my ($self, %opts) = @_;
-    # create the slides, if needed.
-    unless ($opts{noslides}) {
-        $self->sl_pdf;
-    }
     my $source = $self->name . '.tex';
     unless (-f $source) {
         $self->tex;
@@ -450,14 +434,14 @@ sub pdf {
 sub _compile_pdf {
     my ($self, $source) = @_;
     my ($output, $logfile);
+    die "Missing $source!" unless $source;
     if ($source =~ m/(.+)\.tex$/) {
-        die "Missing $source!" unless $source;
         my $name = $1;
         $output = $name . '.pdf';
         $logfile = $name . '.log';
     }
     else {
-        die "Source must be a source file\n";
+        die "Source must be a tex source file\n";
     }
     # maybe a check on the toc if more runs are needed?
     # 1. create the toc

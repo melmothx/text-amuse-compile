@@ -12,7 +12,7 @@ use Text::Amuse::Compile::Utils qw/write_file read_file/;
 use Text::Amuse::Compile::Templates;
 use Cwd;
 
-plan tests => ($ENV{TEST_WITH_LATEX} ? 36 : 17);
+plan tests => ($ENV{TEST_WITH_LATEX} ? 30 : 17);
 
 my $basename = "slides";
 my $workingdir = File::Temp->newdir(CLEANUP => !$ENV{NOCLEANUP});
@@ -85,7 +85,6 @@ foreach my $noc (@nocompile) {
     ok (! -f $noc . '.sl.tex', "No tex file for slides for $noc");
     if ($ENV{TEST_WITH_LATEX}) {
         ok(!$file->sl_pdf, "No slide pdf generated for $noc");
-        ok($file->pdf, "PDF generated");
         ok (! -f $noc . '.sl.pdf', "No pdf file for slides for $noc");
     }
 }
@@ -106,8 +105,7 @@ foreach my $comp (@compile) {
     like ($texbody, qr/begin\{frame\}.+end\{frame\}/s);
     if ($ENV{TEST_WITH_LATEX}) {
         ok($file->sl_pdf, "Slides generated for $comp");
-        ok($file->pdf, "PDF generated");
-        ok (-f $comp . '.sl.pdf', "No pdf file for slides for $comp");
+        ok (-f $comp . '.sl.pdf', "Pdf file for slides for $comp exists");
         # and check a garbaged file
         write_file('garbage.tex', 'lalksdflkjlakjsdflkjaòlksdjf');
         eval { $file->_compile_pdf('garbage.tex') };

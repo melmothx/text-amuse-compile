@@ -462,6 +462,15 @@ div.right {
     padding-left: 3em;
 }
 
+/* definition lists */
+
+dt {
+	font-weight: bold;
+}
+dd {
+    margin: 0;
+    padding-left: 2em;
+}
 
 /* footnotes */
 

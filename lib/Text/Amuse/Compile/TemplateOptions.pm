@@ -3,8 +3,7 @@ package Text::Amuse::Compile::TemplateOptions;
 use utf8;
 use strict;
 use warnings FATAL => 'all';
-use Types::Standard qw/Str Bool/;
-use Type::Utils qw/enum/;
+use Types::Standard qw/Str Bool Enum/;
 use Pod::Usage qw//;
 use Moo;
 
@@ -123,18 +122,14 @@ has bcor => (is => 'rw',
              },
              default => sub { '0mm' });
 
-sub division_values {
-    return [9..15];
-}
-
 has division   => (is => 'rw',
-                   isa => enum(__PACKAGE__->division_values),
+                   isa => Enum[9..15],
                    default => sub { '12' },
                   );
 has oneside => (is => 'rw', isa => Bool);
 has twoside => (is => 'rw', isa => Bool);
 has opening => (is => 'rw',
-                isa => enum([qw/any right left/]),
+                isa => Enum[qw/any right left/],
                 default => sub { 'right' });
 
 
@@ -264,27 +259,21 @@ sub all_fonts {
     return @all;
 }
 
-my $font_type = enum([ map { $_->{name} } __PACKAGE__->all_fonts ]);
-
 has mainfont   => (is => 'rw',
-                   isa => $font_type,
+                   isa => Enum[ map { $_->{name} } __PACKAGE__->all_fonts ],
                    default => sub { 'CMU Serif' },
                   );
 has sansfont   => (is => 'rw',
-                   isa => $font_type,
+                   isa => Enum[ map { $_->{name} } __PACKAGE__->all_fonts ],
                    default => sub { 'CMU Sans Serif' },
                   );
 has monofont   => (is => 'rw',
-                   isa => $font_type,
+                   isa => Enum[ map { $_->{name} } __PACKAGE__->all_fonts ],
                    default => sub { 'CMU Typewriter Text' },
                   );
 
-sub font_sizes {
-    return [ 9..12 ];
-}
-
 has fontsize   => (is => 'rw',
-                   isa => enum(__PACKAGE__->font_sizes),
+                   isa => Enum[9..12],
                    default => sub { 10 },
                   );
 
@@ -466,7 +455,7 @@ sub beamer_themes {
 }
 
 has beamertheme => (is => 'rw',
-                    isa => enum([ __PACKAGE__->beamer_themes ]),
+                    isa => Enum[ __PACKAGE__->beamer_themes ],
                     default => sub { 'default' });
 
 sub beamer_colorthemes {
@@ -491,7 +480,7 @@ sub beamer_colorthemes {
 }
 
 has beamercolortheme => (is => 'rw',
-                         isa => enum([ __PACKAGE__->beamer_colorthemes ]),
+                         isa => Enum[ __PACKAGE__->beamer_colorthemes ],
                          default => sub { 'dove' });
 
 =head1 METHODS

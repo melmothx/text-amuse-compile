@@ -24,6 +24,7 @@ GetOptions (\%options,
                a4-pdf
                lt-pdf
                tex
+               sl-tex
                slides
                pdf
                zip

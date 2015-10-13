@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 14;
+use Test::More tests => 13;
 use Text::Amuse::Compile;
 use Data::Dumper;
 use File::Temp;
@@ -10,17 +10,6 @@ use File::Spec;
 use Text::Amuse::Compile::Utils qw/write_file/;
 
 my $c = Text::Amuse::Compile->new(pdf => 1);
-
-my @avail = $c->available_methods;
-
-is_deeply(\@avail, [
-                    qw/bare_html html
-                       epub
-                       a4_pdf lt_pdf
-                       tex zip
-                       pdf
-                       slides/
-                   ]);
 
 is_deeply([$c->compile_methods], [ qw/pdf/ ]);
 

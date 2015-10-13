@@ -82,7 +82,7 @@ foreach my $noc (@nocompile) {
                                                suffix => '.muse',
                                                templates => $templates,
                                               );
-    ok (!$file->tex_beamer, "No slides generated for $noc");
+    ok (!$file->sl_tex, "No slides generated for $noc");
     ok (! -f $noc . '.sl.tex', "No tex file for slides for $noc");
     if ($ENV{TEST_WITH_LATEX}) {
         ok(!$file->slides, "No slide pdf generated for $noc");
@@ -96,7 +96,7 @@ foreach my $comp (@compile) {
                                                templates => $templates,
                                                logger => sub { diag @_ },
                                               );
-    ok ($file->tex_beamer, "Slides generated for $comp");
+    ok ($file->sl_tex, "Slides generated for $comp");
     ok (-f $comp . '.sl.tex', "TeX file for slides for $comp");
     my $texbody = read_file($comp . '.sl.tex');
     unlike ($texbody, qr/Section ignored/, "No ignore part found");

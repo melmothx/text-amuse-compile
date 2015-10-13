@@ -164,6 +164,7 @@ Return the list of the methods which are going to be used.
 
 =cut
 
+has sl_tex => (is => 'ro', isa => Bool, default => sub { 0 });
 has slides => (is => 'ro', isa => Bool, default => sub { 0 });
 has luatex => (is => 'ro', isa => Bool, default => sub { 0 });
 has zip    => (is => 'ro', isa => Bool, default => sub { 0 });
@@ -216,8 +217,10 @@ sub available_methods {
                epub
                a4_pdf
                lt_pdf
-               tex zip
+               tex
+               zip
                pdf
+               sl_tex
                slides
               /);
 }

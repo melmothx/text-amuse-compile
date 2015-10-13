@@ -407,21 +407,21 @@ sub tex {
                              $texfile);
 }
 
-=item tex_beamer
+=item sl_tex
 
 Produce a file with extension .sl.tex, a LaTeX Beamer source file.
 If the source muse file doesn't require slides, do nothing.
 
 =item slides
 
-Compiles the file produced by C<tex_beamer> (if any) and generate the
+Compiles the file produced by C<sl_tex> (if any) and generate the
 slides.
 
 =back
 
 =cut
 
-sub tex_beamer {
+sub sl_tex {
     my ($self) = @_;
     # no slides for virtual files
     return if $self->virtual;
@@ -436,7 +436,7 @@ sub tex_beamer {
 sub slides {
     my $self = shift;
     $self->purge_slides;
-    if (my $source = $self->tex_beamer) {
+    if (my $source = $self->sl_tex) {
         if (my $out = $self->_compile_pdf($source)) {
             return $out;
         }

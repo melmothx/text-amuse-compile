@@ -23,6 +23,10 @@ use Text::Amuse;
 use Text::Amuse::Functions qw/muse_fast_scan_header
                               muse_format_line/;
 
+use Text::Amuse::Compile::TemplateOptions;
+use Types::Standard qw/Str Bool Object Maybe CodeRef HashRef/;
+use Moo;
+
 =encoding utf8
 
 =head1 NAME
@@ -58,8 +62,7 @@ When set to true, the tex output will obey bcor and twoside/oneside.
 
 =item options
 
-An hashref with the options to pass to the templates. It's returned as
-an hash, not as a reference, to protect it from mangling.
+An hashref with the options to pass to the templates.
 
 =item webfonts
 
@@ -105,63 +108,87 @@ Use luatex instead of xetex
 
 =cut
 
-sub new {
-    my ($class, @args) = @_;
-    die "Wrong number or args" if @args % 2;
-    my $self = { @args };
-    foreach my $k (qw/name suffix templates/) {
-        die "Missing $k" unless $self->{$k};
+has luatex => (is => 'ro', isa => Bool, default => sub { 0 });
+has name => (is => 'ro', isa => Str, required => 1);
+has suffix => (is => 'ro', isa => Str, required => 1);
+has templates => (is => 'ro', isa => Object, required => 1);
+has virtual => (is => 'ro', isa => Bool, default => sub { 0 });
+has standalone => (is => 'ro', isa => Bool, default => sub { 0 });
+has tt => (is => 'ro', isa => Object, default => sub { Template::Tiny->new });
+has logger => (is => 'ro', isa => Maybe[CodeRef]);
+has webfonts => (is => 'ro', isa => Maybe[Object]);
+has document => (is => 'lazy', isa => Object);
+has options => (is => 'ro', isa => HashRef, default => sub { +{} });
+has tex_options => (is => 'lazy', isa => HashRef);
+has html_options => (is => 'lazy', isa => HashRef);
+has wants_slides => (is => 'lazy', isa => Bool);
+has is_deleted => (is => 'lazy', isa => Bool);
+has file_header => (is => 'lazy', isa => HashRef);
+
+sub _build_file_header {
+    my $self = shift;
+    return {} if $self->virtual;
+    my $header = muse_fast_scan_header($self->muse_file);
+    $self->log_fatal("Not a muse file!") unless $header && %$header;
+    return $header;
+}
+
+sub _build_is_deleted {
+    my $self = shift;
+    return 0 if $self->virtual;
+    return !!$self->file_header->{DELETED};
+}
+
+sub _build_wants_slides {
+    my $self = shift;
+    # duplication with Compile::file_needs_compilation
+    my $slides = $self->file_header->{slides};
+    if ($slides and $slides !~ /^\s*(no|false)\s*$/si) {
+        return 1;
     }
-    bless $self, $class;
+    else {
+        return 0;
+    }
 }
 
-sub luatex {
-    return shift->{luatex};
+
+sub _build_document {
+    my $self = shift;
+    return Text::Amuse->new(file => $self->muse_file);
 }
 
-sub name {
-    return shift->{name};
+sub _build_tex_options {
+    my $self = shift;
+    return $self->_escape_options_hashref(ltx => $self->options);
 }
 
-sub virtual {
-    return shift->{virtual};
+sub _build_html_options {
+    my $self = shift;
+    return $self->_escape_options_hashref(html => $self->options);
 }
 
-sub options {
-    my ($self, $format) = @_;
-    $format ||= 'ltx';
+sub _escape_options_hashref {
+    my ($self, $format, $ref) = @_;
+    die "Wrong usage of internal method" unless $format && $ref;
     my %out;
-    if (my $ref = $self->{options}) {
-        foreach my $k (keys %$ref) {
-            if (defined $ref->{$k}) {
-                # filenames
-                if ($k eq 'logo' or $k eq 'cover') {
-                    $out{$k} = $self->_check_filename($ref->{$k});
-                }
-                else {
-                    $out{$k} = muse_format_line($format, $ref->{$k});
+    foreach my $k (keys %$ref) {
+        if (defined $ref->{$k}) {
+            if ($k eq 'logo' or $k eq 'cover') {
+                if (my $checked = $self->_looks_like_a_sane_name($ref->{$k})) {
+                    $out{$k} = $checked;
                 }
             }
             else {
-                $out{$k} = undef;
+                $out{$k} = muse_format_line($format, $ref->{$k});
             }
         }
+        else {
+            $out{$k} = undef;
+        }
     }
-    # return a copy
     return \%out;
 }
 
-sub standalone {
-    return shift->{standalone}
-}
-
-sub suffix {
-    return shift->{suffix};
-}
-
-sub templates {
-    return shift->{templates};
-}
 
 sub muse_file {
     my $self = shift;
@@ -172,67 +199,13 @@ sub status_file {
     return shift->name . '.status';
 }
 
-sub is_deleted {
-    return shift->{is_deleted};
-}
-
-sub _set_is_deleted {
-    my $self = shift;
-    $self->{is_deleted} = shift;
-}
-
-sub tt {
-    my $self = shift;
-    unless ($self->{tt}) {
-        $self->{tt} = Template::Tiny->new;
-    }
-    return $self->{tt};
-}
-
-sub logger {
-    return shift->{logger};
-}
-
-sub webfonts {
-    return shift->{webfonts};
-}
-
-sub document {
-    my $self = shift;
-    # prevent parsing of deleted, bad file
-    return if $self->is_deleted;
-    # return Text::Amuse->new(file => $self->muse_file);
-
-    # this implements caching. Does really makes sense? Maybe it's
-    # better to have a fresh instance for each one. Speed is not an
-    # issue. For a 4Mb document, it would take 4 seconds to produce
-    # the output, and some minutes for LaTeXing.
-
-    unless ($self->{document}) {
-        my $doc = Text::Amuse->new(file => $self->muse_file);
-        $self->{document} = $doc;
-    }
-    return $self->{document};
-}
-
-sub check_status {
-    my $self = shift;
-    my $deleted;
-    # it could be virtual
-    if (!$self->virtual) {
-        my $header = muse_fast_scan_header($self->muse_file);
-        $self->log_fatal("Not a muse file!") unless $header && %$header;
-        $deleted = $header->{DELETED};
-        # TODO maybe use storable?
-    }
-    $self->purge_all if $deleted;
-    $self->_set_is_deleted($deleted);
-}
-
-
 =head2 purge_all
 
 Remove all the output files related to basename
+
+=head2 purge_slides
+
+Remove all the files produces by the C<slides> call (C<*.sl.*>)
 
 =head2 purge_latex
 
@@ -244,13 +217,21 @@ Remove the files associated with this file, by extension.
 
 =cut
 
+sub _slides_extensions {
+    return qw/.sl.tex .sl.pdf
+              .sl.log .sl.nav .sl.toc .sl.aux
+              .sl.nav .sl.snm .sl.out/;
+
+}
+
 sub purged_extensions {
     my $self = shift;
     my @exts = (qw/.pdf .a4.pdf .lt.pdf
                    .tex .log .aux .toc .ok
                    .html .bare.html .epub
                    .zip
-                  /);
+                  /,
+                $self->_slides_extensions);
     return @exts;
 }
 
@@ -277,7 +258,10 @@ sub purge_latex {
     $self->purge(qw/.log .aux .toc .pdf/);
 }
 
-
+sub purge_slides {
+    my $self = shift;
+    $self->purge($self->_slides_extensions);
+}
 
 sub _write_file {
     my ($self, $target, @strings) = @_;
@@ -337,7 +321,7 @@ sub html {
                              {
                               doc => $self->document,
                               css => $self->_render_css(html => 1),
-                              options => $self->options('html'),
+                              options => { %{$self->html_options} },
                              },
                              $outfile);
 }
@@ -349,7 +333,7 @@ sub bare_html {
     $self->_process_template($self->templates->bare_html,
                              {
                               doc => $self->document,
-                              options => $self->options('html'),
+                              options => { %{$self->html_options} },
                              },
                              $outfile);
 }
@@ -404,8 +388,6 @@ logic: if you have some imposed format, they are ignored for the
 standalone PDF but applied for the imposed ones. If you have only
 the standalone PDF, they are applied to it.
 
-=back
-
 =cut
 
 sub tex {
@@ -413,39 +395,79 @@ sub tex {
     my $texfile = $self->name . '.tex';
     $self->log_fatal("Wrong usage") if @args % 2;
     my %arguments = @args;
-
-    unless (scalar(@args) || $self->standalone) {
+    unless (@args || $self->standalone) {
         %arguments = (
                       twoside => 0,
                       oneside => 1,
                       bcor    => '0mm',
                      );
     }
-
-    my %params = %{ $self->options('ltx') };
-    # arguments can override the global options, so they don't mess up
-    # too much when calling pdf-a4, for example. This will also
-    # override twoside, oneside, bcor for default one.
-
-    foreach my $k (keys %arguments) {
-        $params{$k} = $arguments{$k};
-    }
-
     $self->purge('.tex');
     $self->_process_template($self->templates->latex,
-                             $self->_prepare_tex_tokens($self->document, %params),
+                             $self->_prepare_tex_tokens(%arguments),
                              $texfile);
 }
 
-sub pdf {
+=item sl_tex
+
+Produce a file with extension .sl.tex, a LaTeX Beamer source file.
+If the source muse file doesn't require slides, do nothing.
+
+=item slides
+
+Compiles the file produced by C<sl_tex> (if any) and generate the
+slides.
+
+=back
+
+=cut
+
+sub sl_tex {
+    my ($self) = @_;
+    # no slides for virtual files
+    return if $self->virtual;
+    return unless $self->wants_slides;
+    my $texfile = $self->name . '.sl.tex';
+    $self->purge('.sl.tex');
+    return $self->_process_template($self->templates->slides,
+                                    $self->_prepare_tex_tokens,
+                                    $texfile);
+}
+
+sub slides {
     my $self = shift;
+    $self->purge_slides;
+    if (my $source = $self->sl_tex) {
+        if (my $out = $self->_compile_pdf($source)) {
+            return $out;
+        }
+    }
+    return;
+}
+
+sub pdf {
+    my ($self, %opts) = @_;
     my $source = $self->name . '.tex';
-    my $output = $self->name . '.pdf';
     unless (-f $source) {
         $self->tex;
     }
     $self->log_fatal("Missing source file $source!") unless -f $source;
     $self->purge_latex;
+    $self->_compile_pdf($source);
+}
+
+sub _compile_pdf {
+    my ($self, $source) = @_;
+    my ($output, $logfile);
+    die "Missing $source!" unless $source;
+    if ($source =~ m/(.+)\.tex$/) {
+        my $name = $1;
+        $output = $name . '.pdf';
+        $logfile = $name . '.log';
+    }
+    else {
+        die "Source must be a tex source file\n";
+    }
     # maybe a check on the toc if more runs are needed?
     # 1. create the toc
     # 2. insert the toc
@@ -471,10 +493,10 @@ sub pdf {
         my $exit_code = $? >> 8;
         if ($exit_code != 0) {
             $self->log_info("$latexname compilation failed with exit code $exit_code\n");
-            if (-f $self->name  . '.log') {
+            if (-f $logfile) {
                 # if we have a .pdf file, this means something was
                 # produced. Hence, remove the .pdf
-                unlink $self->name . '.pdf';
+                unlink $output;
                 $self->log_fatal("Bailing out\n");
             }
             else {
@@ -483,7 +505,7 @@ sub pdf {
             }
         }
     }
-    $self->parse_tex_log_file;
+    $self->parse_tex_log_file($logfile);
     return $output;
 }
 
@@ -603,7 +625,7 @@ sub epub {
                        {
                         title => $self->_remove_tags($header->{title}),
                         text => $titlepage,
-                        options => $self->options('html'),
+                        options => { %{$self->html_options} },
                        },
                        \$firstpage)
       or $self->log_fatal($self->tt->error);
@@ -631,7 +653,7 @@ sub epub {
         $self->tt->process($self->templates->minimal_html,
                            {
                             title => $self->_remove_tags($title),
-                            options => $self->options('html'),
+                            options => { %{$self->html_options} },
                             text => $fi,
                            },
                            \$xhtml)
@@ -665,10 +687,10 @@ sub epub {
     }
     if (my $fonts = $self->webfonts) {
         foreach my $style (qw/regular italic bold bolditalic/) {
-            $epub->copy_file(File::Spec->catfile($fonts->{srcdir},
-                                                 $fonts->{$style}),
-                             $fonts->{$style},
-                             $fonts->{mimetype});
+            $epub->copy_file(File::Spec->catfile($fonts->srcdir,
+                                                 $fonts->$style),
+                             $fonts->$style,
+                             $fonts->mimetype);
         }
     }
 
@@ -747,7 +769,7 @@ Otherwise print to the standard output.
 
 Calls C<log_info>, remove the lock and dies.
 
-=item parse_tex_log_file
+=item parse_tex_log_file($logfile)
 
 (Internal) Parse the produced logfile for missing characters.
 
@@ -773,8 +795,8 @@ sub log_fatal {
 }
 
 sub parse_tex_log_file {
-    my $self = shift;
-    my $logfile = $self->name . '.log';
+    my ($self, $logfile) = @_;
+    die "Missing file argument!" unless $logfile;
     if (-f $logfile) {
         # if you're wandering why we open this in raw mode: The log
         # file produced by XeLaTeX is utf8, but it splits the output
@@ -832,123 +854,50 @@ sub _process_template {
 
 # method for options to pass to the tex template
 sub _prepare_tex_tokens {
-    my ($self, $doc, %tokens) = @_;
+    my ($self, %args) = @_;
+    my $doc = $self->document;
+    my %tokens = %{ $self->tex_options };
+    my $escaped_args = $self->_escape_options_hashref(ltx => \%args);
+    foreach my $k (keys %$escaped_args) {
+        $tokens{$k} = $escaped_args->{$k};
+    }
+    # now tokens have the unparsed options
+    # now validate the options against the new shiny module
+    my %options = (%{ $self->options }, %args);
+    my $parsed = eval { Text::Amuse::Compile::TemplateOptions->new(%options) };
+    unless ($parsed) {
+        $parsed = Text::Amuse::Compile::TemplateOptions->new;
+        print "Validation failed: $@, setting one by one\n";
+        foreach my $method ($parsed->config_setters) {
+            if (exists $options{$method}) {
+                eval { $parsed->$method($options{$method}) };
+                if ($@) {
+                    print "Error on $method: $@\n";
+                }
+            }
+        }
+    }
+    my $safe_options =
+      $self->_escape_options_hashref(ltx => $parsed->config_output);
 
     # defaults
-    my %parsed = (
-                  papersize => '210mm:11in', # the generic
+    my %parsed = (%$safe_options,
                   class => 'scrbook',
-                  division => 12,
-                  fontsize => 10,
-                  mainfont => 'Linux Libertine O',
-                  paging => 'oneside',
-                  bcor => '0mm',
-                  cover => '',
-                  coverwidth => 1,
                   lang => 'english',
                   mainlanguage_script => '',
                   wants_toc => 0,
                  );
-
-    my $tex_measure = qr{[0-9]+(\.[0-9]+)?(cm|mm|in|pt)};
-
-    # paper size parsing
-    if (my $size = $tokens{papersize}) {
-        my %sizes = (
-                     'half-a4' => 'a5',
-                     'half-lt' => '5.5in:8.5in',
-                     generic => '210mm:11in',
-                     a4 => 'a4',
-                     a5 => 'a5',
-                     a6 => 'a6',
-                     letter => 'letter',
-                    );
-        if (my $real_size = $sizes{$size}) {
-            $parsed{papersize} = $real_size;
-        }
-        elsif ($size =~ m/($tex_measure:$tex_measure)/) {
-            $parsed{papersize} = $1;
-        }
-        else {
-            warn "Unrecognized paper size $size, using the default\n";
-        }
-    }
 
     # no cover page
     unless ($doc->wants_toc) {
         if ($doc->header_as_latex->{nocoverpage} || $tokens{nocoverpage}) {
             $parsed{nocoverpage} = 1;
             $parsed{class} = 'scrartcl';
-        }
-    }
-    if ($parsed{class} eq 'scrbook') {
-        if (my $opening = $tokens{opening}) {
-            my %openings = (
-                            right => 1,
-                            left => 1,
-                            any => 1,
-                           );
-            if ($openings{$opening}) {
-                $parsed{opening} = $opening;
-            }
-            else {
-                warn "Unrecognized opening (right|left|any) $opening\n";
-                $parsed{opening} = 'right';
-            }
-        }
-    }
-    # division
-    if (my $div = $tokens{division}) {
-        my %divs = map { $_ => 1 } (9..15);
-        if ($divs{$div}) {
-            $parsed{division} = $div;
-        }
-        else {
-            warn "Bad value for division: $div\n";
-        }
-    }
-    # fontsize
-    if (my $fontsize = $tokens{fontsize}) {
-        my %sizes = map { $_ => 1 } (9..12);
-        if ($sizes{$fontsize}) {
-            $parsed{fontsize} = $fontsize;
-        }
-    }
-    if ($tokens{mainfont}) {
-        # just copy it over, we can't know which fonts we have
-        # installed.
-        $parsed{mainfont} = $tokens{mainfont};
-    }
-
-    # oneside or twoside
-    if ($tokens{oneside} && $tokens{twoside}) {
-        warn "Passed oneside and twoside at the same time, using oneside (default)\n";
-        $parsed{paging} = 'oneside';
-    }
-    elsif ($tokens{oneside}) {
-        $parsed{paging} = 'oneside';
-    }
-    elsif ($tokens{twoside}) {
-        $parsed{paging} = 'twoside';
-    }
-
-    # bcor
-    if ($tokens{bcor}) {
-        if ($tokens{bcor} =~ m/($tex_measure)/) {
-            $parsed{bcor} = $1;
+            delete $parsed{opening}; # not needed for article.
         }
     }
 
-    if (my $coverwidth = $tokens{coverwidth}) {
-        if ($coverwidth =~ m/([01](\.[0-9]+)?)/) {
-            $parsed{coverwidth} = $1;
-        }
-        else {
-            warn "Wrong value for coverwidth $coverwidth\n";
-        }
-    }
-
-    unless ($tokens{notoc}) {
+    unless ($parsed{notoc}) {
         if ($doc->wants_toc) {
             $parsed{wants_toc} = 1;
         }
@@ -1013,31 +962,14 @@ sub _prepare_tex_tokens {
            };
 }
 
-sub _check_filename {
-    my ($self, $filename) = @_;
-    return unless defined $filename;
+sub _looks_like_a_sane_name {
+    my ($self, $name) = @_;
+    return unless defined $name;
     # windows thing, in case
-    $filename =~ s!\\!/!g;
-    # is a path? test if it exists
-    if ($filename =~ m!/!) {
-        # non-ascii things will never match here
-        # because of the decoding. I see this as a feature
-        if (-f $filename and
-            $filename =~ m/^[a-zA-Z0-9\-\:\/]+\.(pdf|jpe?g|png)$/s) {
-            return $filename;
-        }
-        else {
-            return;
-        }
-    }
-    elsif ($filename =~ m/\A
-                          (
-                              [a-zA-Z0-9-]+
-                              (\.(pdf|jpe?g|png))?
-                          )
-                          \z/x) {
-        # sane filename;
-        return $1;
+    $name =~ s!\\!/!g;
+    # is it a sensible path? those chars are not special for latex or html
+    if ($name =~ m/\A[a-zA-Z0-9\-\:\/]+(\.(pdf|jpe?g|png))?\z/) {
+        return $name;
     }
     else {
         return;

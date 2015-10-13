@@ -38,7 +38,7 @@ test_file($file_no_toc, {
           qr/DIV=9/,
           qr/fontsize=11pt/,
           qr/mainlanguage\{croatian\}/,
-          qr/\\setmainfont\{Linux Libertine O\}/,
+          qr/\\setmainfont\{CMU Serif\}/,
           qr/paper=5.5in:8.5in/,
           qr/\\maketitle\s*\\cleardoublepage/s,
           qr/document\}\s*\\hyphenation\{\s*a-no-ther\ste-st\s*}/s,
@@ -61,11 +61,11 @@ test_file($file_no_toc, {
 
 test_file($file_no_toc, {
                          nocoverpage => 1,
-                         mainfont => 'Gentium',
+                         mainfont => 'Iwona',
                          twoside => 1,
                         },
           qr/\\maketitle\s*\w/,
-          qr/\\setmainfont\{Gentium\}/,
+          qr/\\setmainfont\{Iwona\}/,
           qr/^\s+twoside,%$/m,
           qr/BCOR=0mm/,
          );
@@ -77,7 +77,7 @@ test_file($file_with_toc, {
                            coverwidth => '0.1',
                           },
           qr/\\end\{center\}\s*\\cleardoublepage\s*\\tableofcontents/s,
-          qr/\\includegraphics\[width=0.1\\textwidth\]{prova.pdf}/,
+          qr/\\includegraphics\[width=0.1\\textwidth\]\{prova.pdf\}/,
           qr/^\s+oneside,%$/m,
           qr/BCOR=2.5cm/,
          );
@@ -92,7 +92,7 @@ test_file($file_with_toc, {
           qr/^\s+oneside,%$/m,
           qr/^\\setmainlanguage\{russian\}/m,
           qr/\\renewcaptionname\{russian\}\{\\contentsname\}\{Содржина\}/,
-          qr/\\russianfont\[Script=Cyrillic\]\{Linux\sLibertine\sO\}/,
+          qr/\\russianfont\[Script=Cyrillic\]\{CMU\sSerif\}/,
           qr/paper=210mm:11in/,
           qr/\\maketitle\s*\\cleardoublepage/s,
          );
@@ -104,7 +104,7 @@ test_file($file_with_toc, {
                            twoside => 1,
                            cover => 'prova.pdf',
                           },
-          qr/\\includegraphics\[width=1\\textwidth\]{prova.pdf}/,
+          qr/\\includegraphics\[width=1\\textwidth\]\{prova\.pdf\}/,
          );
 
 test_file($file_with_full_header, { cover => 'prova.pdf' },
@@ -121,7 +121,7 @@ test_file($file_with_toc, {
                            cover => 'prova.pdf',
                            coverwidth => 'blablabla',
                           },
-          qr/\\includegraphics\[width=1\\textwidth\]{prova.pdf}/,);
+          qr/\\includegraphics\[width=1\\textwidth\]\{prova\.pdf\}/,);
 
 
 test_file($file_with_toc, {
@@ -146,7 +146,7 @@ test_file({
           qr/\\maketitle\s*\\cleardoublepage/s,
           qr/\\setmainlanguage\{russian\}\s*
              \\newfontfamily\s*
-             \\russianfont\[Script=Cyrillic\]\{Linux\sLibertine\sO\}\s*
+             \\russianfont\[Script=Cyrillic\]\{CMU\sSerif\}\s*
              \\setotherlanguages\{croatian\}\s*
              \\renewcaptionname\{russian\}\{\\contentsname\}\{Содржина\}/sx,
          );
@@ -167,7 +167,7 @@ test_file({
           qr/\\setmainlanguage\{croatian\}\s*
              \\setotherlanguages\{russian\}\s*
              \\newfontfamily\s*
-             \\russianfont\[Script=Cyrillic\]\{Linux\sLibertine\sO\}/sx
+             \\russianfont\[Script=Cyrillic\]\{CMU\sSerif\}/sx
          );
 
 test_file({
@@ -193,10 +193,10 @@ test_file({
              \\hyphenation\{\s*ju-st\s*th-is\s*\}
             /sx,
           qr/\\setotherlanguages\{croatian,italian\}/,
-          qr/textbf{TitleT.*
-             textbf{SubtitleT.*
-             Large{AuthorT.*
-             large{DateT}.*
+          qr/textbf\{TitleT.*
+             textbf\{SubtitleT.*
+             Large\{AuthorT.*
+             large\{DateT\}.*
              SourceT.*
              NotesT/sx,
           );

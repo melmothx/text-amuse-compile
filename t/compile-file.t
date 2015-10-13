@@ -23,7 +23,7 @@ binmode STDERR, ':encoding(utf-8)';
 my $targetdir = File::Spec->catfile('t', 'testfile');
 chdir $targetdir or die $!;
 
-my $testnum = 73;
+my $testnum = 109;
 
 # check if there is xelatex installed
 my $xelatex = $ENV{TEST_WITH_LATEX};
@@ -48,7 +48,7 @@ is($file->suffix, '.muse');
 ok($file->templates->html);
 ok(!$file->is_deleted);
 is($file->status_file, 'test.status');
-like $file->document->as_latex, qr/\\& Ćao! \\emph{another}/;
+like $file->document->as_latex, qr/\\& Ćao! \\emph\{another\}/;
 like $file->document->as_html, qr{<em>test</em> &amp; Ćao! <em>another</em>};
 ok($file->tt);
 
@@ -109,7 +109,7 @@ foreach my $ext ($file->purged_extensions) {
 
 
 diag "Calling check_status";
-$file->check_status;
+$file->purge_all if $file->is_deleted;
 foreach my $ext ($file->purged_extensions) {
     ok(! -f "deleted$ext", "deleted$ext purged by mark_as_open");
 }

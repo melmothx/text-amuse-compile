@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Text::Amuse::Compile;
 use File::Spec;
+use File::Basename qw/fileparse/;
 use Text::Amuse::Compile::Utils qw/write_file append_file read_file/;
 use Test::More;
 use Cwd;
@@ -11,7 +12,7 @@ use Cwd;
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
     diag "Using (Xe|Lua)LaTeX for testing";
-    plan tests => 38;
+    plan tests => 40;
 }
 else {
     plan skip_all => "No TEST_WITH_LATEX env found! skipping tests\n";
@@ -52,7 +53,7 @@ $c->compile($target);
 
 diag "In " . getcwd();
 
-ok(!$c->errors);
+ok(!$c->has_errors);
 ok(-f $pdf);
 ok(-f $tex);
 $statusline = read_file($status);
@@ -86,7 +87,7 @@ else {
     like $logged, qr/xelatex/i, "executable reported (xelatex)";
 }
 
-ok($c->errors);
+ok($c->has_errors);
 
 
 $c->report_failure_sub(sub {
@@ -100,7 +101,7 @@ unlink $pdf if -f $pdf;
 diag "In " . getcwd();
 
 $c->compile($target);
-ok($c->errors);
+ok($c->has_errors);
 
 ok((! -f $pdf), "Now we're still alive");
 
@@ -131,26 +132,29 @@ $c->report_failure_sub(sub {
                        });
 
 $c->compile($target, "t/lasdf/asd.muse", "t/alkasdf/alsf.text");
-ok($c->errors);
+ok($c->has_errors);
 
 ok((-f $logfile), "Found $logfile");
 ok($failure, "Failure set to 1 via sub");
 
 my @lines = read_file($log);
 
-my @error = grep { /\Q$target\E/ } @lines;
-ok(@error >= 1);
+my ($f_name, $f_path, $f_suffix) = fileparse($target);
+my @error = grep { /\Q$f_name\E/ } @lines;
+ok(@error >= 1, "Found $f_name in the logs") and diag @error;
+chop $f_path;
+@error = grep { /\Q$f_path\E/ } @lines;
+ok(@error >= 1, "Found $f_path in the logs") and diag @error;
 
 @error = grep { /Undefined control sequence/ } @lines;
-ok(@error >= 1, "Found the undefined control sequence errors");
+ok(@error >= 1, "Found the undefined control sequence errors") and diag @error;
 
 @error = grep { /Cannot chdir into/ } @lines;
-ok(@error = 2);
+ok(@error = 2) and diag @error;
 
 unlink $tex or die $!;
 unlink $status or die $!;
-ok($c->errors);
+ok($c->has_errors, "Errors found");
 $c->compile($target);
-ok(!$c->errors);
-
+ok(!$c->has_errors, "No errors found now");
 }

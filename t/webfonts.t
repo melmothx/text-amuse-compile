@@ -13,6 +13,7 @@ use_ok('Text::Amuse::Compile::Webfonts', "use is ok");
 use_ok('Text::Amuse::Compile', "compiler class ok");
 
 my $dir = File::Spec->catdir(qw/t webfonts/);
+rmdir $dir;
 
 my $webfonts = Text::Amuse::Compile::Webfonts->new(webfontsdir => $dir);
 

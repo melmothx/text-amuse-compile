@@ -2,29 +2,34 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 138;
+use Test::More tests => 211;
 use Text::Amuse::Compile;
 use File::Spec;
 use Text::Amuse::Compile::File;
+use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::Utils qw/read_file/;
 use Cwd;
+
+use_ok('Text::Amuse::Compile::TemplateOptions');
+
+my $templates = Text::Amuse::Compile::Templates->new;
 
 my $basepath = getcwd();
 
 my $extra = {
              site => "Test site",
-             mainfont => "LModern",
+             mainfont => "CMU Serif",
              siteslogan => "Hello there!",
              site => "http:mysite.org",
              sitename => "Another crappy test site",
              papersize => "a4paperwithears",
              division => 9,
              fontsize => 48,
-             twoside => "true",
+             twoside => 1,
              bcor => "23",
              logo => "pallinopinco",
              cover => "mycover.pdf",
-             coverwidth => "\\0.5", # given the filtering, the \\ will  be stripped
+             coverwidth => "\\0.5", # validation here will fail, so 1
             };
 
 my $compile = Text::Amuse::Compile->new(
@@ -50,7 +55,7 @@ $returned = {
              papersize => '210mm:11in',
              fontsize => 10,
              bcor => '0mm',
-             coverwidth => '0.5',
+             coverwidth => '1',
             };
 
 my @targets;
@@ -95,7 +100,7 @@ for (1..2) {
         like $c, qr/oneside/, "oneside enforced on single pdf";
         like $c, qr/BCOR=0mm/, "BCOR validated and enforced";
         unlike $c, qr/\\maketitle/;
-        like $c, qr/includegraphics\[width=0\.5\\textwidth\]\{mycover.pdf\}/;
+        like $c, qr/includegraphics\[width=1\\textwidth\]\{mycover.pdf\}/;
         like $c, qr/\\tableofcontents/;
     }
 
@@ -143,7 +148,7 @@ for (1..2) {
     unlike $c, qr/oneside/, "oneside not enforced";
     like $c, qr/BCOR=0mm/, "BCOR enforced";
     unlike $c, qr/\\maketitle/;
-    like $c, qr/includegraphics\[width=0\.5\\textwidth\]\{mycover.pdf\}/;
+    like $c, qr/includegraphics\[width=1\\textwidth\]\{mycover.pdf\}/;
     like $c, qr/\\tableofcontents/;
     unlink $texfile or die $!;
 }
@@ -152,7 +157,7 @@ for (1..2) {
 my $dummy = Text::Amuse::Compile::File->new(
                                             name => 'dummy',
                                             suffix => '.muse',
-                                            templates => 'dummy',
+                                            templates => $templates,
                                             options => {
                                                         pippo => '[[http://test.org][test]]',
                                                         prova => 'hello *there* & \stuff',
@@ -161,8 +166,8 @@ my $dummy = Text::Amuse::Compile::File->new(
                                                        },
                                            );
 
-my $html_options = $dummy->options('html');
-my $latex_options = $dummy->options;
+my $html_options = $dummy->html_options;
+my $latex_options = $dummy->tex_options;
 
 is_deeply($html_options, {
                           pippo => '<a href="http://test.org">test</a>',
@@ -177,7 +182,7 @@ is_deeply($latex_options, {
                            test => "Another great thing!",
                           }, "latex escaped and interpreted ok");
 
-is_deeply($dummy->options('ltx'), $latex_options);
+is_deeply($dummy->tex_options, $latex_options);
 
 eval {
     my $die = $dummy->options('garbage');
@@ -189,15 +194,15 @@ chdir $basepath or die $!;
 $dummy = Text::Amuse::Compile::File->new(
                                          name => 'dummy',
                                          suffix => '.muse',
-                                         templates => 'dummy',
+                                         templates => $templates,
                                          options => {
                                                      cover => 'prova.pdf',
                                                      logo => 'c-i-a',
                                                     },
                                            );
 
-is $dummy->options->{cover}, 'prova.pdf';
-is $dummy->options->{logo}, 'c-i-a';
+is $dummy->tex_options->{cover}, 'prova.pdf';
+is $dummy->tex_options->{logo}, 'c-i-a';
 
 my $testfile = File::Spec->rel2abs(File::Spec->catfile(qw/t manual logo.png/));
 ok (-f $testfile, "$testfile exists");
@@ -211,28 +216,143 @@ SKIP: {
     $dummy = Text::Amuse::Compile::File->new(
                                              name => 'dummy',
                                              suffix => '.muse',
-                                             templates => 'dummy',
+                                             templates => $templates,
                                              options => {
                                                          cover => $testfile,
                                                          logo => $wintestfile,
                                                         },
                                             );
 
-    ok $dummy->_check_filename($testfile), "$testfile is valid";
-    ok $dummy->_check_filename($wintestfile), "$wintestfile is valid";
+    ok $dummy->_looks_like_a_sane_name($testfile), "$testfile is valid";
+    ok $dummy->_looks_like_a_sane_name($wintestfile), "$wintestfile is valid";
 
-    is $dummy->options->{cover}, $testfile, "cover is $testfile";
-    is $dummy->options->{logo}, $testfile, "logo is $testfile";
+    is $dummy->tex_options->{cover}, $testfile, "cover is $testfile";
+    is $dummy->tex_options->{logo}, $testfile, "logo is $testfile";
 
     $dummy = Text::Amuse::Compile::File->new(
                                              name => 'dummy',
                                              suffix => '.muse',
-                                             templates => 'dummy',
+                                             templates => $templates,
                                              options => {
                                                          cover => 'a bc.pdf',
                                                          logo => 'c alsdkfl',
                                                         },
                                             );
-    is $dummy->options->{cover}, undef, "cover with spaces doesn't validate";
-    is $dummy->options->{logo}, undef, "logo with spaces doesn't validate";
+    is $dummy->tex_options->{cover}, undef, "cover with spaces doesn't validate";
+    is $dummy->tex_options->{logo}, undef, "logo with spaces doesn't validate";
 }
+
+my $opts = Text::Amuse::Compile::TemplateOptions->new(twoside => 1);
+is $opts->paging, 'twoside', "paging ok twoside";
+$opts->oneside(1);
+is $opts->paging, 'oneside', "paging ok oneside";
+$opts->twoside(0);
+is $opts->paging, 'oneside', "paging ok oneside";;
+$opts = Text::Amuse::Compile::TemplateOptions->new;
+is $opts->paging, 'oneside', "paging ok oneside";;
+foreach my $method (qw/mainfont sansfont monofont/) {
+    my $last;
+    for my $good_font ('PT Sans', 'CMU Serif') {
+        $opts->$method($good_font);
+        is $opts->$method, $good_font, "$good_font is ok";
+        $last = $good_font;
+    }
+    eval {
+        $opts->$method("Random font name");
+    };
+
+    ok $@, "random font name doesn't pass the validation";
+    is $opts->$method, $last, "font is still $last";
+}
+foreach my $test ({ name => 'fontsize',
+                    good => 11,
+                    bad => 10.5 },
+                  {
+                   name => 'division',
+                   good => 9,
+                   bad => 'asdf',
+                  },
+                  {
+                   name => 'coverwidth',
+                   good => 0.91,
+                   bad => 'asdf',
+                  },
+                  {
+                   name => 'coverwidth',
+                   good => 1,
+                   bad => 1.01,
+                  },
+                  {
+                   name => 'coverwidth',
+                   good => 0.2,
+                   bad => -1,
+                  },
+                  {
+                   name => 'papersize',
+                   good => 'a4',
+                   bad => 'random',
+                  },
+                  {
+                   name => 'papersize',
+                   good => 'half-lt',
+                   bad => 'half-a6',
+                  },
+                  {
+                   name => 'papersize',
+                   good => '16cm:12in',
+                   bad => '16mx15cm',
+                  },
+                  {
+                   name => 'bcor',
+                   good => '16cm',
+                   bad => '16m',
+                  },
+                  {
+                   name => 'beamertheme',
+                   bad => 'Pula',
+                   good => 'Copenhagen',
+                  },
+                  {
+                   name => 'beamercolortheme',
+                   bad => 'vrabac',
+                   good => 'seagull',
+                  },
+                 ) {
+    my $method = $test->{name};
+    eval {
+        $opts->$method($test->{good});
+    };
+    ok !$@, "Setting $method to $test->{good} is fine";
+    is $opts->$method, $test->{good}, "Option picked up";
+    eval {
+        $opts->$method($test->{bad});
+    };
+    ok $@, "Setting $method to $test->{bad} raises an exception $@";
+    is $opts->$method, $test->{good}, "Option still the $test->{good}";
+}
+  
+foreach my $method (qw/logo cover/) {
+    eval {
+        $opts->$method($testfile);
+    };
+    ok !$@, "$method set to $testfile";
+    is $opts->$method, $testfile, "$method set to $testfile";
+    eval {
+        $opts->$method('/lakl/laksdjf/alksdfl\alksdjf/');
+    };
+    ok $@, "Random filename for $method fails";
+    eval {
+        $opts->$method('prova.pdf');
+    };
+    ok !$@, "$method for prova.pdf is ok";
+}
+
+$opts->papersize('half-a4');
+is $opts->tex_papersize, 'a5', "half-a4 papersize is fine";
+$opts->papersize('');
+is $opts->tex_papersize, '210mm:11in', "false papersize is fine";
+$opts->papersize('a4');
+is $opts->tex_papersize, 'a4', "tex papersize is fine";
+$opts->papersize('15cm:10in');
+is $opts->tex_papersize, '15cm:10in', "custom tex papersize is fine";
+

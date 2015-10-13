@@ -78,8 +78,8 @@ if ($xelatex) {
 
 my @chunks = grep { /language/ } split(/\n/, $outtex);
 
-like shift(@chunks), qr/setmainlanguage{french}/, "Found french";
-like shift(@chunks), qr/setotherlanguages{(russian,english|english,russian)}/,
+like shift(@chunks), qr/setmainlanguage\{french\}/, "Found french";
+like shift(@chunks), qr/setotherlanguages\{(russian,english|english,russian)\}/,
   "Found other languages";
 
 

@@ -10,6 +10,7 @@ use File::Path qw/mkpath/;
 use File::Spec::Functions qw/catfile/;
 use Pod::Usage;
 use Text::Amuse::Compile::Utils qw/append_file/;
+use Text::Amuse::Compile::TemplateOptions;
 use Encode;
 
 binmode STDOUT, ':encoding(utf-8)';
@@ -23,6 +24,8 @@ GetOptions (\%options,
                a4-pdf
                lt-pdf
                tex
+               sl-tex
+               slides
                pdf
                zip
                ttdir=s
@@ -34,13 +37,23 @@ GetOptions (\%options,
                recursive=s
                dry-run
                luatex
+               version
+               verbose
+               purge
                help/) or die "Bad option passed!\n";
 
 if ($options{help}) {
-    pod2usage("Using Text::Amuse::Compile version " .
-              $Text::Amuse::Compile::VERSION . "\n");
+    pod2usage({ -exitval => 'NOEXIT' });
+    if ($options{verbose}) {
+        Text::Amuse::Compile::TemplateOptions->show_options;
+    }
     exit 2;
 }
+if ($options{version}) {
+    print Text::Amuse::Compile->version;
+    exit 0;
+}
+
 
 =encoding utf8
 
@@ -84,6 +97,19 @@ file.
 =item --pdf
 
 PDF output.
+
+=item --slides
+
+PDF output. Extension is .sl.pdf and it is a Beamer PDF. File .sl.tex
+is left in place.
+
+Please note that the muse file must say that the slides are required.
+The header for that is C<#slides> set to a value other than empty,
+C<0>, C<no>, C<false>.
+
+=item --sl-tex
+
+Produce the beamer LaTeX file, using the same rule above.
 
 =item --a4-pdf
 
@@ -149,68 +175,18 @@ escape special characters and to permit inline markup.
 
 Example:
 
-  muse-compile --extra site=http://anarhija.net \
-               --extra papersize=a6 --extra division=15 --extra twoside=true \
-               --extra bcor=10mm --extra mainfont="Charis SIL" \
-               --extra sitename="Testsite" \
-               --extra siteslogan="Anticopyright" \
-               --extra logo=mylogo \
-               --extra cover=mycover.pdf \
-               --extra opening=any \
-               file.muse
+  muse-compile.pl --extra site=http://anarhija.net \
+                  --extra papersize=a6 --extra division=15 --extra twoside=true \
+                  --extra bcor=10mm --extra mainfont="Charis SIL" \
+                  --extra sitename="Testsite" \
+                  --extra siteslogan="Anticopyright" \
+                  --extra logo=mylogo \
+                  --extra cover=mycover.pdf \
+                  --extra opening=any \
+                  file.muse
 
-Keep in mind that in this case C<mylogo> has to be or an absolute
-filename (not recommended, because the full path will remain in the
-.tex source), or a basename (even without extension) which can be
-found by C<kpsewhich> (or a file in the current directory, if you
-aren't doing a recursive compilation). Same applies for C<cover>.
-
-Supported extra keys (documented in L<Text::Amuse::Compile::Templates>):
-
-=over 4
-
-=item * papersize (common values: a4, a5, letter)
-
-=item * mainfont (grep fc-list -l for the correct name)
-
-=item * fontsize (9, 10, 11, 12) as integer, meaning points (pt)
-
-=item * oneside (true or false)
-
-=item * twoside (true or false)
-
-=item * bcor (binding correction for inner margins)
-
-=item * sitename
-
-=item * siteslogan
-
-=item * site
-
-=item * logo (filename)
-
-=item * cover (filename for front cover)
-
-=item * coverwidth (dimension ratio with the text width, eg. '0.85')
-
-It requires a float, where 1 is the full text-width, 0.5 half, etc.
-
-=item * division (the DIV factor for margin control)
-
-=item * nocoverpage
-
-Use the LaTeX article class if toc is not present
-
-=item * notoc
-
-Never generate a table of contents
-
-=item * opening
-
-Page for starting a chapter: "any" or "right" or (at your own peril)
-"left"
-
-=back
+See muse-compile.pl --help --verbose for the full description of
+meaning of these options.
 
 =item --recursive <directory>
 
@@ -229,6 +205,10 @@ which would be compiled.
 
 Use lualatex instead of xelatex.
 
+=item --purge
+
+Purge old files before compiling. Not supported for recursive compilation.
+
 =back
 
 =cut
@@ -237,12 +217,14 @@ my %args;
 
 my $output_templates = delete $options{'output-templates'};
 my $logfile = delete $options{log};
+my $purge = delete $options{purge};
 
 if ($options{extra}) {
     my $extras = delete $options{extra};
     foreach my $k (keys %$extras) {
         $extras->{$k} = decode('utf-8', $extras->{$k});
     }
+    # also handle the booleans here
     $args{extra} = $extras;
 }
 
@@ -341,10 +323,11 @@ if ($recursive) {
     }
 }
 else {
+    $compiler->purge(@ARGV) if $purge;
     $compiler->compile(@ARGV);
 }
 
-if ($compiler->errors) {
+if (@{$compiler->errors}) {
     $logfile ||= "above";
     die "Compilation finished with errors, see $logfile!\n";
 }

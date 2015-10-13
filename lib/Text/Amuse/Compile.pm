@@ -4,11 +4,16 @@ use 5.010001;
 use strict;
 use warnings FATAL => 'all';
 
+use constant {
+    DEBUG => 0,
+};
+
 use File::Basename;
 use File::Temp;
 use File::Find;
 use File::Spec;
 
+use Text::Amuse::Functions qw/muse_fast_scan_header/;
 use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::Webfonts;
 use Text::Amuse::Compile::File;
@@ -16,6 +21,8 @@ use Text::Amuse::Compile::Merged;
 
 use Cwd;
 use Fcntl qw/:flock/;
+use Moo;
+use Types::Standard qw/Maybe Bool Str HashRef CodeRef Object ArrayRef/;
 
 =head1 NAME
 
@@ -68,7 +75,27 @@ for the packages needed).
 
 =item pdf
 
-Plain PDF without any imposition
+Plain PDF without any imposition.
+
+Additionally, if if the header has a C<#slides> header with some value
+(e.g., 1, yes, ok, whatever) and if there some sectioning, create a
+pdf presentation out of it.
+
+E.g., the following will no produce slides:
+
+  #title Foo
+  #slides
+
+But this would
+
+  #title Foo
+  #slides 1
+
+The value of the header is totally insignificant.
+
+Sections which contain the comment C<; noslide> are ignored. LaTeX
+source is left in the tree with .sl.tex extension, and the output will
+have .sl.pdf extension.
 
 =item a4_pdf
 
@@ -94,10 +121,24 @@ The bare HTML, non <head>
 
 The zipped sources
 
-=item extra
+=item sl_tex
+
+The Beamer LaTeX output, if the muse headers say so.
+
+=item slides
+
+The Beamer PDF output, if the muse headers say so.
+
+=item extra_opts
 
 An hashref of key/value pairs to pass to each template in the
-C<options> namespace.
+C<options> namespace. This is internal
+
+=item extra
+
+In the constructor arguments, a shallow copy will be stored in
+C<extra_opts>. Using it as an accessor will return an hash with the
+copy of C<extra_opts>
 
 =item standalone
 
@@ -131,128 +172,119 @@ Return the list of the methods which are going to be used.
 
 =cut
 
-sub available_methods {
-    return (qw/bare_html html
-               epub
-               a4_pdf lt_pdf
-               tex zip
-               pdf/);
+has sl_tex => (is => 'ro', isa => Bool, default => sub { 0 });
+has slides => (is => 'ro', isa => Bool, default => sub { 0 });
+has luatex => (is => 'ro', isa => Bool, default => sub { 0 });
+has zip    => (is => 'ro', isa => Bool, default => sub { 0 });
+has tex    => (is => 'ro', isa => Bool, default => sub { 0 });
+has pdf    => (is => 'ro', isa => Bool, default => sub { 0 });
+has a4_pdf => (is => 'ro', isa => Bool, default => sub { 0 });
+has lt_pdf => (is => 'ro', isa => Bool, default => sub { 0 });
+has epub   => (is => 'ro', isa => Bool, default => sub { 0 });
+has html   => (is => 'ro', isa => Bool, default => sub { 0 });
+has bare_html => (is => 'ro', isa => Bool, default => sub { 0 });
+
+has cleanup   => (is => 'ro', isa => Bool, default => sub { 0 });
+has debug     => (is => 'ro', isa => Bool, default => sub { 0 });
+
+has ttdir     => (is => 'ro',   isa => Maybe[Str], default => undef);
+has templates => (is => 'lazy', isa => Object);
+
+has webfontsdir => (is => 'ro', isa => Maybe[Str], default => undef);
+has webfonts  => (is => 'lazy', isa => Maybe[Object]);
+has standalone => (is => 'lazy', isa => Bool);
+has extra_opts => (is => 'ro', isa => HashRef, default => sub { +{} });
+
+sub BUILDARGS {
+    my ($class, %params) = @_;
+    $params{extra_opts} = { %{ delete $params{extra} || {} } };
+    my $all = 1;
+    foreach my $format ($class->available_methods) {
+        if (exists $params{$format}) {
+            $all = 0;
+            last;
+        }
+    }
+    if ($all) {
+        foreach my $format ($class->available_methods) {
+            $params{$format} = 1;
+        }
+    }
+    foreach my $dir (qw/ttdir webfontsdir/) {
+        if (exists $params{$dir} and defined $params{$dir} and -d $params{$dir}) {
+            my $abs = File::Spec->rel2abs($params{$dir});
+            $params{$dir} = $abs;
+        }
+    }
+    return \%params;
 }
 
+sub available_methods {
+    return (qw/bare_html
+               html
+               epub
+               a4_pdf
+               lt_pdf
+               tex
+               zip
+               pdf
+               sl_tex
+               slides
+              /);
+}
 sub compile_methods {
     my $self = shift;
-    my @out;
-    foreach my $m ($self->available_methods) {
-        if ($self->$m) {
-            push @out, $m;
-        }
-    }
-    return @out;
+    return grep { $self->$_ } $self->available_methods;
 }
 
-sub new {
-    my ($class, @args) = @_;
-    # available options by default
-    die "Wrong usage" if @args % 2;
-
-    my $self = { map { $_ => 1 } $class->available_methods };
-
-    my %params = @args;
-
-    $self->{templates} =
-      Text::Amuse::Compile::Templates->new(ttdir => delete($params{ttdir}));
-
-    $self->{webfonts} =
-      Text::Amuse::Compile::Webfonts->new(webfontsdir => delete($params{webfontsdir}));
-
-    foreach my $k (qw/report_failure_sub logger debug
-                      luatex cleanup/) {
-        $self->{$k} = delete $params{$k};
-    }
-    if (exists $params{standalone}) {
-        $self->{standalone} = delete $params{standalone};
-    }
-    if (my $extraref = delete $params{extra}) {
-        $self->{extra} = { %$extraref };
-    }
-
-    # options passed, null out and reparse the params
-    if (%params) {
-        foreach my $k ($class->available_methods) {
-            $self->{$k} = delete $params{$k};
-        }
-
-        die "Unrecognized options: " . join(", ", keys %params)
-          if %params;
-    }
-
-    bless $self, $class;
-}
-
-sub luatex {
-    return shift->{luatex};
-}
-
-sub zip {
-    return shift->{zip};
-}
-
-sub tex {
-    return shift->{tex};
-}
-sub pdf {
-    return shift->{pdf};
-}
-sub a4_pdf {
-    return shift->{a4_pdf};
-}
-sub lt_pdf {
-    return shift->{lt_pdf};
-}
-sub epub {
-    return shift->{epub};
-}
-sub html {
-    return shift->{html};
-}
-sub bare_html {
-    return shift->{bare_html};
-}
-
-sub templates {
-    return shift->{templates};
-}
-
-sub webfonts {
-    return shift->{webfonts};
-}
-
-sub cleanup {
-    return shift->{cleanup};
-}
-
-sub debug {
-    return shift->{debug};
-}
-
-sub standalone {
-    my $self = shift;
-    unless (defined $self->{standalone}) {
-        if ($self->a4_pdf || $self->lt_pdf) {
-            $self->{standalone} = 0;
-        }
-        else {
-            $self->{standalone} = 1;
-        }
-    }
-    return $self->{standalone};
-}
 
 
 sub extra {
-    my $extra = shift->{extra} || {};
-    return %$extra;
+    return %{ shift->extra_opts };
 }
+
+
+sub _build_standalone {
+    my $self = shift;
+    if ($self->a4_pdf || $self->lt_pdf) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
+
+sub _build_templates {
+    my $self = shift;
+    return Text::Amuse::Compile::Templates->new(ttdir => $self->ttdir);
+}
+
+sub _build_webfonts {
+    my $self = shift;
+    return Text::Amuse::Compile::Webfonts->new(webfontsdir => $self->webfontsdir);
+}
+
+has logger => (is => 'rw',
+               isa => CodeRef,
+               default => sub { return sub { print @_ }; });
+
+has report_failure_sub => (is => 'rw',
+                           isa => CodeRef,
+                           default => sub {
+                               return sub {
+                                   print "Failure to compile $_[0]\n";
+                               }
+                           });
+has errors => (is => 'rwp', isa => ArrayRef, default => sub { [] });
+
+
+=head2 BUILDARGS routine
+
+The C<extra> key is passed instead to C<extra_opts>. Directories are
+made absolute. If no formats are required explicitely, set them all to
+true.
+
+=cut
 
 =head2 METHODS
 
@@ -285,19 +317,6 @@ sub version {
 
 Accessor/setter for the subroutine which will handle the logging.
 Defaults to printing to the standard output.
-
-=cut
-
-sub logger {
-    my ($self, $sub) = @_;
-    if (@_ > 1) {
-        $self->{logger} = $sub;
-    }
-    elsif (!$self->{logger}) {
-        $self->{logger} = sub { print @_ };
-    }
-    return $self->{logger};
-}
 
 =head3 recursive_compile($directory)
 
@@ -449,11 +468,9 @@ sub compile {
     foreach my $file (@files) {
         chdir $cwd or die "Couldn't chdir into $cwd $!";
         if (ref($file)) {
-            $self->logger->("Working on virtual file in " . getcwd(). "\n");
             eval { $self->_compile_virtual_file($file); };
         }
         else {
-            $self->logger->("Working on $file in " . getcwd() . "\n");
             eval { $self->_compile_file($file); };
         }
         my $fatal = $@;
@@ -482,7 +499,7 @@ sub _compile_virtual_file {
     chdir $path or die "Couldn't chdir into $path $!";
     my $suffix = delete($virtual{suffix}) || '.muse';
     my $name =   delete($virtual{name})   || 'virtual';
-
+    $self->logger->("Working on virtual file in " . getcwd(). "\n");
     my @filelist = map { $_ . $suffix } @$files;
     my $doc = Text::Amuse::Compile::Merged->new(files => \@filelist, %virtual);
     my $muse = Text::Amuse::Compile::File->new(
@@ -512,6 +529,7 @@ sub _compile_file {
     };
 
     my $filename = $name . $suffix;
+    $self->logger->("Working on $filename file in " . getcwd(). "\n");
 
     my %args = (
                 name => $name,
@@ -555,24 +573,28 @@ sub _muse_compile {
         sleep 5;
     }
     my @fatals;
-    $muse->check_status;
     if ($muse->is_deleted) {
+        $muse->purge_all;
         $self->_write_status_file($fhlock, 'DELETED');
         return;
     }
-    else {
-        foreach my $method ($self->compile_methods) {
-            eval {
-                $muse->$method;
-            };
-            if ($@) {
-                push @fatals, $@;
-                last;
+    foreach my $method ($self->compile_methods) {
+        if ($method eq 'slides' or $method eq 'sl_tex') {
+            unless ($muse->wants_slides) {
+                $self->logger->("* Slides not required\n");
+                next;
             }
-            else {
-                my $output = $muse->name . $self->_suffix_for_method($method);
-                $self->logger->("* Created $output\n");
-            }
+        }
+        my $output = eval { $muse->$method };
+        if ($@) {
+            push @fatals, $@;
+            last;
+        }
+        elsif ($output) {
+            $self->logger->("* Created $output\n");
+        }
+        else {
+            $self->logger->("* $method skipped\n");
         }
     }
     if (@fatals) {
@@ -588,6 +610,7 @@ sub _muse_compile {
 sub _suffix_for_method {
     my ($self, $method) = @_;
     return unless $method;
+    return '.sl.pdf' if $method eq 'slides';
     my $ext = $method;
     $ext =~ s/_/./g;
     $ext = '.' . $ext;
@@ -601,21 +624,39 @@ output file is missing or stale.
 
 =cut
 
-sub file_needs_compilation {
+sub _check_file_basename {
     my ($self, $file) = @_;
     die "Bad usage" unless $file;
     die "$file is not a file" unless -f $file;
     my ($name, $path, $suffix) = fileparse($file, '.muse');
     die "Bad usage, not a muse file" unless $suffix;
+    return File::Spec->catfile($path, $name);
+}
+
+
+sub file_needs_compilation {
+    my ($self, $file) = @_;
     my $need = 0;
     my $mtime = 9;
+    my $basename = $self->_check_file_basename($file);
+    my $header = muse_fast_scan_header($file);
     foreach my $m ($self->compile_methods) {
         my $outsuffix = $self->_suffix_for_method($m);
-        my $outfile = File::Spec->catfile($path, $name . $outsuffix);
-        if (-f $outfile and (stat($outfile))[$mtime] > (stat($file))[$mtime]) {
+        my $outfile = $basename . $outsuffix;
+        if ($m eq 'sl_tex' or $m eq 'slides') {
+            # duplication with File::_build_wants_slides
+            my $slides = $header->{slides};
+            if (!$slides or $slides =~ /^\s*(no|false)\s*$/si) {
+                print "$outfile check not needed\n" if DEBUG;
+                next;
+            }
+        }
+        if (-f $outfile and (stat($outfile))[$mtime] >= (stat($file))[$mtime]) {
+            print "$outfile is OK\n" if DEBUG;
             next;
         }
         else {
+            print "$outfile is NOT OK\n" if DEBUG;
             $need = 1;
             last;
         }
@@ -623,28 +664,35 @@ sub file_needs_compilation {
     return $need;
 }
 
+=head2 purge(@files)
+
+Remove all the files produced by the compilation of the files passed
+as arguments.
+
+=cut
+
+sub purge {
+    my ($self, @files) = @_;
+    foreach my $file (@files) {
+        my $basename = $self->_check_file_basename($file);
+        foreach my $ext (Text::Amuse::Compile::File->purged_extensions) {
+            die "?" if $ext eq '.muse';
+            my $produced = $basename . $ext;
+            if (-f $produced) {
+                $self->logger->("Purging $produced\n");
+                unlink $produced or warn "Cannot unlink $produced $!";
+            }
+        }
+    }
+}
+
+
 =head3 report_failure_sub(sub { push @problems, $_[0] });
 
 You can set the sub to be used to report problems using this accessor.
 It will receive as first argument the file which led to failure.
 
 The actual errors are logged by the C<logger> sub.
-
-=cut
-
-sub report_failure_sub {
-    my ($self, $sub) = @_;
-    if (@_ > 1) {
-        $self->{report_failure_sub} = $sub;
-    }
-    elsif (!$self->{report_failure_sub}) {
-        $self->{report_failure_sub} = sub {
-            print "Failure to compile $_[0]\n";
-        };
-    }
-    return $self->{report_failure_sub};
-}
-
 
 =head3 errors
 
@@ -658,30 +706,25 @@ Add an error. [Internal]
 
 Reset the errors
 
+=head3 has_errors
+
+Return the number of errors (handy to use as a boolean).
+
 =cut
 
 sub add_errors {
     my ($self, @args) = @_;
-    $self->{errors} ||= [];
-    push @{$self->{errors}}, @args;
+    push @{$self->errors}, @args;
 }
 
 sub reset_errors {
     my $self = shift;
-    $self->{errors} = [];
+    $self->_set_errors([]);
 }
 
-sub errors {
-    my $self = shift;
-    if ($self->{errors}) {
-        return @{$self->{errors}};
-    }
-    else {
-        return;
-    }
+sub has_errors {
+    return scalar(@{ shift->errors });
 }
-
-
 
 =head1 TeX live packages needed.
 

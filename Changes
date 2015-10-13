@@ -1,5 +1,13 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.40 UNRELEASED
+
+ - Generate slides when the header #slides is true.
+ - New beamer themes options
+ - New option for sans serif and typewriter fonts
+ - Updated styles for description lists
+ - Internal refactoring for option handling
+
 0.38 2015-08-26
 
  - Replaced EBook::EPUB with EBook::EPUB::Lite (to lighten up the
@@ -60,7 +68,7 @@ Revision history for perl module Text::Amuse::Compile
    prevent to do crazy stuff into the template. I see this as a
    feature. Eventually, if the need arise, there could be an option to
    use Template instead, given that the interface is the same. This is
-   a major clenaup which has the potential to introduce bugs.
+   a major cleanup which has the potential to introduce bugs.
 
  - Added validation for extra values
 

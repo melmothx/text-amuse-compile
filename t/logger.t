@@ -7,7 +7,9 @@ use Test::More tests => 8;
 use Data::Dumper;
 use File::Spec;
 use Text::Amuse::Compile::File;
+use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile;
+
 
 my $builder = Test::More->builder;
 binmode $builder->output,         ":utf8";
@@ -42,7 +44,7 @@ my @report;
 my %options = (
                name => File::Spec->catfile(qw/t log-encoding/),
                suffix => '.muse',
-               templates => 1,
+               templates => Text::Amuse::Compile::Templates->new,
                logger => sub {
                    push @report, @_;
                },
@@ -52,7 +54,7 @@ my $muse = Text::Amuse::Compile::File->new(%options);
 my @warnings;
 INTERCEPT: {
     local $SIG{__WARN__} = sub { push @warnings, @_};
-    $muse->parse_tex_log_file;
+    $muse->parse_tex_log_file(File::Spec->catfile(qw/t log-encoding.log/));
 }
 
 ok (!@warnings, "No warnings") or diag Dumper(\@warnings);

@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 13;
 use Text::Amuse::Compile;
 use Data::Dumper;
 use File::Temp;
@@ -10,16 +10,6 @@ use File::Spec;
 use Text::Amuse::Compile::Utils qw/write_file/;
 
 my $c = Text::Amuse::Compile->new(pdf => 1);
-
-my @avail = $c->available_methods;
-
-is_deeply(\@avail, [
-                    qw/bare_html html
-                       epub
-                       a4_pdf lt_pdf
-                       tex zip
-                       pdf/
-                   ]);
 
 is_deeply([$c->compile_methods], [ qw/pdf/ ]);
 
@@ -35,6 +25,8 @@ is_deeply([$c->compile_methods], [ qw/epub tex  pdf/ ]);
 is $c->_suffix_for_method('bare_html'), '.bare.html';
 is $c->_suffix_for_method('tex'), '.tex';
 is $c->_suffix_for_method('a4_pdf'), '.a4.pdf';
+is $c->_suffix_for_method('sl_pdf'), '.sl.pdf';
+is $c->_suffix_for_method('pdf'), '.pdf';
 
 my $wd = File::Temp->newdir;
 

@@ -571,9 +571,9 @@ sub _muse_compile {
         return;
     }
     foreach my $method ($self->compile_methods) {
-        if ($method eq 'slides') {
+        if ($method eq 'slides' or $method eq 'sl_tex') {
             unless ($muse->wants_slides) {
-                $self->logger->("* Slides not required");
+                $self->logger->("* Slides not required\n");
                 next;
             }
         }
@@ -660,7 +660,7 @@ sub purge {
             die "?" if $ext eq '.muse';
             my $produced = $basename . $ext;
             if (-f $produced) {
-                print "Purging $produced\n";
+                $self->logger->("Purging $produced\n");
                 unlink $produced or warn "Cannot unlink $produced $!";
             }
         }

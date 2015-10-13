@@ -28,7 +28,7 @@
 # Avoid patch remnants
 \.orig$
 \.rej$
-t/testfile/.*\.(aux|html|log|ok|pdf|tex|toc|epub|lock|test|zip|status)$
+t/testfile/.*\.(aux|html|log|ok|pdf|tex|snm|vrb|toc|epub|lock|test|zip|status)$
 t/manual/.*\.(aux|html|log|ok|pdf|tex|toc|epub|lock|test|zip|status)$
 t/merged-dir/.*ok$
 fulltest.sh

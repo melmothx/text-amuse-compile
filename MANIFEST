@@ -3,6 +3,7 @@ Changes
 lib/Text/Amuse/Compile.pm
 lib/Text/Amuse/Compile/File.pm
 lib/Text/Amuse/Compile/Merged.pm
+lib/Text/Amuse/Compile/TemplateOptions.pm
 lib/Text/Amuse/Compile/Templates.pm
 lib/Text/Amuse/Compile/Utils.pm
 lib/Text/Amuse/Compile/Webfonts.pm
@@ -61,6 +62,7 @@ t/testfile/deep/deep/dir/logo.png
 t/testfile/deep/deep/dir/manual.muse
 t/testfile/deleted.muse
 t/testfile/for-epub.muse
+t/testfile/slides.muse
 t/testfile/test.muse
 t/tex.t
 t/tex/headers.muse

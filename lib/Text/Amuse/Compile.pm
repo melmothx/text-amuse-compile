@@ -613,17 +613,24 @@ output file is missing or stale.
 
 =cut
 
-sub file_needs_compilation {
+sub _check_file_basename {
     my ($self, $file) = @_;
     die "Bad usage" unless $file;
     die "$file is not a file" unless -f $file;
     my ($name, $path, $suffix) = fileparse($file, '.muse');
     die "Bad usage, not a muse file" unless $suffix;
+    return File::Spec->catfile($path, $name);
+}
+
+
+sub file_needs_compilation {
+    my ($self, $file) = @_;
     my $need = 0;
     my $mtime = 9;
+    my $basename = $self->_check_file_basename($file);
     foreach my $m ($self->compile_methods) {
         my $outsuffix = $self->_suffix_for_method($m);
-        my $outfile = File::Spec->catfile($path, $name . $outsuffix);
+        my $outfile = $basename . $outsuffix;
         if (-f $outfile and (stat($outfile))[$mtime] > (stat($file))[$mtime]) {
             next;
         }
@@ -634,6 +641,29 @@ sub file_needs_compilation {
     }
     return $need;
 }
+
+=head2 purge("file.muse")
+
+Remove all the files produced by the compilation of the files passed
+as arguments.
+
+=cut
+
+sub purge {
+    my ($self, @files) = @_;
+    foreach my $file (@files) {
+        my $basename = $self->_check_file_basename($file);
+        foreach my $ext (Text::Amuse::Compile::File->purged_extensions) {
+            die "?" if $ext eq '.muse';
+            my $produced = $basename . $ext;
+            if (-f $produced) {
+                print "Purging $produced\n";
+                unlink $produced or warn "Cannot unlink $produced $!";
+            }
+        }
+    }
+}
+
 
 =head3 report_failure_sub(sub { push @problems, $_[0] });
 

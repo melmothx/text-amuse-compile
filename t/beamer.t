@@ -10,9 +10,10 @@ use File::Temp;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Utils qw/write_file read_file/;
 use Text::Amuse::Compile::Templates;
+use Text::Amuse::Compile;
 use Cwd;
 
-plan tests => ($ENV{TEST_WITH_LATEX} ? 30 : 17);
+plan tests => ($ENV{TEST_WITH_LATEX} ? 54 : 21);
 
 my $basename = "slides";
 my $workingdir = File::Temp->newdir(CLEANUP => !$ENV{NOCLEANUP});
@@ -46,7 +47,7 @@ This is ignored
 
 MUSE
 
-my @falses = (undef, '', '0', 'no', 'NO');
+my @falses = (undef, '', '0', 'no', 'NO', 'false', 'FALSE');
 my @nocompile;
 foreach my $false (@falses) {
     my $suffix = $false;
@@ -102,7 +103,8 @@ foreach my $comp (@compile) {
     unlike ($texbody, qr/Ignored section/, "No ignore part found");
     unlike ($texbody, qr/This is ignored/, "No ignore part found");
     unlike ($texbody, qr/Text ignored/, "No ignore part found");
-    like ($texbody, qr/begin\{frame\}.+end\{frame\}/s);
+    like ($texbody, qr/begin\{frame\}.+first.+second.+end\{frame\}/s,
+         "Found a frame");
     if ($ENV{TEST_WITH_LATEX}) {
         ok($file->slides, "Slides generated for $comp");
         ok (-f $comp . '.sl.pdf', "Pdf file for slides for $comp exists");
@@ -115,3 +117,39 @@ foreach my $comp (@compile) {
 
 chdir $home or die $!;
 
+my %extra = (
+             sansfont => 'Iwona',
+             beamertheme => 'Madrid',
+             beamercolortheme => 'wolverine',
+            );
+
+
+
+if ($ENV{TEST_WITH_LATEX}) {
+    my $c = Text::Amuse::Compile->new(slides => 1);
+    my $muse = catfile(qw/t testfile slides.muse/);
+    my $tex = catfile(qw/t testfile slides.sl.tex/);
+    my $pdf = catfile(qw/t testfile slides.sl.pdf/);
+    $c->compile($muse);
+    ok (-f $tex, "TeX $tex generated");
+    ok (-f $pdf, "PDF generated");
+    my $content = read_file($tex);
+    like $content, qr/sansfont\{CMU/, "Sans font as default";
+    like $content, qr/colortheme\{dove/, "colortheme is dove";
+    like $content, qr/usetheme\{default/, "theme is default";
+    unlike $content, qr/ignored/, "Ignored sections are skipped";
+    $c = Text::Amuse::Compile->new(slides => 1, extra => \%extra);
+    $c->compile($muse);
+    ok (-f $tex, "TeX $tex generated");
+    ok (!$c->file_needs_compilation($muse), "File $muse doesn't need compilation");
+    ok (-f $pdf, "PDF $pdf generated");
+    $content = read_file($tex);
+    like $content, qr/sansfont\{Iwona/, "Sans font as default";
+    like $content, qr/colortheme\{wolverine/, "colortheme is dove";
+    like $content, qr/usetheme\{Madrid/, "theme is default";
+    $c->purge($muse);
+    ok (! -f $pdf, "$pdf purged");
+    ok (! -f $tex, "$tex purged");
+    ok (-f $muse,  "$muse still here");
+    ok ($c->file_needs_compilation($muse), "File $muse needs compilation");
+}

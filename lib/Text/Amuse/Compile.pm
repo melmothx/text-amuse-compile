@@ -664,7 +664,7 @@ sub file_needs_compilation {
     return $need;
 }
 
-=head2 purge("file.muse")
+=head2 purge(@files)
 
 Remove all the files produced by the compilation of the files passed
 as arguments.

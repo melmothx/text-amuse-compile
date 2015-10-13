@@ -39,6 +39,7 @@ GetOptions (\%options,
                luatex
                version
                verbose
+               purge
                help/) or die "Bad option passed!\n";
 
 if ($options{help}) {
@@ -204,6 +205,10 @@ which would be compiled.
 
 Use lualatex instead of xelatex.
 
+=item --purge
+
+Purge old files before compiling. Not supported for recursive compilation.
+
 =back
 
 =cut
@@ -212,6 +217,7 @@ my %args;
 
 my $output_templates = delete $options{'output-templates'};
 my $logfile = delete $options{log};
+my $purge = delete $options{purge};
 
 if ($options{extra}) {
     my $extras = delete $options{extra};
@@ -317,6 +323,7 @@ if ($recursive) {
     }
 }
 else {
+    $compiler->purge(@ARGV) if $purge;
     $compiler->compile(@ARGV);
 }
 

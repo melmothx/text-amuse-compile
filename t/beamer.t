@@ -18,7 +18,7 @@ use constant {
 };
 
 
-plan tests => (TEST_WITH_LATEX ? 60 : 50);
+plan tests => (TEST_WITH_LATEX ? 62 : 52);
 
 my $basename = "slides";
 my $workingdir = File::Temp->newdir(CLEANUP => !$ENV{NOCLEANUP});
@@ -103,6 +103,7 @@ foreach my $comp (@compile) {
     $out_pdf =~ s/muse$/sl.pdf/;
     my $c = Text::Amuse::Compile->new(%compiler_args);
     $c->purge($comp);
+    ok($c->file_needs_compilation($comp), "$comp needs compilation");
     ok ((! -f $out_tex), "No sl.tex present for $comp");
     ok ((! -f $out_pdf), "No slides present for $comp");
     $c->compile($comp);
@@ -117,6 +118,7 @@ foreach my $comp (@compile) {
     if (TEST_WITH_LATEX) {
         ok ((-f $out_pdf), "No slides generated for $comp");
     }
+    ok(!$c->file_needs_compilation($comp), "$comp doesn't need compilation");
 }
 
 my %extra = (
@@ -156,3 +158,4 @@ my %extra = (
     ok (-f $muse,  "$muse still here");
     ok ($c->file_needs_compilation($muse), "File $muse needs compilation");
 }
+

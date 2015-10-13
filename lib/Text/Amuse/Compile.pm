@@ -4,6 +4,10 @@ use 5.010001;
 use strict;
 use warnings FATAL => 'all';
 
+use constant {
+    DEBUG => $ENV{AMUSE_DEBUG},
+};
+
 use File::Basename;
 use File::Temp;
 use File::Find;
@@ -635,9 +639,11 @@ sub file_needs_compilation {
         my $outsuffix = $self->_suffix_for_method($m);
         my $outfile = $basename . $outsuffix;
         if (-f $outfile and (stat($outfile))[$mtime] > (stat($file))[$mtime]) {
+            print "$outfile is OK\n" if DEBUG;
             next;
         }
         else {
+            print "$outfile is NOT OK\n" if DEBUG;
             $need = 1;
             last;
         }

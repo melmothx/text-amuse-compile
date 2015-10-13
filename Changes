@@ -1,12 +1,13 @@
 Revision history for perl module Text::Amuse::Compile
 
-0.40 UNRELEASED
+0.40 2015-10-13
 
  - Generate slides when the header #slides is true.
  - New beamer themes options
  - New option for sans serif and typewriter fonts
  - Updated styles for description lists
  - Internal refactoring for option handling
+ - New option --purge to muse-compile
 
 0.38 2015-08-26
 

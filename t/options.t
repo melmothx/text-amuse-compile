@@ -335,8 +335,14 @@ foreach my $method (qw/logo cover/) {
     eval {
         $opts->$method($testfile);
     };
-    ok !$@, "$method set to $testfile";
-    is $opts->$method, $testfile, "$method set to $testfile";
+    if ($testfile =~ m/^[a-zA-Z0-9\-\:\/\\]+\.(pdf|jpe?g|png)$/s) {
+        ok !$@, "$method set to $testfile";
+        is $opts->$method, $testfile, "$method set to $testfile";
+    }
+    else {
+        ok $@, "$method set to $testfile failed";
+        is $opts->$method, '', "$method set to $testfile";
+    }
     eval {
         $opts->$method('/lakl/laksdjf/alksdfl\alksdjf/');
     };

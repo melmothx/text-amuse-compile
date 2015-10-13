@@ -121,6 +121,10 @@ The bare HTML, non <head>
 
 The zipped sources
 
+=item sl_tex
+
+The Beamer LaTeX output, if the muse headers say so.
+
 =item slides
 
 The Beamer PDF output, if the muse headers say so.

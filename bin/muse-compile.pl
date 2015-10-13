@@ -225,6 +225,18 @@ if ($options{extra}) {
         $extras->{$k} = decode('utf-8', $extras->{$k});
     }
     # also handle the booleans here
+    foreach my $boolean (qw/oneside twoside nocoverpage
+                            notoc/) {
+        if (exists $extras->{$boolean}) {
+            if ($extras->{$boolean} and
+                $extras->{$boolean} !~ m/^(no|false)$/i) {
+                $extras->{$boolean} = 1;
+            }
+            else {
+                $extras->{$boolean} = 0;
+            }
+        }
+    }
     $args{extra} = $extras;
 }
 

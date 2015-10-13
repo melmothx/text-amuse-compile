@@ -13,11 +13,18 @@ use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile;
 use Cwd;
 
-plan tests => ($ENV{TEST_WITH_LATEX} ? 54 : 21);
+use constant {
+    TEST_WITH_LATEX => $ENV{TEST_WITH_LATEX},
+};
+
+
+plan tests => (TEST_WITH_LATEX ? 53 : 43);
 
 my $basename = "slides";
 my $workingdir = File::Temp->newdir(CLEANUP => !$ENV{NOCLEANUP});
 diag "Using " . $workingdir->dirname;
+
+my %compiler_args = (sl_tex => !TEST_WITH_LATEX, slides => !!TEST_WITH_LATEX);
 
 my $muse_body = <<'MUSE';
 #title Slides
@@ -48,7 +55,7 @@ This is ignored
 MUSE
 
 my @falses = (undef, '', '0', 'no', 'NO', 'false', 'FALSE');
-my @nocompile;
+my (@compile, @nocompile);
 foreach my $false (@falses) {
     my $suffix = $false;
     my $body;
@@ -65,84 +72,79 @@ foreach my $false (@falses) {
     my $name = $basename . '-'. $suffix;
     my $target = catfile($workingdir->dirname, $name . '.muse');
     write_file($target, $body);
-    push @nocompile, $name;
+    push @nocompile, $target;
 }
 
-write_file(catfile($workingdir->dirname, $basename . '.muse'),
-           "#slides yes\n" . $muse_body);
-my @compile = ($basename);
-
-my $home = getcwd;
-chdir $workingdir->dirname or die $!;
-
-my $templates = Text::Amuse::Compile::Templates->new;
+foreach my $true ($basename) {
+    my $target = catfile($workingdir->dirname, $basename . '.muse');
+    write_file($target, "#slides yes\n" . $muse_body);
+    push @compile, $target;
+}
 
 foreach my $noc (@nocompile) {
-    my $file = Text::Amuse::Compile::File->new(name => $noc,
-                                               suffix => '.muse',
-                                               templates => $templates,
-                                              );
-    ok (!$file->sl_tex, "No slides generated for $noc");
-    ok (! -f $noc . '.sl.tex', "No tex file for slides for $noc");
-    if ($ENV{TEST_WITH_LATEX}) {
-        ok(!$file->slides, "No slide pdf generated for $noc");
-        ok (! -f $noc . '.sl.pdf', "No pdf file for slides for $noc");
+    my $c = Text::Amuse::Compile->new(%compiler_args);
+    my $out_tex = my $out_pdf = $noc;
+    $out_tex =~ s/muse$/sl.tex/;
+    $out_pdf =~ s/muse$/sl.pdf/;
+    $c->purge($noc);
+    ok ((! -f $out_tex), "No sl.tex present for $noc");
+    ok ((! -f $out_pdf), "No slides present for $noc");
+    $c->compile($noc);
+    ok ((! -f $out_tex), "No sl.tex generated for $noc");
+    if (TEST_WITH_LATEX) {
+        ok ((! -f $out_pdf), "No slides generated for $noc");
     }
 }
 
 foreach my $comp (@compile) {
-    my $file = Text::Amuse::Compile::File->new(name => $comp,
-                                               suffix => '.muse',
-                                               templates => $templates,
-                                               logger => sub { diag @_ },
-                                              );
-    ok ($file->sl_tex, "Slides generated for $comp");
-    ok (-f $comp . '.sl.tex', "TeX file for slides for $comp");
-    my $texbody = read_file($comp . '.sl.tex');
+    my $out_tex = my $out_pdf = $comp;
+    $out_tex =~ s/muse$/sl.tex/;
+    $out_pdf =~ s/muse$/sl.pdf/;
+    my $c = Text::Amuse::Compile->new(%compiler_args);
+    $c->purge($comp);
+    ok ((! -f $out_tex), "No sl.tex present for $comp");
+    ok ((! -f $out_pdf), "No slides present for $comp");
+    $c->compile($comp);
+    ok ((-f $out_tex), "TeX file for slides for $comp");
+    my $texbody = read_file($out_tex);
     unlike ($texbody, qr/Section ignored/, "No ignore part found");
     unlike ($texbody, qr/Ignored section/, "No ignore part found");
     unlike ($texbody, qr/This is ignored/, "No ignore part found");
     unlike ($texbody, qr/Text ignored/, "No ignore part found");
     like ($texbody, qr/begin\{frame\}.+first.+second.+end\{frame\}/s,
          "Found a frame");
-    if ($ENV{TEST_WITH_LATEX}) {
-        ok($file->slides, "Slides generated for $comp");
-        ok (-f $comp . '.sl.pdf', "Pdf file for slides for $comp exists");
-        # and check a garbaged file
-        write_file('garbage.tex', 'lalksdflkjlakjsdflkjaòlksdjf');
-        eval { $file->_compile_pdf('garbage.tex') };
-        ok ($@, "failure on garbage");
+    if (TEST_WITH_LATEX) {
+        ok ((-f $out_pdf), "No slides generated for $comp");
     }
 }
-
-chdir $home or die $!;
 
 my %extra = (
              sansfont => 'Iwona',
              beamertheme => 'Madrid',
              beamercolortheme => 'wolverine',
             );
-
-
-
-if ($ENV{TEST_WITH_LATEX}) {
-    my $c = Text::Amuse::Compile->new(slides => 1);
+{
+    my $c = Text::Amuse::Compile->new(%compiler_args);
     my $muse = catfile(qw/t testfile slides.muse/);
     my $tex = catfile(qw/t testfile slides.sl.tex/);
     my $pdf = catfile(qw/t testfile slides.sl.pdf/);
+    $c->purge($muse);
     $c->compile($muse);
     ok (-f $tex, "TeX $tex generated");
-    ok (-f $pdf, "PDF generated");
+    if (TEST_WITH_LATEX) {
+        ok (-f $pdf, "PDF generated");
+    }
     my $content = read_file($tex);
     like $content, qr/sansfont\{CMU/, "Sans font as default";
     like $content, qr/colortheme\{dove/, "colortheme is dove";
     like $content, qr/usetheme\{default/, "theme is default";
     unlike $content, qr/ignored/, "Ignored sections are skipped";
-    $c = Text::Amuse::Compile->new(slides => 1, extra => \%extra);
+    $c = Text::Amuse::Compile->new(%compiler_args, extra => \%extra);
+    $c->purge($muse);
     $c->compile($muse);
     ok (-f $tex, "TeX $tex generated");
     ok (!$c->file_needs_compilation($muse), "File $muse doesn't need compilation");
-    ok (-f $pdf, "PDF $pdf generated");
+    ok (-f $pdf, "PDF $pdf generated") if TEST_WITH_LATEX;
     $content = read_file($tex);
     like $content, qr/sansfont\{Iwona/, "Sans font as default";
     like $content, qr/colortheme\{wolverine/, "colortheme is dove";

@@ -18,7 +18,7 @@ use constant {
 };
 
 
-plan tests => (TEST_WITH_LATEX ? 53 : 43);
+plan tests => (TEST_WITH_LATEX ? 60 : 50);
 
 my $basename = "slides";
 my $workingdir = File::Temp->newdir(CLEANUP => !$ENV{NOCLEANUP});
@@ -87,6 +87,7 @@ foreach my $noc (@nocompile) {
     $out_tex =~ s/muse$/sl.tex/;
     $out_pdf =~ s/muse$/sl.pdf/;
     $c->purge($noc);
+    ok(!$c->file_needs_compilation($noc), "$noc doesn't need compilation");
     ok ((! -f $out_tex), "No sl.tex present for $noc");
     ok ((! -f $out_pdf), "No slides present for $noc");
     $c->compile($noc);

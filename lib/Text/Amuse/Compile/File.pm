@@ -141,6 +141,7 @@ sub _build_is_deleted {
 
 sub _build_wants_slides {
     my $self = shift;
+    # duplication with Compile::file_needs_compilation
     my $slides = $self->file_header->{slides};
     if ($slides and $slides !~ /^\s*(no|false)\s*$/si) {
         return 1;

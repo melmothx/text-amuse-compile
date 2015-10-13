@@ -106,6 +106,10 @@ Please note that the muse file must say that the slides are required.
 The header for that is C<#slides> set to a value other than empty,
 C<0>, C<no>, C<false>.
 
+=item --sl-tex
+
+Produce the beamer LaTeX file, using the same rule above.
+
 =item --a4-pdf
 
 PDF imposed on A4 paper, with a variable signature in the range of 40-80

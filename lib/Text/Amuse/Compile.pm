@@ -5,7 +5,7 @@ use strict;
 use warnings FATAL => 'all';
 
 use constant {
-    DEBUG => $ENV{AMUSE_DEBUG},
+    DEBUG => 0,
 };
 
 use File::Basename;
@@ -635,10 +635,19 @@ sub file_needs_compilation {
     my $need = 0;
     my $mtime = 9;
     my $basename = $self->_check_file_basename($file);
+    my $header = muse_fast_scan_header($file);
     foreach my $m ($self->compile_methods) {
         my $outsuffix = $self->_suffix_for_method($m);
         my $outfile = $basename . $outsuffix;
-        if (-f $outfile and (stat($outfile))[$mtime] > (stat($file))[$mtime]) {
+        if ($m eq 'sl_tex' or $m eq 'slides') {
+            # duplication with File::_build_wants_slides
+            my $slides = $header->{slides};
+            if (!$slides or $slides =~ /^\s*(no|false)\s*$/si) {
+                print "$outfile check not needed\n" if DEBUG;
+                next;
+            }
+        }
+        if (-f $outfile and (stat($outfile))[$mtime] >= (stat($file))[$mtime]) {
             print "$outfile is OK\n" if DEBUG;
             next;
         }

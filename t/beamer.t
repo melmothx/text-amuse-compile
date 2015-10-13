@@ -114,7 +114,7 @@ foreach my $comp (@compile) {
     unlike ($texbody, qr/This is ignored/, "No ignore part found");
     unlike ($texbody, qr/Text ignored/, "No ignore part found");
     like ($texbody, qr/begin\{frame\}.+first.+second.+end\{frame\}/s,
-         "Found a frame");
+          "Found a frame");
     if (TEST_WITH_LATEX) {
         ok ((-f $out_pdf), "No slides generated for $comp");
     }

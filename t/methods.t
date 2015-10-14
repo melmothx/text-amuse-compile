@@ -2,8 +2,9 @@
 
 use strict;
 use warnings;
-use Test::More tests => 18;
+use Test::More tests => 19;
 use Text::Amuse::Compile;
+use Text::Amuse::Compile::File;
 use Data::Dumper;
 use File::Temp;
 use File::Spec;
@@ -99,3 +100,27 @@ sub inspect_wd {
     }
     diag Dumper(\%out);
 }
+is_deeply([ Text::Amuse::Compile::File->purged_extensions ],
+          [
+          '.pdf',
+          '.a4.pdf',
+          '.lt.pdf',
+          '.tex',
+          '.log',
+          '.aux',
+          '.toc',
+          '.ok',
+          '.html',
+          '.bare.html',
+          '.epub',
+          '.zip',
+          '.sl.tex',
+          '.sl.pdf',
+          '.sl.log',
+          '.sl.nav',
+          '.sl.toc',
+          '.sl.aux',
+          '.sl.vrb',
+          '.sl.snm',
+          '.sl.out'
+        ]);

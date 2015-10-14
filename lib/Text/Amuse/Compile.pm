@@ -30,11 +30,11 @@ Text::Amuse::Compile - Compiler for Text::Amuse
 
 =head1 VERSION
 
-Version 0.41
+Version 0.42
 
 =cut
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 
 =head1 SYNOPSIS
 
@@ -77,26 +77,6 @@ for the packages needed).
 
 Plain PDF without any imposition.
 
-Additionally, if if the header has a C<#slides> header with some value
-(e.g., 1, yes, ok, whatever) and if there some sectioning, create a
-pdf presentation out of it.
-
-E.g., the following will no produce slides:
-
-  #title Foo
-  #slides
-
-But this would
-
-  #title Foo
-  #slides 1
-
-The value of the header is totally insignificant.
-
-Sections which contain the comment C<; noslide> are ignored. LaTeX
-source is left in the tree with .sl.tex extension, and the output will
-have .sl.pdf extension.
-
 =item a4_pdf
 
 PDF imposed on A4 paper
@@ -125,9 +105,34 @@ The zipped sources
 
 The Beamer LaTeX output, if the muse headers say so.
 
-=item slides
+=item sl_pdf
 
 The Beamer PDF output, if the muse headers say so.
+
+If the header has a C<#slides> header with some value (e.g., 1, yes,
+ok, whatever) and if there some sectioning, create a pdf presentation
+out of it.
+
+E.g., the following will not produce slides:
+
+  #title Foo
+  #slides
+
+But this would
+
+  #title Foo
+  #slides 1
+
+The value of the header is totally insignificant, as long is not
+C<false> or C<no> or C<0> or empty, which disable them.
+
+Sections which contain the comment C<; noslide> are ignored. LaTeX
+source is left in the tree with C<.sl.tex> extension, and the output
+will have C<.sl.pdf> extension.
+
+=item slides
+
+Alias for sl_pdf.
 
 =item extra_opts
 
@@ -173,7 +178,7 @@ Return the list of the methods which are going to be used.
 =cut
 
 has sl_tex => (is => 'ro', isa => Bool, default => sub { 0 });
-has slides => (is => 'ro', isa => Bool, default => sub { 0 });
+has sl_pdf => (is => 'ro', isa => Bool, default => sub { 0 });
 has luatex => (is => 'ro', isa => Bool, default => sub { 0 });
 has zip    => (is => 'ro', isa => Bool, default => sub { 0 });
 has tex    => (is => 'ro', isa => Bool, default => sub { 0 });
@@ -195,10 +200,17 @@ has webfonts  => (is => 'lazy', isa => Maybe[Object]);
 has standalone => (is => 'lazy', isa => Bool);
 has extra_opts => (is => 'ro', isa => HashRef, default => sub { +{} });
 
+sub slides {
+    return shift->sl_pdf;
+}
+
 sub BUILDARGS {
     my ($class, %params) = @_;
     $params{extra_opts} = { %{ delete $params{extra} || {} } };
     my $all = 1;
+    if (exists $params{slides}) {
+        $params{sl_pdf} ||= $params{slides};
+    }
     foreach my $format ($class->available_methods) {
         if (exists $params{$format}) {
             $all = 0;
@@ -229,7 +241,7 @@ sub available_methods {
                zip
                pdf
                sl_tex
-               slides
+               sl_pdf
               /);
 }
 sub compile_methods {
@@ -579,7 +591,7 @@ sub _muse_compile {
         return;
     }
     foreach my $method ($self->compile_methods) {
-        if ($method eq 'slides' or $method eq 'sl_tex') {
+        if ($method eq 'sl_pdf' or $method eq 'sl_tex') {
             unless ($muse->wants_slides) {
                 $self->logger->("* Slides not required\n");
                 next;
@@ -610,7 +622,6 @@ sub _muse_compile {
 sub _suffix_for_method {
     my ($self, $method) = @_;
     return unless $method;
-    return '.sl.pdf' if $method eq 'slides';
     my $ext = $method;
     $ext =~ s/_/./g;
     $ext = '.' . $ext;
@@ -643,7 +654,7 @@ sub file_needs_compilation {
     foreach my $m ($self->compile_methods) {
         my $outsuffix = $self->_suffix_for_method($m);
         my $outfile = $basename . $outsuffix;
-        if ($m eq 'sl_tex' or $m eq 'slides') {
+        if ($m eq 'sl_tex' or $m eq 'sl_pdf') {
             # duplication with File::_build_wants_slides
             my $slides = $header->{slides};
             if (!$slides or $slides =~ /^\s*(no|false)\s*$/si) {

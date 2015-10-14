@@ -410,13 +410,13 @@ sub tex {
 
 =item sl_tex
 
-Produce a file with extension .sl.tex, a LaTeX Beamer source file.
+Produce a file with extension C<.sl.tex>, a LaTeX Beamer source file.
 If the source muse file doesn't require slides, do nothing.
 
-=item slides
+=item sl_pdf
 
 Compiles the file produced by C<sl_tex> (if any) and generate the
-slides.
+slides with extension C<.sl.pdf>
 
 =back
 
@@ -434,7 +434,7 @@ sub sl_tex {
                                     $texfile);
 }
 
-sub slides {
+sub sl_pdf {
     my $self = shift;
     $self->purge_slides;
     if (my $source = $self->sl_tex) {

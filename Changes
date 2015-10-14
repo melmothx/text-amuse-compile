@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.42 2015-10-14
+
+ - "slides" is now an alias for "sl_pdf"
+
 0.41 2015-10-14
 
  - Fixed default for older Moo

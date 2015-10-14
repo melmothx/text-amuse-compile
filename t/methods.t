@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 13;
+use Test::More tests => 18;
 use Text::Amuse::Compile;
 use Data::Dumper;
 use File::Temp;
@@ -20,6 +20,26 @@ is_deeply([$c->compile_methods], [ qw/epub pdf/ ]);
 $c = Text::Amuse::Compile->new(pdf => 1, epub => 1, tex => 1);
 
 is_deeply([$c->compile_methods], [ qw/epub tex  pdf/ ]);
+
+$c = Text::Amuse::Compile->new(pdf => 1, epub => 1, tex => 1, slides => 1);
+
+is_deeply([$c->compile_methods], [ qw/epub tex  pdf sl_pdf/ ]);
+
+$c = Text::Amuse::Compile->new(pdf => 1, epub => 1, tex => 1, sl_pdf => 1);
+
+is_deeply([$c->compile_methods], [ qw/epub tex  pdf sl_pdf/ ]);
+
+$c = Text::Amuse::Compile->new(pdf => 1, epub => 1, tex => 1, sl_pdf => 1, slides => 0);
+
+is_deeply([$c->compile_methods], [ qw/epub tex  pdf sl_pdf/ ]);
+
+$c = Text::Amuse::Compile->new(pdf => 1, epub => 1, tex => 1, sl_pdf => 0, slides => 1);
+
+is_deeply([$c->compile_methods], [ qw/epub tex  pdf sl_pdf/ ]);
+
+$c = Text::Amuse::Compile->new(pdf => 1, epub => 1, tex => 1, sl_pdf => 1, slides => 1);
+
+is_deeply([$c->compile_methods], [ qw/epub tex  pdf sl_pdf/ ]);
 
 
 is $c->_suffix_for_method('bare_html'), '.bare.html';

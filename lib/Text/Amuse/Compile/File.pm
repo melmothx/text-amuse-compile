@@ -207,11 +207,21 @@ Remove all the output files related to basename
 
 =head2 purge_slides
 
-Remove all the files produces by the C<slides> call (C<*.sl.*>)
+Remove all the files produces by the C<slides> call, i.e. file.sl.pdf
+and file.sl.log and all the leftovers (.sl.toc, .sl.aux, etc.).
 
 =head2 purge_latex
 
-Remove files left by previous latex compilation
+Remove files left by previous latex compilation, i.e. file.pdf and
+file.log and all the leftovers (toc, aux, etc.).
+
+=head2 purge_latex_leftovers
+
+Remove the latex leftover files (toc, aux, etc.).
+
+=head2 purge_slides_leftovers
+
+Remove the latex leftover files (.sl.toc, .sl.aux, etc.).
 
 =head2 purge('.epub', ...)
 

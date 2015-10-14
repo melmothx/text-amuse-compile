@@ -209,7 +209,8 @@ sub BUILDARGS {
     $params{extra_opts} = { %{ delete $params{extra} || {} } };
     my $all = 1;
     if (exists $params{slides}) {
-        $params{sl_pdf} ||= $params{slides};
+        my $slides = delete $params{slides};
+        $params{sl_pdf} ||= $slides;
     }
     foreach my $format ($class->available_methods) {
         if (exists $params{$format}) {

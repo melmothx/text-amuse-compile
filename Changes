@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.41 2015-10-14
+
+ - Fixed default for older Moo
+
 0.40 2015-10-13
 
  - Generate slides when the header #slides is true.

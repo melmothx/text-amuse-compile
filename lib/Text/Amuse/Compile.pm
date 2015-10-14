@@ -30,11 +30,11 @@ Text::Amuse::Compile - Compiler for Text::Amuse
 
 =head1 VERSION
 
-Version 0.40
+Version 0.41
 
 =cut
 
-our $VERSION = '0.40';
+our $VERSION = '0.41';
 
 =head1 SYNOPSIS
 
@@ -187,10 +187,10 @@ has bare_html => (is => 'ro', isa => Bool, default => sub { 0 });
 has cleanup   => (is => 'ro', isa => Bool, default => sub { 0 });
 has debug     => (is => 'ro', isa => Bool, default => sub { 0 });
 
-has ttdir     => (is => 'ro',   isa => Maybe[Str], default => undef);
+has ttdir     => (is => 'ro',   isa => Maybe[Str]);
 has templates => (is => 'lazy', isa => Object);
 
-has webfontsdir => (is => 'ro', isa => Maybe[Str], default => undef);
+has webfontsdir => (is => 'ro', isa => Maybe[Str]);
 has webfonts  => (is => 'lazy', isa => Maybe[Object]);
 has standalone => (is => 'lazy', isa => Bool);
 has extra_opts => (is => 'ro', isa => HashRef, default => sub { +{} });

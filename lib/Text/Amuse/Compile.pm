@@ -586,8 +586,8 @@ sub _muse_compile {
         sleep 5;
     }
     my @fatals;
+    $muse->purge_all;
     if ($muse->is_deleted) {
-        $muse->purge_all;
         $self->_write_status_file($fhlock, 'DELETED');
         return;
     }

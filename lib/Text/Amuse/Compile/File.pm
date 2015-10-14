@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use utf8;
 
+use constant { DEBUG => 1 };
+
 # core
 # use Data::Dumper;
 use File::Copy qw/move/;
@@ -217,35 +219,54 @@ Remove the files associated with this file, by extension.
 
 =cut
 
-sub _slides_extensions {
-    return qw/.sl.tex .sl.pdf
-              .sl.log .sl.nav .sl.toc .sl.aux
-              .sl.nav .sl.snm .sl.out/;
+sub _compiled_extensions {
+    return qw/.sl.tex .tex .a4.pdf .lt.pdf .ok .html .bare.html .epub .zip/;
+}
 
+sub _latex_extensions {
+    return qw/.pdf .log/;
+}
+
+sub _slides_extensions {
+    my $self = shift;
+    return map { '.sl' . $_ } $self->_latex_extensions;
+}
+
+sub _latex_leftover_extensions {
+    return qw/.aux .nav .out .snm .toc .tuc .vrb/;
+}
+
+sub _slides_leftover_extensions {
+    my $self = shift;
+    return map { '.sl' . $_ } $self->_latex_leftover_extensions;
 }
 
 sub purged_extensions {
     my $self = shift;
-    my @exts = (qw/.pdf .a4.pdf .lt.pdf
-                   .tex .log .aux .toc .ok
-                   .html .bare.html .epub
-                   .zip
-                  /,
-                $self->_slides_extensions);
+    my @exts = (
+                $self->_compiled_extensions,
+                $self->_latex_extensions,
+                $self->_latex_leftover_extensions,
+                $self->_slides_extensions,
+                $self->_slides_leftover_extensions,
+               );
     return @exts;
 }
 
 sub purge {
     my ($self, @exts) = @_;
+    $self->log_info("Started purging\n") if DEBUG;
     my $basename = $self->name;
     foreach my $ext (@exts) {
-        $self->log_fatal("wtf?") if ($ext eq '.muse');
+        $self->log_fatal("wtf? Refusing to purge " . $basename . $ext)
+          if ($ext eq '.muse');
         my $target = $basename . $ext;
         if (-f $target) {
-            # $self->log_info("Removing $target\n");
+            $self->log_info("Removing target $target\n") if DEBUG;
             unlink $target or $self->log_fatal("Couldn't unlink $target $!");
         }
     }
+    $self->log_info("Ended purging\n") if DEBUG;
 }
 
 sub purge_all {
@@ -255,17 +276,27 @@ sub purge_all {
 
 sub purge_latex {
     my $self = shift;
-    $self->purge(qw/.log .aux .toc .pdf/);
+    $self->purge($self->_latex_extensions, $self->_latex_leftover_extensions);
 }
 
 sub purge_slides {
     my $self = shift;
-    $self->purge($self->_slides_extensions);
+    $self->purge($self->_slides_extensions, $self->_slides_leftover_extensions);
+}
+
+sub purge_latex_leftovers {
+    my $self = shift;
+    $self->purge($self->_latex_leftover_extensions);
+}
+
+sub purge_slides_leftovers {
+    my $self = shift;
+    $self->purge($self->_slides_leftover_extensions);
 }
 
 sub _write_file {
     my ($self, $target, @strings) = @_;
-    open (my $fh, ">:encoding(utf-8)", $target)
+    open (my $fh, ">:encoding(UTF-8)", $target)
       or $self->log_fatal("Couldn't open $target $!");
 
     print $fh @strings;
@@ -426,9 +457,9 @@ sub sl_tex {
     my ($self) = @_;
     # no slides for virtual files
     return if $self->virtual;
-    return unless $self->wants_slides;
-    my $texfile = $self->name . '.sl.tex';
     $self->purge('.sl.tex');
+    my $texfile = $self->name . '.sl.tex';
+    return unless $self->wants_slides;
     return $self->_process_template($self->templates->slides,
                                     $self->_prepare_tex_tokens,
                                     $texfile);
@@ -436,9 +467,15 @@ sub sl_tex {
 
 sub sl_pdf {
     my $self = shift;
-    $self->purge_slides;
-    if (my $source = $self->sl_tex) {
+    $self->purge_slides; # remove .sl.pdf and .sl.log
+    my $source = $self->name . '.sl.tex';
+    unless (-f $source) {
+        $source = $self->sl_tex;
+    }
+    if ($source) {
+        $self->log_fatal("Missing source file $source!") unless -f $source;
         if (my $out = $self->_compile_pdf($source)) {
+            $self->purge_slides_leftovers;
             return $out;
         }
     }
@@ -453,7 +490,11 @@ sub pdf {
     }
     $self->log_fatal("Missing source file $source!") unless -f $source;
     $self->purge_latex;
-    $self->_compile_pdf($source);
+    if (my $out = $self->_compile_pdf($source)) {
+        $self->purge_latex_leftovers;
+        return $out;
+    }
+    return;
 }
 
 sub _compile_pdf {
@@ -468,6 +509,7 @@ sub _compile_pdf {
     else {
         die "Source must be a tex source file\n";
     }
+    $self->log_info("Compiling $source to $output\n") if DEBUG;
     # maybe a check on the toc if more runs are needed?
     # 1. create the toc
     # 2. insert the toc
@@ -506,6 +548,7 @@ sub _compile_pdf {
         }
     }
     $self->parse_tex_log_file($logfile);
+    $self->log_info("Compilation over\n") if DEBUG;
     return $output;
 }
 

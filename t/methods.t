@@ -100,27 +100,37 @@ sub inspect_wd {
     }
     diag Dumper(\%out);
 }
-is_deeply([ Text::Amuse::Compile::File->purged_extensions ],
-          [
-          '.pdf',
-          '.a4.pdf',
-          '.lt.pdf',
-          '.tex',
-          '.log',
-          '.aux',
-          '.toc',
-          '.ok',
-          '.html',
-          '.bare.html',
-          '.epub',
-          '.zip',
-          '.sl.tex',
-          '.sl.pdf',
-          '.sl.log',
-          '.sl.nav',
-          '.sl.toc',
-          '.sl.aux',
-          '.sl.vrb',
-          '.sl.snm',
-          '.sl.out'
-        ]);
+
+my @expected = (
+                '.pdf',
+                '.a4.pdf',
+                '.lt.pdf',
+                '.tex',
+                '.log',
+                '.nav',
+                '.snm',
+                '.tuc',
+                '.vrb',
+                '.out',
+                '.aux',
+                '.toc',
+                '.ok',
+                '.html',
+                '.bare.html',
+                '.epub',
+                '.zip',
+                '.sl.tex',
+                '.sl.pdf',
+                '.sl.log',
+                '.sl.nav',
+                '.sl.toc',
+                '.sl.aux',
+                '.sl.vrb',
+                '.sl.tuc',
+                '.sl.snm',
+                '.sl.out'
+               );
+is_deeply([ sort Text::Amuse::Compile::File->purged_extensions ],
+          [ sort @expected ],
+          "Purged extensions ok");
+

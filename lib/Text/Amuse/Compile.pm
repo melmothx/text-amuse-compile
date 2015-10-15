@@ -5,7 +5,7 @@ use strict;
 use warnings FATAL => 'all';
 
 use constant {
-    DEBUG => 0,
+    DEBUG => $ENV{AMW_DEBUG},
 };
 
 use File::Basename;
@@ -149,10 +149,6 @@ copy of C<extra_opts>
 
 Do not force bcor=0 and oneside for plain tex and pdf
 
-=item debug
-
-Slow down the compilation sleeping for a while. DO NOT USE.
-
 =back
 
 Template directory:
@@ -190,7 +186,6 @@ has html   => (is => 'ro', isa => Bool, default => sub { 0 });
 has bare_html => (is => 'ro', isa => Bool, default => sub { 0 });
 
 has cleanup   => (is => 'ro', isa => Bool, default => sub { 0 });
-has debug     => (is => 'ro', isa => Bool, default => sub { 0 });
 
 has ttdir     => (is => 'ro',   isa => Maybe[Str]);
 has templates => (is => 'lazy', isa => Object);
@@ -582,11 +577,10 @@ sub _muse_compile {
       or die "Cannot open $statusfile\n!";
     flock($fhlock, LOCK_EX | LOCK_NB) or die "Cannot acquire lock on $statusfile";
 
-    if ($self->debug) {
-        sleep 5;
-    }
+    sleep 5 if DEBUG;
+
     my @fatals;
-    $muse->purge_all;
+    $muse->purge_all unless DEBUG;
     if ($muse->is_deleted) {
         $self->_write_status_file($fhlock, 'DELETED');
         return;

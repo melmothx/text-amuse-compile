@@ -1,5 +1,8 @@
 #!perl
 
+BEGIN {
+    $ENV{AMW_DEBUG} = 1;
+}
 use strict;
 use warnings;
 use Text::Amuse::Compile;

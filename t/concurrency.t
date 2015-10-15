@@ -1,5 +1,9 @@
 #!perl
 
+BEGIN {
+    $ENV{AMW_DEBUG} = 1;
+}
+
 use strict;
 use warnings;
 use Test::More;
@@ -20,7 +24,7 @@ my $target = catfile(qw/t testfile deleted.muse/);
 my $cwd = getcwd();
 if (my $pid = fork()) {
     sleep 1;
-    my $c = Text::Amuse::Compile->new(html => 1, debug => 1);
+    my $c = Text::Amuse::Compile->new(html => 1);
     my $error;
     my $failed;
     $c->logger(sub { $error .= join('', @_) });
@@ -32,7 +36,7 @@ if (my $pid = fork()) {
     wait;
 }
 else {
-    my $c = Text::Amuse::Compile->new(html => 1, debug => 1);
+    my $c = Text::Amuse::Compile->new(html => 1);
     $c->compile($target);
     exit;
 }

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use constant { DEBUG => 1 };
+use constant { DEBUG => $ENV{AMW_DEBUG} };
 
 # core
 # use Data::Dumper;

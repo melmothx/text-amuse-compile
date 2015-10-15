@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.43 2015-10-15
+
+ - Cleanup files left by previous compilation and remove LaTeX
+   leftovers (.aux, .vrb, etc).
+
 0.42 2015-10-14
 
  - "slides" is now an alias for "sl_pdf"

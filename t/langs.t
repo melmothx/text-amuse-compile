@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 42;
+use Test::More tests => 56;
 
 use Text::Amuse::Compile::Utils qw/read_file write_file/;
 use File::Spec::Functions qw/catfile catdir/;
@@ -21,6 +21,7 @@ foreach my $code (qw/cs de en es fi fr hr it
     my $target = catfile($wd, $code . '.muse');
     write_file($target, "#title test\n#lang $code\n\nBlablabla\n");
     $c->compile($target);
+    is $c->parse_muse_header($target)->language, $code;
     my $html = catfile($wd, $code . '.html');
     ok(-f $html, "$html produced");
     my $content = read_file($html);

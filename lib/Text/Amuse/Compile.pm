@@ -18,6 +18,7 @@ use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::Webfonts;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Merged;
+use Text::Amuse::Compile::MuseHeader;
 
 use Cwd;
 use Fcntl qw/:flock/;
@@ -628,6 +629,11 @@ sub _suffix_for_method {
 Returns true if the file has already been compiled, false if some
 output file is missing or stale.
 
+=head3 parse_muse_header($file)
+
+Return a L<Text::Amuse::Compile::MuseHeader> object for the given
+file.
+
 =cut
 
 sub _check_file_basename {
@@ -639,23 +645,23 @@ sub _check_file_basename {
     return File::Spec->catfile($path, $name);
 }
 
+sub parse_muse_header {
+    my ($self, $file) = @_;
+    return Text::Amuse::Compile::MuseHeader->new(muse_fast_scan_header($file));
+}
+
 
 sub file_needs_compilation {
     my ($self, $file) = @_;
     my $need = 0;
     my $mtime = 9;
     my $basename = $self->_check_file_basename($file);
-    my $header = muse_fast_scan_header($file);
+    my $header = $self->parse_muse_header($file);
     foreach my $m ($self->compile_methods) {
         my $outsuffix = $self->_suffix_for_method($m);
         my $outfile = $basename . $outsuffix;
         if ($m eq 'sl_tex' or $m eq 'sl_pdf') {
-            # duplication with File::_build_wants_slides
-            my $slides = $header->{slides};
-            if (!$slides or $slides =~ /^\s*(no|false)\s*$/si) {
-                print "$outfile check not needed\n" if DEBUG;
-                next;
-            }
+            next unless $header->wants_slides;
         }
         if (-f $outfile and (stat($outfile))[$mtime] >= (stat($file))[$mtime]) {
             print "$outfile is OK\n" if DEBUG;

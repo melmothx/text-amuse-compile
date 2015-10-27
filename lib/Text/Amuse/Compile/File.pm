@@ -26,6 +26,7 @@ use Text::Amuse::Functions qw/muse_fast_scan_header
                               muse_format_line/;
 
 use Text::Amuse::Compile::TemplateOptions;
+use Text::Amuse::Compile::MuseHeader;
 use Types::Standard qw/Str Bool Object Maybe CodeRef HashRef/;
 use Moo;
 
@@ -125,34 +126,28 @@ has tex_options => (is => 'lazy', isa => HashRef);
 has html_options => (is => 'lazy', isa => HashRef);
 has wants_slides => (is => 'lazy', isa => Bool);
 has is_deleted => (is => 'lazy', isa => Bool);
-has file_header => (is => 'lazy', isa => HashRef);
+has file_header => (is => 'lazy', isa => Object);
 
 sub _build_file_header {
     my $self = shift;
-    return {} if $self->virtual;
-    my $header = muse_fast_scan_header($self->muse_file);
-    $self->log_fatal("Not a muse file!") unless $header && %$header;
-    return $header;
+    my $header;
+    if ($self->virtual) {
+        $header = {};
+    }
+    else {
+        $header = muse_fast_scan_header($self->muse_file);
+        $self->log_fatal("Not a muse file!") unless $header && %$header;
+    }
+    return Text::Amuse::Compile::MuseHeader->new($header);
 }
 
 sub _build_is_deleted {
-    my $self = shift;
-    return 0 if $self->virtual;
-    return !!$self->file_header->{DELETED};
+    return shift->file_header->is_deleted;
 }
 
 sub _build_wants_slides {
-    my $self = shift;
-    # duplication with Compile::file_needs_compilation
-    my $slides = $self->file_header->{slides};
-    if ($slides and $slides !~ /^\s*(no|false)\s*$/si) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
+    return shift->file_header->wants_slides;
 }
-
 
 sub _build_document {
     my $self = shift;

@@ -18,7 +18,7 @@ use constant {
 };
 
 
-plan tests => (TEST_WITH_LATEX ? 62 : 52);
+plan tests => (TEST_WITH_LATEX ? 78 : 68);
 
 my $basename = "slides";
 my $workingdir = File::Temp->newdir(CLEANUP => !$ENV{NOCLEANUP});
@@ -95,6 +95,9 @@ foreach my $noc (@nocompile) {
     if (TEST_WITH_LATEX) {
         ok ((! -f $out_pdf), "No slides generated for $noc");
     }
+    my $header = Text::Amuse::Compile->parse_muse_header($noc);
+    ok (!$header->wants_slides, "Doesn't want slides");
+    is ($header->language, 'en');
 }
 
 foreach my $comp (@compile) {
@@ -119,6 +122,9 @@ foreach my $comp (@compile) {
         ok ((-f $out_pdf), "No slides generated for $comp");
     }
     ok(!$c->file_needs_compilation($comp), "$comp doesn't need compilation");
+    my $header = Text::Amuse::Compile->parse_muse_header($comp);
+    ok ($header->wants_slides, "File wants slides");
+    is ($header->language, 'en');
 }
 
 my %extra = (

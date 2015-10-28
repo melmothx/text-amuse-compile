@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.44 2015-10-28
+
+ - Added class to parse the muse headers
+ - Added methods to the template options to get some defaults
+
 0.43 2015-10-15
 
  - Cleanup files left by previous compilation and remove LaTeX

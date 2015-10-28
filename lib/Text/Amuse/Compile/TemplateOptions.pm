@@ -615,6 +615,8 @@ the available Beamer themes and color themes:
 
 =head2 Defaults fonts and themes
 
+=over 4
+
 =item default_mainfont
 
 =item default_sansfont
@@ -624,6 +626,8 @@ the available Beamer themes and color themes:
 =item default_beamertheme
 
 =item default_beamercolortheme
+
+=back
 
 =head2 Help
 

@@ -2,12 +2,13 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 211;
+use Test::More tests => 216;
 use Text::Amuse::Compile;
 use File::Spec;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::Utils qw/read_file/;
+use Text::Amuse::Compile::TemplateOptions;
 use Cwd;
 
 use_ok('Text::Amuse::Compile::TemplateOptions');
@@ -362,3 +363,9 @@ is $opts->tex_papersize, 'a4', "tex papersize is fine";
 $opts->papersize('15cm:10in');
 is $opts->tex_papersize, '15cm:10in', "custom tex papersize is fine";
 
+my $default = Text::Amuse::Compile::TemplateOptions->new;
+foreach my $method (qw/mainfont sansfont monofont beamertheme beamercolortheme/) {
+    my $default_method = "default_" . $method;
+    is ($default->$method, $default->$default_method, "$method ok")
+      and diag $default->$method;
+}

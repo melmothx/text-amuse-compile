@@ -164,12 +164,12 @@ The size of the body font (9, 10, 11, 12) as integer, meaning points
 sub serif_fonts {
     my @fonts = (
                  {
-                  name => 'Linux Libertine O',
-                  desc => 'Linux Libertine'
-                 },
-                 {
                   name => 'CMU Serif',
                   desc => 'Computer Modern',
+                 },
+                 {
+                  name => 'Linux Libertine O',
+                  desc => 'Linux Libertine'
                  },
                  {
                   name => 'TeX Gyre Termes',
@@ -209,13 +209,17 @@ sub serif_fonts {
 sub mono_fonts {
     my @fonts = (
                  {
+                  name => 'CMU Typewriter Text',
+                  desc => 'Computer Modern Typewriter Text',
+                 },
+                 {
                   name => 'DejaVu Sans Mono',
                   desc => 'DejaVu Sans Mono',
                  },
                  {
-                  name => 'CMU Typewriter Text',
-                  desc => 'Computer Modern Typewriter Text',
-                 },
+                  name => 'TeX Gyre Cursor',
+                  desc => 'TeX Gyre Cursor (Courier)',
+                 }
                 );
 }
 sub sans_fonts {
@@ -259,17 +263,29 @@ sub all_fonts {
     return @all;
 }
 
+sub default_mainfont {
+    return (__PACKAGE__->serif_fonts)[0]{name};
+}
+
+sub default_sansfont {
+    return (__PACKAGE__->sans_fonts)[0]{name};
+}
+
+sub default_monofont {
+    return (__PACKAGE__->mono_fonts)[0]{name};
+}
+
 has mainfont   => (is => 'rw',
                    isa => Enum[ map { $_->{name} } __PACKAGE__->all_fonts ],
-                   default => sub { 'CMU Serif' },
+                   default => sub { __PACKAGE__->default_mainfont },
                   );
 has sansfont   => (is => 'rw',
                    isa => Enum[ map { $_->{name} } __PACKAGE__->all_fonts ],
-                   default => sub { 'CMU Sans Serif' },
+                   default => sub { __PACKAGE__->default_sansfont },
                   );
 has monofont   => (is => 'rw',
                    isa => Enum[ map { $_->{name} } __PACKAGE__->all_fonts ],
-                   default => sub { 'CMU Typewriter Text' },
+                   default => sub { __PACKAGE__->default_monofont },
                   );
 
 has fontsize   => (is => 'rw',
@@ -454,9 +470,13 @@ sub beamer_themes {
     return @themes;
 }
 
+sub default_beamertheme {
+    return 'default';
+}
+
 has beamertheme => (is => 'rw',
                     isa => Enum[ __PACKAGE__->beamer_themes ],
-                    default => sub { 'default' });
+                    default => sub { __PACKAGE__->default_beamertheme });
 
 sub beamer_colorthemes {
     my @themes = (qw/default
@@ -479,9 +499,13 @@ sub beamer_colorthemes {
     return @themes;
 }
 
+sub default_beamercolortheme {
+    return 'dove';
+}
+
 has beamercolortheme => (is => 'rw',
                          isa => Enum[ __PACKAGE__->beamer_colorthemes ],
-                         default => sub { 'dove' });
+                         default => sub { __PACKAGE__->default_beamercolortheme });
 
 =head1 METHODS
 
@@ -588,6 +612,18 @@ the available Beamer themes and color themes:
 =item beamer_themes
 
 =back
+
+=head2 Defaults fonts and themes
+
+=item default_mainfont
+
+=item default_sansfont
+
+=item default_monofont
+
+=item default_beamertheme
+
+=item default_beamercolortheme
 
 =head2 Help
 

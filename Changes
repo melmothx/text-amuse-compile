@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.45 2015-10-30
+
+ - Fixed bug on fileparse() usage.
+
 0.44 2015-10-28
 
  - Added class to parse the muse headers

@@ -531,7 +531,7 @@ sub _compile_file {
     my ($self, $file) = @_;
     die "$file is not a file" unless $file && -f $file;
     # parse the filename and chdir there.
-    my ($name, $path, $suffix) = fileparse($file, '.muse', '.txt');
+    my ($name, $path, $suffix) = fileparse($file, qr{\.muse});
 
     if ($path) {
         chdir $path or die "Cannot chdir into $path from " . getcwd() . "\n" ;
@@ -640,7 +640,7 @@ sub _check_file_basename {
     my ($self, $file) = @_;
     die "Bad usage" unless $file;
     die "$file is not a file" unless -f $file;
-    my ($name, $path, $suffix) = fileparse($file, '.muse');
+    my ($name, $path, $suffix) = fileparse($file, qr{\.muse});
     die "Bad usage, not a muse file" unless $suffix;
     return File::Spec->catfile($path, $name);
 }

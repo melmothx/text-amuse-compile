@@ -52,7 +52,7 @@ like $tex, qr/Second file \\emph\{text\}/, "Found the second file body";
 like $tex, qr/Pallino Pinco/, "Found the first author";
 like $tex, qr/First file subtitle/, "Found the first text subtitle";
 like $tex, qr/Pallone Ponchi/, "Found the second file author";
-like $tex, qr/\{Second file subtitle\}/, "Found the title of the second file";
+like $tex, qr/usekomafont\{subtitle\}\{Second file subtitle\\par\}/, "Found the title of the second file";
 
 is_deeply $doc->header_as_latex,
   {
@@ -134,7 +134,7 @@ like $outtex, qr/Second file \\emph\{text\}/, "Found the second file body";
 like $outtex, qr/Pallino Pinco/, "Found the first author";
 like $outtex, qr/First file subtitle/, "Found the first text subtitle";
 like $outtex, qr/Pallone Ponchi/, "Found the second file author";
-like $outtex, qr/\{Second file subtitle\}/, "Found the title of the second file";
+like $outtex, qr/usekomafont\{subtitle\}\{Second file subtitle\\par\}/, "Found the title of the second file";
 
 like $outtex, qr/\\title\{Title is Bla \\emph\{bla\} bla\}/, "Doc title found";
 

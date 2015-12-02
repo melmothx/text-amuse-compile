@@ -68,6 +68,7 @@ t/testfile/slides.muse
 t/testfile/test.muse
 t/tex.t
 t/tex/headers.muse
+t/tex/prova.png
 t/tex/testing-no-toc.muse
 t/tex/testing.muse
 t/titlepage.t

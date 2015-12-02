@@ -40,7 +40,7 @@ test_file($file_no_toc, {
           qr/mainlanguage\{croatian\}/,
           qr/\\setmainfont\{CMU Serif\}/,
           qr/paper=5.5in:8.5in/,
-          qr/\\maketitle\s*\\cleardoublepage/s,
+          qr/\\end\{titlepage\}\s*\\cleardoublepage/s,
           qr/document\}\s*\\hyphenation\{\s*a-no-ther\ste-st\s*}/s,
          );
 
@@ -56,7 +56,7 @@ test_file($file_no_toc, {
           qr/fontsize=10pt/,
           qr/paper=a6/,
           qr/BCOR=15mm/,
-          qr/\\maketitle\s*\w/,
+          qr/\\vskip 3em\s*\\end\{center\}\\par\s*\w/s,
          );
 
 test_file($file_no_toc, {
@@ -64,7 +64,7 @@ test_file($file_no_toc, {
                          mainfont => 'Iwona',
                          twoside => 1,
                         },
-          qr/\\maketitle\s*\w/,
+          qr/\\vskip 3em\s*\\end\{center\}\\par\s*\w/s,
           qr/\\setmainfont\{Iwona\}/,
           qr/^\s+twoside,%$/m,
           qr/BCOR=0mm/,
@@ -76,7 +76,7 @@ test_file($file_with_toc, {
                            bcor => '2.5cm',
                            coverwidth => '0.1',
                           },
-          qr/\\end\{center\}\s*\\cleardoublepage\s*\\tableofcontents/s,
+          qr/\\end\{titlepage\}\s*\\cleardoublepage\s*\\tableofcontents/s,
           qr/\\includegraphics\[width=0.1\\textwidth\]\{prova.pdf\}/,
           qr/^\s+oneside,%$/m,
           qr/BCOR=2.5cm/,
@@ -94,7 +94,7 @@ test_file($file_with_toc, {
           qr/\\renewcaptionname\{russian\}\{\\contentsname\}\{Содржина\}/,
           qr/\\russianfont\[Script=Cyrillic\]\{CMU\sSerif\}/,
           qr/paper=210mm:11in/,
-          qr/\\maketitle\s*\\cleardoublepage/s,
+          qr/\\end\{titlepage\}\s*\\cleardoublepage/s,
          );
 
 
@@ -108,10 +108,10 @@ test_file($file_with_toc, {
          );
 
 test_file($file_with_full_header, { cover => 'prova.pdf' },
-          qr/\\Large\\textbf\{AuthorT/,
-          qr/\\LARGE\\textbf\{TitleT/,
-          qr/\\large DateT/,
-          qr/\\Large\\textbf\{SubtitleT/,
+          qr/usekomafont{author}{AuthorT/,
+          qr/usekomafont{title}{\\LARGE TitleT/,
+          qr/usekomafont{date}{DateT/,
+          qr/usekomafont{subtitle}{SubtitleT/,
          );
 
 test_file($file_with_toc, {
@@ -128,7 +128,7 @@ test_file($file_with_toc, {
                            papersize => 'half-a4',
                           },
           qr/paper=a5/,
-          qr/\\maketitle\s*\\cleardoublepage/s,
+          qr/\\end\{titlepage\}\s*\\cleardoublepage/s,
          );
 
 test_file({
@@ -143,7 +143,7 @@ test_file({
           qr/russian/,
           qr/Pallino.*Pinco.*Second.*author/s,
           qr/mainlanguage\{russian}.*selectlanguage\{croatian}.*selectlanguage\{russian}/s,
-          qr/\\maketitle\s*\\cleardoublepage/s,
+          qr/\\end\{titlepage\}\s*\\cleardoublepage/s,
           qr/\\setmainlanguage\{russian\}\s*
              \\newfontfamily\s*
              \\russianfont\[Script=Cyrillic\]\{CMU\sSerif\}\s*
@@ -159,7 +159,7 @@ test_file({
           },
           {
           },
-          qr/\\maketitle\s*\\cleardoublepage/s,
+          qr/\\end\{titlepage\}\s*\\cleardoublepage/s,
           qr/mainlanguage\{croatian}.*selectlanguage\{russian}.*selectlanguage\{croatian}/s,
           qr/Second.*author.*Pallino.*Pinco/s,
           qr/croatian/,

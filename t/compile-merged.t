@@ -60,7 +60,7 @@ like $outtex, qr/Second file \\emph\{text\}/, "Found the second file body";
 like $outtex, qr/Pallino Pinco/, "Found the first author";
 like $outtex, qr/First file subtitle/, "Found the first text subtitle";
 like $outtex, qr/Pallone Ponchi/, "Found the second file author";
-like $outtex, qr/\{Second file subtitle\}/, "Found the title of the second file";
+like $outtex, qr/usekomafont\{subtitle\}\{Second file subtitle\\par}/, "Found the title of the second file";
 
 like $outtex, qr/\\title\{My new shiny test}/, "Doc title found";
 

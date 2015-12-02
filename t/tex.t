@@ -18,10 +18,10 @@ binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
 if ($ENV{TEST_WITH_LATEX}) {
-    plan tests => 155;
+    plan tests => 157;
 }
 else {
-    plan tests => 138;
+    plan tests => 140;
 }
 
 
@@ -110,13 +110,18 @@ test_file($file_with_toc, {
                            cover => 'prova.png',
                           },
           qr/\\includegraphics\[width=1\\textwidth\]\{prova\.png\}/,
+          qr/\\pagestyle\{plain\}/,
          );
 
-test_file($file_with_full_header, { cover => 'prova.png' },
+test_file($file_with_full_header, {
+                                   cover => 'prova.png',
+                                   headings => 1,
+                                  },
           qr/usekomafont{author}{AuthorT/,
           qr/usekomafont{title}{\\huge TitleT/,
           qr/usekomafont{date}{DateT/,
           qr/usekomafont{subtitle}{SubtitleT/,
+          qr/\\pagestyle\{headings\}/,
          );
 
 test_file($file_with_toc, {
@@ -296,6 +301,10 @@ sub test_file {
         $out =~ s/tex$/status/;
         unlink $out unless $error;
         $out =~ s/status$/pdf/;
+        if (-f $out) {
+            unlink $out unless $error;
+        }
+        $out =~ s/pdf$/log/;
         if (-f $out) {
             unlink $out unless $error;
         }

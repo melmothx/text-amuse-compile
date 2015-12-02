@@ -662,7 +662,7 @@ sub latex {
 \newcommand*{\Slash}{\slash\hspace{0pt}}
 
 % global style
-\pagestyle{plain}
+\pagestyle{[% IF safe_options.headings %]headings[% ELSE %]plain[% END %]}
 \addtokomafont{disposition}{\rmfamily}
 \addtokomafont{descriptionlabel}{\rmfamily}
 % forbid widows/orphans

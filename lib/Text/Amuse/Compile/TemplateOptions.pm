@@ -390,6 +390,11 @@ Ignored if there is a toc.
 Do not generate a table of contents, even if the document requires
 one.
 
+=item * headings
+
+Generate the running headings in the document. Beware that this will
+get you overfull headings if you have long titles.
+
 =back
 
 =cut
@@ -417,7 +422,7 @@ has coverwidth => (is => 'rw',
 
 has nocoverpage => (is => 'rw', isa => Bool, default => sub { 0 });
 has notoc       => (is => 'rw', isa => Bool, default => sub { 0 });
-
+has headings    => (is => 'rw', isa => Bool, default => sub { 0 });
 
 =head2 Slides
 
@@ -548,6 +553,7 @@ sub config_setters {
     return (qw/papersize bcor division oneside twoside
                mainfont sansfont monofont fontsize
                sitename siteslogan site logo
+               headings
                cover coverwidth nocoverpage notoc
                opening beamertheme beamercolortheme/);
 }

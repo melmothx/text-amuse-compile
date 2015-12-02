@@ -684,7 +684,9 @@ sub latex {
 \hyphenation{ [% doc.hyphenation %] }
 [% END %]
 
-[% IF safe_options.nocoverpage %]
+[% UNLESS safe_options.nocoverpage %]
+  \begin{titlepage}
+[% END %]
   \strut\vskip 2em
   \begin{center}
   {\usekomafont{title}{\huge [% doc.header_as_latex.title %]\par}}%
@@ -694,37 +696,26 @@ sub latex {
   [% END %]
   \vskip 2em
   [% IF doc.header_defined.author %]
-  {\usekomafont{author}{[% doc.header_as_latex.author %]\par}}
+  {\usekomafont{author}{[% doc.header_as_latex.author %]\par}}%
   [% END %]
   \vskip 1.5em
-  [% IF doc.header_defined.date %]
-  {\usekomafont{date}{[% doc.header_as_latex.date %]\par}}
-  [% END %]
-  \vskip 3em
-  \end{center}\par
-[% ELSE %]
-  \begin{titlepage}
-    \begin{center}
-      \vspace*{0.05\textheight}
-      [% IF doc.header_defined.author %]
-        {\usekomafont{author}{[% doc.header_as_latex.author %]\\[\baselineskip]}}%
-      [% END %]
-      {\usekomafont{title}{\LARGE [% doc.header_as_latex.title %]\\[\baselineskip]}}%
-      [% IF doc.header_defined.subtitle %]
-        {\usekomafont{subtitle}{[% doc.header_as_latex.subtitle %]\\[\baselineskip]}}%
-      [% END %]
-      [% IF safe_options.cover %]
-      \vfill
+[% UNLESS safe_options.nocoverpage %]
+   [% IF safe_options.cover %]
+      \vskip 3em
       \includegraphics[width=[% safe_options.coverwidth %]\textwidth]{[% safe_options.cover %]}
-      [% END %]
-      \vfill
-      [% IF doc.header_defined.date %]
-        {\usekomafont{date}{[% doc.header_as_latex.date %]\\[\baselineskip]}}
-      [% ELSE %]
-        \strut
-      [% END %]
-      \strut
-    \end{center}
+   [% END %]
+   \vfill
+[% END %]
+  [% IF doc.header_defined.date %]
+  {\usekomafont{date}{[% doc.header_as_latex.date %]\par}}%
+  [% ELSE %]
+    \strut\par
+  [% END %]
+  \end{center}
+[% IF safe_options.nocoverpage %]
+  \vskip 3em
+  \par
+[% ELSE %]
   \end{titlepage}
 \cleardoublepage
 [% END %]
@@ -896,20 +887,20 @@ sub bare_latex {
 \vspace{0.1\textheight}
 
 \begin{center}
-\huge{\textbf{[% doc.header_as_latex.title %]}\par}
-\bigskip
-[% IF doc.header_defined.subtitle %]
-\LARGE{\textbf{[% doc.header_as_latex.subtitle %]}\par}
-\bigskip
-[% END %]
-[% IF doc.header_defined.author %]
-\Large{[% doc.header_as_latex.author %]\par}
-\bigskip
-[% END %]
-[% IF doc.header_defined.date %]
-\large{[% doc.header_as_latex.date %]}
-[% END %]
-
+  \strut\vskip 2em
+  {\usekomafont{title}{\huge [% doc.header_as_latex.title %]\par}}%
+  \vskip 1em
+  [% IF doc.header_defined.subtitle %]
+  {\usekomafont{subtitle}{[% doc.header_as_latex.subtitle %]\par}}%
+  [% END %]
+  \vskip 2em
+  [% IF doc.header_defined.author %]
+  {\usekomafont{author}{[% doc.header_as_latex.author %]\par}}%
+  [% END %]
+  \vskip 1.5em
+  [% IF doc.header_defined.date %]
+  {\usekomafont{date}{[% doc.header_as_latex.date %]\par}}%
+  [% END %]
 \end{center}
 
 \vfill

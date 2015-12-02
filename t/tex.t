@@ -17,7 +17,12 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 138;
+if ($ENV{TEST_WITH_LATEX}) {
+    plan tests => 155;
+}
+else {
+    plan tests => 138;
+}
 
 
 # this is the test file for the LaTeX output, which is the most
@@ -56,7 +61,7 @@ test_file($file_no_toc, {
           qr/fontsize=10pt/,
           qr/paper=a6/,
           qr/BCOR=15mm/,
-          qr/\\vskip 3em\s*\\end\{center\}\\par\s*\w/s,
+          qr/\\end\{center\}\s*\\vskip 3em\s*\\par\s*\w/s,
          );
 
 test_file($file_no_toc, {
@@ -64,20 +69,20 @@ test_file($file_no_toc, {
                          mainfont => 'Iwona',
                          twoside => 1,
                         },
-          qr/\\vskip 3em\s*\\end\{center\}\\par\s*\w/s,
+          qr/\\end\{center\}\s*\\vskip 3em\s*\\par\s*\w/s,
           qr/\\setmainfont\{Iwona\}/,
           qr/^\s+twoside,%$/m,
           qr/BCOR=0mm/,
          );
 
 test_file($file_with_toc, {
-                           cover => 'prova.pdf',
+                           cover => 'prova.png',
                            oneside => 1,
                            bcor => '2.5cm',
                            coverwidth => '0.1',
                           },
           qr/\\end\{titlepage\}\s*\\cleardoublepage\s*\\tableofcontents/s,
-          qr/\\includegraphics\[width=0.1\\textwidth\]\{prova.pdf\}/,
+          qr/\\includegraphics\[width=0.1\\textwidth\]\{prova.png\}/,
           qr/^\s+oneside,%$/m,
           qr/BCOR=2.5cm/,
          );
@@ -102,14 +107,14 @@ test_file($file_with_toc, {
                            papersize => 'generic',
                            oneside => 1,
                            twoside => 1,
-                           cover => 'prova.pdf',
+                           cover => 'prova.png',
                           },
-          qr/\\includegraphics\[width=1\\textwidth\]\{prova\.pdf\}/,
+          qr/\\includegraphics\[width=1\\textwidth\]\{prova\.png\}/,
          );
 
-test_file($file_with_full_header, { cover => 'prova.pdf' },
+test_file($file_with_full_header, { cover => 'prova.png' },
           qr/usekomafont{author}{AuthorT/,
-          qr/usekomafont{title}{\\LARGE TitleT/,
+          qr/usekomafont{title}{\\huge TitleT/,
           qr/usekomafont{date}{DateT/,
           qr/usekomafont{subtitle}{SubtitleT/,
          );
@@ -118,10 +123,10 @@ test_file($file_with_toc, {
                            papersize => 'generic',
                            oneside => 1,
                            twoside => 1,
-                           cover => 'prova.pdf',
+                           cover => 'prova.png',
                            coverwidth => 'blablabla',
                           },
-          qr/\\includegraphics\[width=1\\textwidth\]\{prova\.pdf\}/,);
+          qr/\\includegraphics\[width=1\\textwidth\]\{prova\.png\}/,);
 
 
 test_file($file_with_toc, {
@@ -193,10 +198,10 @@ test_file({
              \\hyphenation\{\s*ju-st\s*th-is\s*\}
             /sx,
           qr/\\setotherlanguages\{croatian,italian\}/,
-          qr/textbf\{TitleT.*
-             textbf\{SubtitleT.*
-             Large\{AuthorT.*
-             large\{DateT\}.*
+          qr/usekomafont\{title\}\{\\huge\ TitleT.*
+             usekomafont\{subtitle\}\{SubtitleT.*
+             usekomafont\{author\}\{AuthorT.*
+             usekomafont\{date\}\{DateT.*
              SourceT.*
              NotesT/sx,
           );
@@ -245,7 +250,8 @@ $outbody = test_file($file_no_toc, {
                     );
 sub test_file {
     my ($file, $extra, @regexps) = @_;
-    my $c = Text::Amuse::Compile->new(tex => 1, extra => $extra);
+    my $c = Text::Amuse::Compile->new(tex => 1, extra => $extra,
+                                      pdf => !!$ENV{TEST_WITH_LATEX});
     $c->compile($file);
     my $out;
     if (ref($file)) {
@@ -256,6 +262,11 @@ sub test_file {
         $out =~ s/\.muse$/.tex/;
     }
     ok (-f $out, "$out produced");
+    if ($ENV{TEST_WITH_LATEX}) {
+        my $pdf = $out;
+        $pdf =~ s/\.tex$/.pdf/;
+        ok (-f $pdf, "$pdf produced");
+    }
     my $body = read_file($out);
     # print $body;
     my $error = 0;
@@ -284,6 +295,10 @@ sub test_file {
         unlink $out unless $error;
         $out =~ s/tex$/status/;
         unlink $out unless $error;
+        $out =~ s/status$/pdf/;
+        if (-f $out) {
+            unlink $out unless $error;
+        }
     }
     return $body;
 }

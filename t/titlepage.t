@@ -51,7 +51,7 @@ for my $coverpage (0, 1) {
         ok (-f $outtex, "$outtex is fine");
         if ($pdf) {
             ok (-f $outpdf, "$outpdf is fine");
-            move($outpdf, $outpdf . ($coverpage ? '.nc' : '.cp') . '.pdf');
+            move($outpdf, $outpdf . ($coverpage ? '.cp' : '.nc') . '.pdf');
         }
         my $body = read_file($outtex);
         my @fields = split(/-/, basename($basename));

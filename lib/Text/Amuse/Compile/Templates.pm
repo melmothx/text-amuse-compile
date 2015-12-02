@@ -703,26 +703,29 @@ sub latex {
   \vskip 3em
   \end{center}\par
 [% ELSE %]
-  \thispagestyle{empty}
-  \strut\bigskip
-  \begin{center}
-    [% IF doc.header_defined.author %]
-    {\Large\textbf{[% doc.header_as_latex.author %]}\\[\baselineskip]}
-    [% END %]
-    {\LARGE\textbf{[% doc.header_as_latex.title %]\\[\baselineskip]}}
-    [% IF doc.header_defined.subtitle %]
-      {\Large\textbf{[% doc.header_as_latex.subtitle %]}\\[\baselineskip]}
-    [% END %]
-    [% IF safe_options.cover %]
-    \vfill
-    \includegraphics[width=[% safe_options.coverwidth %]\textwidth]{[% safe_options.cover %]}
-    [% END %]
-    \vfill
-    [% IF doc.header_defined.date %]
-    {\large [% doc.header_as_latex.date %]}
-    [% END %]
-    \strut
-  \end{center}
+  \begin{titlepage}
+    \begin{center}
+      \vspace*{0.05\textheight}
+      [% IF doc.header_defined.author %]
+        {\usekomafont{author}{[% doc.header_as_latex.author %]\\[\baselineskip]}}%
+      [% END %]
+      {\usekomafont{title}{\LARGE [% doc.header_as_latex.title %]\\[\baselineskip]}}%
+      [% IF doc.header_defined.subtitle %]
+        {\usekomafont{subtitle}{[% doc.header_as_latex.subtitle %]\\[\baselineskip]}}%
+      [% END %]
+      [% IF safe_options.cover %]
+      \vfill
+      \includegraphics[width=[% safe_options.coverwidth %]\textwidth]{[% safe_options.cover %]}
+      [% END %]
+      \vfill
+      [% IF doc.header_defined.date %]
+        {\usekomafont{date}{[% doc.header_as_latex.date %]\\[\baselineskip]}}
+      [% ELSE %]
+        \strut
+      [% END %]
+      \strut
+    \end{center}
+  \end{titlepage}
 \cleardoublepage
 [% END %]
 

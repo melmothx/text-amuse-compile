@@ -70,5 +70,13 @@ t/tex.t
 t/tex/headers.muse
 t/tex/testing-no-toc.muse
 t/tex/testing.muse
+t/titlepage.t
+t/titlepages/title-author-subtitle-date.muse
+t/titlepages/title-author-subtitle.muse
+t/titlepages/title-author.muse
+t/titlepages/title-date.muse
+t/titlepages/title-subtitle-date.muse
+t/titlepages/title-subtitle.muse
+t/titlepages/title.muse
 t/utils.t
 t/webfonts.t

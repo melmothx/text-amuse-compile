@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.46 2015-12-02
+
+ - Handle long author's name in documents, avoiding \maketitle
+ - Added headings option to the template
+
 0.45 2015-10-30
 
  - Fixed bug on fileparse() usage.

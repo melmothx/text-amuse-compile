@@ -684,7 +684,25 @@ sub latex {
 \hyphenation{ [% doc.hyphenation %] }
 [% END %]
 
-[% IF safe_options.cover %]
+[% IF safe_options.nocoverpage %]
+\strut\vskip 2em
+\begin{center}
+{\usekomafont{title}{\huge [% doc.header_as_latex.title %]\par}}%
+\vskip 1em
+[% IF doc.header_defined.subtitle %]
+{\usekomafont{subtitle}{[% doc.header_as_latex.subtitle %]\par}}%
+[% END %]
+\vskip 2em
+[% IF doc.header_defined.author %]
+{\usekomafont{author}{[% doc.header_as_latex.author %]\par}}
+[% END %]
+\vskip 1.5em
+[% IF doc.header_defined.date %]
+{\usekomafont{date}{[% doc.header_as_latex.date %]\par}}
+[% END %]
+\vskip 3em
+\end{center}\par
+[% ELSE %]
   \thispagestyle{empty}
   \strut\bigskip
   \begin{center}
@@ -695,18 +713,16 @@ sub latex {
     [% IF doc.header_defined.subtitle %]
       {\Large\textbf{[% doc.header_as_latex.subtitle %]}\\[\baselineskip]}
     [% END %]
+    [% IF safe_options.cover %]
     \vfill
     \includegraphics[width=[% safe_options.coverwidth %]\textwidth]{[% safe_options.cover %]}
+    [% END %]
     \vfill
     [% IF doc.header_defined.date %]
     {\large [% doc.header_as_latex.date %]}
     [% END %]
     \strut
   \end{center}
-[% ELSE %]
-\maketitle
-[% END %]
-[% UNLESS safe_options.nocoverpage %]
 \cleardoublepage
 [% END %]
 

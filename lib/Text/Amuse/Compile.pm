@@ -19,6 +19,7 @@ use Text::Amuse::Compile::Webfonts;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Merged;
 use Text::Amuse::Compile::MuseHeader;
+use Text::Amuse::Compile::FileName;
 
 use Cwd;
 use Fcntl qw/:flock/;
@@ -509,7 +510,7 @@ sub _compile_virtual_file {
     my $suffix = delete($virtual{suffix}) || '.muse';
     my $name =   delete($virtual{name})   || 'virtual';
     $self->logger->("Working on virtual file in " . getcwd(). "\n");
-    my @filelist = map { $_ . $suffix } @$files;
+    my @filelist = map { Text::Amuse::Compile::FileName->new($_) } @$files;
     my $doc = Text::Amuse::Compile::Merged->new(files => \@filelist, %virtual);
     my $muse = Text::Amuse::Compile::File->new(
                                                name => $name,
@@ -529,26 +530,26 @@ sub _compile_virtual_file {
 
 sub _compile_file {
     my ($self, $file) = @_;
-    die "$file is not a file" unless $file && -f $file;
-    # parse the filename and chdir there.
-    my ($name, $path, $suffix) = fileparse($file, qr{\.muse});
+    my $fileobj = Text::Amuse::Compile::FileName->new($file);
+    die "$file is not a file" unless $fileobj && -f $fileobj->full_path;
 
-    if ($path) {
+    if (my $path = $fileobj->path) {
         chdir $path or die "Cannot chdir into $path from " . getcwd() . "\n" ;
     };
 
-    my $filename = $name . $suffix;
+    my $filename = $fileobj->filename;
     $self->logger->("Working on $filename file in " . getcwd(). "\n");
 
     my %args = (
-                name => $name,
-                suffix => $suffix,
+                name => $fileobj->name,
+                suffix => $fileobj->suffix,
                 templates => $self->templates,
                 options => { $self->extra },
                 logger => $self->logger,
                 standalone => $self->standalone,
                 webfonts => $self->webfonts,
                 luatex => $self->luatex,
+                fileobj => $fileobj,
                );
 
     my $muse = Text::Amuse::Compile::File->new(%args);

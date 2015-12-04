@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use File::Spec::Functions qw/catfile catdir/;
 use Text::Amuse::Compile;
-use Test::More tests => 1;
+use Test::More tests => 8;
 
 my $muse = <<'MUSE';
 #title The title ()
@@ -94,7 +94,7 @@ ok($c->compile({
                 name => 'new-test',
                 files => [
                           $files[0] . ':1,3',
-                          $files[1] . ':3,9',
+                          $files[1] . ':0,3,9',
                           $files[2] . ':9,100',
                          ],
                 title => 'Hello World',

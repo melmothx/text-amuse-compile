@@ -60,7 +60,14 @@ sub new {
     my (%languages, %language_codes);
     my ($main_lang, $main_lang_code);
     foreach my $file (@$files) {
-        my $doc = Text::Amuse->new(file => $file);
+        my %args;
+        if (ref($file)) {
+            %args = $file->text_amuse_constructor;
+        }
+        else {
+            %args = (file => $file);
+        }
+        my $doc = Text::Amuse->new(%args);
         push @docs, $doc;
 
         my $current_lang_code = $doc->language_code;

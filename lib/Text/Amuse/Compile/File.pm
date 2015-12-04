@@ -59,6 +59,10 @@ If it's a virtual file which doesn't exit on the disk (a merged one)
 
 =item templates
 
+=item fileobj
+
+An optional L<Text::Amuse::Compile::FileName> object (for partials)
+
 =item standalone
 
 When set to true, the tex output will obey bcor and twoside/oneside.
@@ -119,6 +123,7 @@ has virtual => (is => 'ro', isa => Bool, default => sub { 0 });
 has standalone => (is => 'ro', isa => Bool, default => sub { 0 });
 has tt => (is => 'ro', isa => Object, default => sub { Template::Tiny->new });
 has logger => (is => 'ro', isa => Maybe[CodeRef]);
+has fileobj => (is => 'ro', isa => Maybe[Object]);
 has webfonts => (is => 'ro', isa => Maybe[Object]);
 has document => (is => 'lazy', isa => Object);
 has options => (is => 'ro', isa => HashRef, default => sub { +{} });
@@ -151,7 +156,14 @@ sub _build_wants_slides {
 
 sub _build_document {
     my $self = shift;
-    return Text::Amuse->new(file => $self->muse_file);
+    my %args;
+    if (my $fileobj = $self->fileobj) {
+        %args = $fileobj->text_amuse_constructor;
+    }
+    else {
+        %args = (file => $self->muse_file);
+    }
+    return Text::Amuse->new(%args);
 }
 
 sub _build_tex_options {

@@ -2,6 +2,7 @@ bin/muse-compile.pl
 Changes
 lib/Text/Amuse/Compile.pm
 lib/Text/Amuse/Compile/File.pm
+lib/Text/Amuse/Compile/FileName.pm
 lib/Text/Amuse/Compile/Merged.pm
 lib/Text/Amuse/Compile/MuseHeader.pm
 lib/Text/Amuse/Compile/TemplateOptions.pm
@@ -23,6 +24,7 @@ t/coverpage.t
 t/epub-toc.t
 t/epub.t
 t/failures.t
+t/filenames.t
 t/header.t
 t/html.t
 t/langs.t
@@ -46,6 +48,7 @@ t/notoc.t
 t/options-f/dir1/1/options1.muse
 t/options-f/dir2/2/options2.muse
 t/options.t
+t/partials.t
 t/pdf.t
 t/pipe-exec.t
 t/pipe.t

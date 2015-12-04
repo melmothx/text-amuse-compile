@@ -639,16 +639,14 @@ file.
 
 sub _check_file_basename {
     my ($self, $file) = @_;
-    die "Bad usage" unless $file;
-    die "$file is not a file" unless -f $file;
-    my ($name, $path, $suffix) = fileparse($file, qr{\.muse});
-    die "Bad usage, not a muse file" unless $suffix;
-    return File::Spec->catfile($path, $name);
+    my $fileobj = Text::Amuse::Compile::FileName->new($file);
+    return File::Spec->catfile($fileobj->path, $fileobj->name);
 }
 
 sub parse_muse_header {
     my ($self, $file) = @_;
-    return Text::Amuse::Compile::MuseHeader->new(muse_fast_scan_header($file));
+    my $path = Text::Amuse::Compile::FileName->new($file)->full_path;
+    return Text::Amuse::Compile::MuseHeader->new(muse_fast_scan_header($path));
 }
 
 

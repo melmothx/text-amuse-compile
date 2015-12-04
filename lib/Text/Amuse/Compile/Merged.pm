@@ -200,16 +200,7 @@ sub raw_html_toc {
         my @pieces = $doc->as_splat_html;
         my @toc = $doc->raw_html_toc;
         my $missing = scalar(@pieces) - scalar(@toc);
-        if ($missing > 1 or $missing < 0) {
-            die "This shouldn't happen: missing pieces: $missing";
-        }
-        elsif ($missing == 1) {
-            push @out, {
-                        index => $index++,
-                        level => 2,
-                        string => "start body",
-                       };
-        }
+        die "This shouldn't happen: missing pieces: $missing" if $missing;
         # main loop
         foreach my $entry (@toc) {
             push @out, {

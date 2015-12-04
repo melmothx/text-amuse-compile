@@ -599,21 +599,9 @@ sub epub {
 
     my @pieces = $text->as_splat_html;
     my @toc = $text->raw_html_toc;
-    my $missing = scalar(@pieces) - scalar(@toc);
-    # this shouldn't happen
-
-    # print Dumper(\@toc);
-
-    if ($missing > 1 or $missing < 0) {
-        # $self->log_info(Dumper(\@pieces), Dumper(\@toc));
+    # fixed in 0.51
+    if (my $missing = scalar(@pieces) - scalar(@toc)) {
         $self->log_fatal("This shouldn't happen: missing pieces: $missing");
-    }
-    elsif ($missing == 1) {
-        unshift @toc, {
-                       index => 0,
-                       level => 1,
-                       string => "start body",
-                      };
     }
     my $epub = EBook::EPUB::Lite->new;
 

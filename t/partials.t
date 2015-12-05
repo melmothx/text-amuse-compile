@@ -7,11 +7,18 @@ use File::Spec::Functions qw/catfile catdir/;
 use Text::Amuse::Compile;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use Text::Amuse::Compile::Utils qw/read_file write_file/;
-use Test::More tests => 37;
+use Test::More tests => 133;
+my $builder = Test::More->builder;
+binmode $builder->output,         ":utf8";
+binmode $builder->failure_output, ":utf8";
+binmode $builder->todo_output,    ":utf8";
+binmode STDOUT, ':encoding(utf-8)';
+binmode STDERR, ':encoding(utf-8)';
 
 my $muse = <<'MUSE';
 #title The title ()
 #author The author ()
+#notes just a test notes field
 
 First chunk àà (0)
 
@@ -82,7 +89,7 @@ for my $file (@files) {
     like $body, $missing;
     write_file($filename, $body);
     ok($c->compile($filename), "Plain $filename is ok");
-    ok($c->compile($filename . ':0,1,3,9,100'));
+    ok($c->compile($filename . ':0,1,3,9,100,pre,post'));
     foreach my $ext ('.tex', '.html') {
         my $ext_body = read_file(catfile($wd, $file . $ext));
         like $ext_body, $expected, "Chunks found";
@@ -125,9 +132,9 @@ my $check_body = qr/Hello\ World
                     path => $wd,
                     name => 'new-test',
                     files => [
-                              $files[0] . ':1,3',
-                              $files[1] . ':0,3,9',
-                              $files[2] . ':9,100',
+                              $files[0] . ':pre,1,3,post',
+                              $files[1] . ':pre,0,3,9,post',
+                              $files[2] . ':pre,9,100,post',
                              ],
                     title => 'Hello World',
                    }), "new-test compiled");
@@ -144,6 +151,76 @@ my $check_body = qr/Hello\ World
   SKIP: {
         skip "Not testing pdf", 1 unless $ENV{TEST_WITH_LATEX};
         ok(-f catfile($wd, 'new-test.pdf'));
+    }
+}
+
+# check preamble and postamble
+
+# $c = Text::Amuse::Compile->new(epub => 1, tex => 1);
+
+foreach my $spec ({
+                   pre => 1,
+                   1 => 1,
+                   post => 1,
+                  },
+                  {
+                   pre => 1,
+                   1 => 1,
+                  },
+                  {
+                   post => 1,
+                   1 => 1,
+                  },
+                  {
+                   1 => 1,
+                  }) {
+    my $specstring = join(',', keys %$spec);
+    my $name = 'muse-' .  $specstring . '-merged';
+    $name =~ s/,/-/g;
+    ok($c->compile({
+                    path => $wd,
+                    name => $name,
+                    title => $name,
+                    files => [ $files[0] . ':' . $specstring ],
+                   }));
+    ok($c->compile(catfile($wd, $files[0] . '.muse:' . $specstring)));
+    my $index = 0;
+    my $match_pre = qr{The\ title\ -\ first\ -\ \(\)}sx;
+    my $match_pre_tex = qr{\\huge\s*$match_pre}s;
+    my $match_pre_epub = qr{<h1[^>]*?>\s*$match_pre\s*</h1>}s;
+    my $match_post = qr{just a test notes field};
+    foreach my $finalname ($files[0], $name) {
+        $index++;
+        my $epub = catfile($wd, $finalname . '.epub');
+        my $tex = catfile($wd, $finalname . '.tex');
+      SKIP: {
+            skip "pdf $finalname not required", 1 unless $ENV{TEST_WITH_LATEX};
+            ok(-f catfile($wd, "$finalname.pdf", "pdf $finalname created"));
+        }
+        ok (-f $tex, "$tex created");
+        ok (-f $epub, "$epub created");
+        my $tex_body = read_file($tex);
+        my $epub_body = _get_epub_xhtml($epub);
+        for my $body ($tex_body, $epub_body) {
+            like $body, qr/First part body ćđ - first/, "body matches";
+            unlike $body, $missing;
+        }
+        if ($spec->{pre}) {
+            like $tex_body, $match_pre_tex, "tex body for $finalname has pre";
+            like $epub_body, $match_pre_epub, "epub body for $finalname has pre";
+        }
+        else {
+            unlike $tex_body, $match_pre_tex, "tex body for $finalname has no pre";
+            unlike $epub_body, $match_pre_epub, "epub body for $finalname has no pre";
+        }
+        if ($spec->{post}) {
+            like $tex_body, $match_post, "tex body for $finalname has post";
+            like $epub_body, $match_post, "epub body for $finalname has post";
+        }
+        else {
+            unlike $tex_body, $match_post, "tex body for $finalname has no post";
+            unlike $epub_body, $match_post, "epub body for $finalname has no post";
+        }
     }
 }
 

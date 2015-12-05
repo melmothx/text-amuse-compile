@@ -283,11 +283,21 @@ sub as_latex {
 
 Always returns true
 
+=head2 wants_postamble
+
+Always returns true
+
+=head2 wants_preamble
+
+Always returns true
+
 =cut
 
-sub wants_toc {
-    return 1;
-}
+sub wants_toc       { return 1; }
+
+sub wants_postamble { return 1; }
+
+sub wants_preamble  { return 1; }
 
 =head2 is_deleted
 

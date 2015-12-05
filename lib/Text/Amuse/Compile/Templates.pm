@@ -202,6 +202,7 @@ sub html {
 </head>
 <body>
  <div id="page">
+  [% IF doc.wants_preamble %]
   [% IF doc.header_defined.author %]
   <h2 class="amw-text-author">[% doc.header_as_html.author %]</h2>
   [% END %]
@@ -212,6 +213,7 @@ sub html {
   [% IF doc.header_defined.date %]
   <h3 class="amw-text-date">[% doc.header_as_html.date %]</h3>
   [% END  %]
+  [% END %]
   [% IF doc.toc_as_html %]
   <div class="table-of-contents">
   [% doc.toc_as_html %]
@@ -221,6 +223,7 @@ sub html {
 [% doc.as_html %]
  </div>
   <hr />
+  [% IF doc.wants_postamble %]
   <div id="impressum">
     [% IF doc.header_defined.source %]
     <div class="amw-text-source" id="source">
@@ -233,6 +236,7 @@ sub html {
     </div>
     [% END %]
   </div>
+  [% END %]
 </div>
 </body>
 </html>
@@ -525,6 +529,7 @@ sub title_page_html {
         return $ref;
     }
     my $html = <<'EOF';
+[% IF doc.wants_preamble %]
 <div id="first-page-title-page">
   [% IF doc.header_defined.author %]
   <h2 class="amw-text-author">[% doc.header_as_html.author %]</h2>
@@ -537,7 +542,11 @@ sub title_page_html {
   <h3 class="amw-text-date">[% doc.header_as_html.date %]</h3>
   [% END  %]
 </div>
-<hr />
+[% END %]
+<div style="padding-top: 3em; padding-bottom: 3em; text-align:center">
+ <strong>* * * * *</strong>
+</div>
+[% IF doc.wants_postamble %]
 <div id="impressum-title-page">
   [% IF doc.header_defined.source %]
   <div class="amw-text-source" id="source">
@@ -550,6 +559,7 @@ sub title_page_html {
   </div>
   [% END %]
 </div>
+[% END %]
 EOF
     return \$html;
 }
@@ -689,6 +699,7 @@ sub latex {
 [% END %]
   \strut\vskip 2em
   \begin{center}
+[% IF doc.wants_preamble %]
   {\usekomafont{title}{\huge [% doc.header_as_latex.title %]\par}}%
   \vskip 1em
   [% IF doc.header_defined.subtitle %]
@@ -699,6 +710,9 @@ sub latex {
   {\usekomafont{author}{[% doc.header_as_latex.author %]\par}}%
   [% END %]
   \vskip 1.5em
+[% ELSE %]
+\strut
+[% END %]
 [% UNLESS safe_options.nocoverpage %]
    [% IF safe_options.cover %]
       \vskip 3em
@@ -706,11 +720,15 @@ sub latex {
    [% END %]
    \vfill
 [% END %]
+[% IF doc.wants_preamble %]
   [% IF doc.header_defined.date %]
   {\usekomafont{date}{[% doc.header_as_latex.date %]\par}}%
   [% ELSE %]
     \strut\par
   [% END %]
+[% ELSE %]
+\strut
+[% END %]
   \end{center}
 [% IF safe_options.nocoverpage %]
   \vskip 3em
@@ -758,6 +776,7 @@ sub latex {
 
 \begin{center}
 
+[% IF doc.wants_preamble %]
 [% doc.header_as_latex.author     %]
 
 [% doc.header_as_latex.title      %]
@@ -765,12 +784,19 @@ sub latex {
 [% doc.header_as_latex.subtitle   %]
 
 [% doc.header_as_latex.date       %]
+[% ELSE %]
+\strut
+[% END %]
 
 \bigskip
 
+[% IF doc.wants_postamble %]
 [% doc.header_as_latex.source     %]
 
 [% doc.header_as_latex.notes      %]
+[% ELSE %]
+\strut
+[% END %]
 
 [% IF safe_options.site %]
 \bigskip
@@ -877,9 +903,11 @@ sub bare_latex {
 
 \cleardoublepage
 
+\strut
+
 \thispagestyle{empty}
 
-\strut
+[% IF doc.wants_preamble %]
 
 \phantomsection
 \addcontentsline{toc}{part}{[% doc.header_as_latex.title %]}
@@ -903,7 +931,18 @@ sub bare_latex {
   [% END %]
 \end{center}
 
+[% END %]
+
 \vfill
+
+% put some material here just in case we have an empty page
+\begin{center}
+{\large\textbf{* * * * *}}
+\end{center}
+
+\vfill
+
+[% IF doc.wants_postamble %]
 
 [% IF doc.header_defined.source %]
 \begin{center}
@@ -915,6 +954,10 @@ sub bare_latex {
 \begin{center}
 [% doc.header_as_latex.notes      %]
 \end{center}
+[% END %]
+
+[% ELSE %]
+\strut
 [% END %]
 
 \cleardoublepage

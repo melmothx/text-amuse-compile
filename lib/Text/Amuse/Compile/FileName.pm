@@ -45,9 +45,9 @@ output).
 sub new {
     my ($class, $filename) = @_;
     die "Missing filename" unless defined $filename;
-    my $fragment = qr/\:
-                      (?: [0-9] | [1-9][0-9]+ )
-                      (?: , (?:[0-9]|[1-9][0-9]+))*
+    my $fragment_definition = qr/(?: [0-9] | [1-9][0-9]+ | pre | post )/x;
+    my $fragment = qr/\: $fragment_definition
+                      (?: , $fragment_definition )*
                      /x;
     my $ext = qr{\.muse};
     my @fragments;

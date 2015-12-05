@@ -630,13 +630,13 @@ sub epub {
     if ($text->header_defined->{author}) {
         my $author = $header->{author};
         $epub->add_author($self->_clean_html($author));
-        $titlepage .= "<h2>$author</h2>\n";
+        $titlepage .= "<h2>$author</h2>\n" if $text->wants_preamble;
     }
 
     if ($text->header_defined->{title}) {
         my $t = $header->{title};
         $epub->add_title($self->_clean_html($t));
-        $titlepage .= "<h1>$t</h1>\n";
+        $titlepage .= "<h1>$t</h1>\n" if $text->wants_preamble;
     }
     else {
         $epub->add_title('Untitled');
@@ -644,13 +644,13 @@ sub epub {
 
     if ($text->header_defined->{subtitle}) {
         my $st = $header->{subtitle};
-        $titlepage .= "<h2>$st</h2>\n"
+        $titlepage .= "<h2>$st</h2>\n" if $text->wants_preamble;
     }
     if ($text->header_defined->{date}) {
         if ($header->{date} =~ m/([0-9]{4})/) {
             $epub->add_date($1);
         }
-        $titlepage .= "<h3>$header->{date}</h3>"
+        $titlepage .= "<h3>$header->{date}</h3>" if $text->wants_preamble;
     }
 
     $epub->add_language($text->language_code);
@@ -658,13 +658,13 @@ sub epub {
     if ($text->header_defined->{source}) {
         my $source = $header->{source};
         $epub->add_source($self->_clean_html($source));
-        $titlepage .= "<p>$source</p>";
+        $titlepage .= "<p>$source</p>" if $text->wants_postamble;
     }
 
     if ($text->header_defined->{notes}) {
         my $notes = $header->{notes};
         $epub->add_description($self->_clean_html($notes));
-        $titlepage .= "<p>$notes</p>";
+        $titlepage .= "<p>$notes</p>" if $text->wants_postamble;
     }
 
     # create the front page

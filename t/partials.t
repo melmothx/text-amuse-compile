@@ -195,7 +195,7 @@ foreach my $spec ({
         my $tex = catfile($wd, $finalname . '.tex');
       SKIP: {
             skip "pdf $finalname not required", 1 unless $ENV{TEST_WITH_LATEX};
-            ok(-f catfile($wd, "$finalname.pdf", "pdf $finalname created"));
+            ok(-f catfile($wd, "$finalname.pdf"), "pdf $finalname created");
         }
         ok (-f $tex, "$tex created");
         ok (-f $epub, "$epub created");

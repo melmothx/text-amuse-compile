@@ -6,7 +6,7 @@ use utf8;
 use File::Basename;
 
 use Text::Amuse::Compile::FileName;
-use Test::More tests => 40;
+use Test::More tests => 50;
 
 for my $fstype (qw/unix mswin32/) {
     fileparse_set_fstype($fstype);
@@ -40,6 +40,13 @@ for my $fstype (qw/unix mswin32/) {
                   "constructor ok for $file");
         ok ($obj->path, "Path is " . $obj->path);
         is $obj->name_with_fragments, $spec;
+        if ($spec =~ m/:/) {
+            $spec =~ s/:/\.muse:/;
+        }
+        else {
+            $spec =~ s/$/\.muse/;
+        }
+        is $obj->name_with_ext_and_fragments, $spec, "$spec ok";
     }
 }
 

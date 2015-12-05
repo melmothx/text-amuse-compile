@@ -72,6 +72,15 @@ sub path { shift->{path} };
 sub suffix { shift->{suffix} };
 sub fragments { return @{ shift->{fragments} || [] } }
 
+sub name_with_fragments {
+    my $self = shift;
+    my $name = $self->name;
+    if (my @fragments = $self->fragments) {
+        $name .= ':' . join(',', @fragments);
+    }
+    return $name;
+}
+
 sub filename {
     my $self = shift;
     return $self->name . $self->suffix;

@@ -5,7 +5,9 @@ use strict;
 use warnings;
 use File::Spec::Functions qw/catfile catdir/;
 use Text::Amuse::Compile;
-use Test::More tests => 8;
+use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
+use Text::Amuse::Compile::Utils qw/read_file write_file/;
+use Test::More tests => 10;
 
 my $muse = <<'MUSE';
 #title The title ()
@@ -73,29 +75,66 @@ for my $file (@files) {
     my $filename = catfile($wd, $file. '.muse');
     my $body = $muse;
     $body =~ s/\(/- $file - (/g;
-    open (my $fh, '>:encoding(utf-8)', $filename) or die $!;
-    print $fh $body;
-    close $fh;
+    write_file($filename, $body);
     ok($c->compile($filename), "Plain $filename is ok");
     ok($c->compile($filename . ':1,3,9'));
 }
 
+my $check_body = qr/Hello\ World
+                    .*
+                    The\ title\ -\ first
+                    .*
+                    First\ part\ body\ ćđ\ -\ first\ -\ \(1\)
+                    .*
+                    First\ section\ body\ -\ first\ -\ \(3\)
+                    .*
+                    First\ chunk\ àà\ -\ second\ -\  \(0\)
+                    .*
+                    First\ section\ body\ -\ second\ -\ \(3\)
+                    .*
+                    Third\ section\ -\ second\ -\ \(9\)
+                    .*
+                    Third\ section\ -\ third\ -\ \(9\)
+                   /xsi;
+my $missing = qr/\([245678]\)/;
+{
+    ok($c->compile({
+                    path => $wd,
+                    name => 'new-test',
+                    files => \@files,
+                    title => 'Hello World',
+                   }), "plain virtual compiled ok");
+    ok($c->compile({
+                    path => $wd,
+                    name => 'new-test',
+                    files => [
+                              $files[0] . ':1,3',
+                              $files[1] . ':0,3,9',
+                              $files[2] . ':9,100',
+                             ],
+                    title => 'Hello World',
+                   }), "new-test compiled");
+    my $epub_body = _get_epub_xhtml(catfile($wd, 'new-test.epub'));
+    $epub_body =~ s/\n\n+/\n/gs;
+    like $epub_body, $check_body, "epub looks fine";
+    unlike $epub_body, $missing, "epub has not the excluded parts";
+}
 
-ok($c->compile({
-                path => $wd,
-                name => 'new-test',
-                files => \@files,
-                title => 'Hello World',
-               }), "plain virtual compiled ok");
-
-
-ok($c->compile({
-                path => $wd,
-                name => 'new-test',
-                files => [
-                          $files[0] . ':1,3',
-                          $files[1] . ':0,3,9',
-                          $files[2] . ':9,100',
-                         ],
-                title => 'Hello World',
-               }), "new-test compiled");
+# same as compile-merged
+sub _get_epub_xhtml {
+    my $epub = shift;
+    my $zip = Archive::Zip->new;
+    die "Couldn't read $epub" if $zip->read($epub) != AZ_OK;
+    my $tmpdir = File::Temp->newdir(CLEANUP => 1);
+    $zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
+      or die "Couldn't extract $epub OPS into $tmpdir";
+    opendir (my $dh, $tmpdir->dirname) or die $!;
+    my @pieces = sort grep { /\Apiece\d+\.xhtml\z/ } readdir($dh);
+    closedir $dh;
+    my @html;
+    foreach my $piece ('toc.ncx', 'titlepage.xhtml', @pieces) {
+        push @html, "<!-- $piece -->\n",
+          read_file(File::Spec->catfile($tmpdir->dirname, $piece));
+    }
+    return join('', @html);
+}

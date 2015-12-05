@@ -20,7 +20,7 @@ WriteMakefile(
     },
     PREREQ_PM => {
         # ours
-        'Text::Amuse' => 0.52,
+        'Text::Amuse' => 0.53,
         'PDF::Imposition' => 0.14,
         'EBook::EPUB::Lite' => 0.71,
         # needed

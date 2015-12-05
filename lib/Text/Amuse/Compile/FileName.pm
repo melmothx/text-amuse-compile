@@ -38,6 +38,12 @@ output).
 
 =head2 fragments
 
+=head2 fragments_specification
+
+=head2 name_with_ext_and_fragments
+
+=head2 name_with_fragments
+
 =head2 text_amuse_constructor
 
 =cut

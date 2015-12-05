@@ -7,7 +7,7 @@ use File::Spec::Functions qw/catfile catdir/;
 use Text::Amuse::Compile;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use Text::Amuse::Compile::Utils qw/read_file write_file/;
-use Test::More tests => 10;
+use Test::More tests => 37;
 
 my $muse = <<'MUSE';
 #title The title ()
@@ -69,15 +69,32 @@ diag "Working in $wd";
 my @files = (qw/first second third/);
 
 # populate
-my $c = Text::Amuse::Compile->new(tex => 1, html => 1, epub => 1);
+my $c = Text::Amuse::Compile->new(tex => 1, html => 1, epub => 1,
+                                  pdf => !!$ENV{TEST_WITH_LATEX});
+
+my $missing = qr/\([245678]\)/;
+my $expected = qr/\(0\).*\(1\).*\(3\).*\(9\)/s;
 
 for my $file (@files) {
     my $filename = catfile($wd, $file. '.muse');
     my $body = $muse;
     $body =~ s/\(/- $file - (/g;
+    like $body, $missing;
     write_file($filename, $body);
     ok($c->compile($filename), "Plain $filename is ok");
-    ok($c->compile($filename . ':1,3,9'));
+    ok($c->compile($filename . ':0,1,3,9,100'));
+    foreach my $ext ('.tex', '.html') {
+        my $ext_body = read_file(catfile($wd, $file . $ext));
+        like $ext_body, $expected, "Chunks found";
+        unlike $ext_body, $missing, "Missing chunks not found";
+    }
+    my $epub_body = _get_epub_xhtml(catfile($wd, $file . '.epub'));
+    like $epub_body, $expected, "EPUB looks fine";
+    unlike $epub_body, $missing, "Missing chunks not found in epub";
+  SKIP: {
+        skip "Not testing pdf", 1 unless $ENV{TEST_WITH_LATEX};
+        ok(-f catfile($wd, $file . '.pdf'));
+    }
 }
 
 my $check_body = qr/Hello\ World
@@ -96,7 +113,7 @@ my $check_body = qr/Hello\ World
                     .*
                     Third\ section\ -\ third\ -\ \(9\)
                    /xsi;
-my $missing = qr/\([245678]\)/;
+
 {
     ok($c->compile({
                     path => $wd,
@@ -118,6 +135,16 @@ my $missing = qr/\([245678]\)/;
     $epub_body =~ s/\n\n+/\n/gs;
     like $epub_body, $check_body, "epub looks fine";
     unlike $epub_body, $missing, "epub has not the excluded parts";
+    foreach my $ext ('.tex') {
+        # html has no support for merged, yet
+        my $ext_body = read_file(catfile($wd, 'new-test' . $ext));
+        like $ext_body, $check_body, "body for $ext is ok";
+        unlike $ext_body, $missing, "body for $ext has no excluded pieces";
+    }
+  SKIP: {
+        skip "Not testing pdf", 1 unless $ENV{TEST_WITH_LATEX};
+        ok(-f catfile($wd, 'new-test.pdf'));
+    }
 }
 
 # same as compile-merged

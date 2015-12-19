@@ -903,11 +903,12 @@ sub bare_latex {
 
 \cleardoublepage
 
+[% IF doc.wants_preamble %]
+% start titlepage
+
 \strut
 
 \thispagestyle{empty}
-
-[% IF doc.wants_preamble %]
 
 \phantomsection
 \addcontentsline{toc}{part}{[% doc.header_as_latex.title %]}
@@ -931,18 +932,17 @@ sub bare_latex {
   [% END %]
 \end{center}
 
+% end titlepage
+
+\cleardoublepage
+
 [% END %]
 
-\vfill
-
-% put some material here just in case we have an empty page
-\begin{center}
-{\large\textbf{* * * * *}}
-\end{center}
-
-\vfill
+[% doc.as_latex %]
 
 [% IF doc.wants_postamble %]
+\strut
+\vfill
 
 [% IF doc.header_defined.source %]
 \begin{center}
@@ -956,13 +956,7 @@ sub bare_latex {
 \end{center}
 [% END %]
 
-[% ELSE %]
-\strut
 [% END %]
-
-\cleardoublepage
-
-[% doc.as_latex %]
 
 LATEX
     return \$latex;

@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.51 2015-12-19
+
+ - Layout fixes for bare tex output: do not put the postamble in the
+   title page, but append it to the end of the body.
+
 0.50 2015-12-05
 
  - Handle partials

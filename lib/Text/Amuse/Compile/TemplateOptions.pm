@@ -346,7 +346,7 @@ sub _check_filename {
         # sane filename;
         return $1;
     }
-    die "$filename is neither absolute and existing or a bare name without specail characters";
+    die "$filename is neither absolute and existing or a bare name without special characters";
 }
 
 has sitename   => (is => 'rw', isa => Str, default => sub { '' });

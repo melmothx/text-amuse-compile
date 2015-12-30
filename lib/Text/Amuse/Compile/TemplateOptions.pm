@@ -81,9 +81,14 @@ sub _get_papersize {
                    'half-a4' => 'a5',
                    'half-lt' => '5.5in:8.5in',
                    generic => '210mm:11in',
+                   a3 => 'a3',
                    a4 => 'a4',
                    a5 => 'a5',
                    a6 => 'a6',
+                   b3 => 'b3',
+                   b4 => 'b4',
+                   b5 => 'b5',
+                   b6 => 'b6',
                    letter => 'letter',
                   );
     if ($paper) {

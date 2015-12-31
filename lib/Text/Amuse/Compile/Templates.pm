@@ -596,6 +596,7 @@ sub latex {
     my $latex = <<'EOF';
 \documentclass[DIV=[% safe_options.division %],%
                BCOR=[% safe_options.bcor %],%
+               headinclude=[% IF safe_options.headings %]true[% ELSE %]false[% END %],%
                footinclude=false,[% IF safe_options.opening %]open=[% safe_options.opening %],[% END %]%
                fontsize=[% safe_options.fontsize %]pt,%
                [% safe_options.paging %],%
@@ -620,6 +621,56 @@ sub latex {
 [% IF safe_options.mainlanguage_toc_name %]
 \renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}
 [% END %]
+
+% global style
+[% IF safe_options.headings %]
+\usepackage{scrlayer-scrpage}
+\pagestyle{scrheadings}
+[% IF safe_options.headings.title_subtitle %]
+\lehead{\pagemark}
+\rohead{\pagemark}
+\rehead{[% doc.header_as_latex.title %]}
+\lohead{[% doc.header_as_latex.subtitle %]}
+[% END %]
+[% IF safe_options.headings.author_title %]
+\lehead{\pagemark}
+\rohead{\pagemark}
+\rehead{[% doc.header_as_latex.author %]}
+\lohead{[% doc.header_as_latex.title %]}
+[% END %]
+[% IF safe_options.headings.section_subsection %]
+\automark[subsection]{section}
+\ohead[]{\pagemark}
+\ihead[]{\headmark}
+[% END %]
+[% IF safe_options.headings.chapter_section %]
+\automark[section]{chapter}
+\ohead[]{\pagemark}
+\ihead[]{\headmark}
+[% END %]
+[% IF safe_options.headings.title_chapter %]
+\automark[chapter]{chapter}
+\lehead{\pagemark}
+\rohead{\pagemark}
+\rehead{[% doc.header_as_latex.title %]}
+\lohead{\headmark}
+[% END %]
+[% IF safe_options.headings.title_section %]
+\automark[section]{section}
+\lehead{\pagemark}
+\rohead{\pagemark}
+\rehead{[% doc.header_as_latex.title %]}
+\lohead{\headmark}
+[% END %]
+\chead[]{}
+\ifoot[]{}
+\cfoot[]{}
+\ofoot[]{}
+[% ELSE %]
+\pagestyle{plain}
+[% END %]
+
+
 
 \usepackage{microtype} % you need an *updated* texlive 2012, but harmless
 \usepackage{graphicx}
@@ -671,8 +722,6 @@ sub latex {
 
 \newcommand*{\Slash}{\slash\hspace{0pt}}
 
-% global style
-\pagestyle{[% IF safe_options.headings %]headings[% ELSE %]plain[% END %]}
 \addtokomafont{disposition}{\rmfamily}
 \addtokomafont{descriptionlabel}{\rmfamily}
 % forbid widows/orphans

@@ -400,6 +400,24 @@ one.
 Generate the running headings in the document. Beware that this will
 get you overfull headings if you have long titles.
 
+Available values (which should be self-descriptive).
+
+=over 4
+
+=item title_subtitle
+
+=item author_title
+
+=item section_subsection
+
+=item chapter_section
+
+=item title_section
+
+=item title_chapter
+
+=back
+
 =back
 
 =cut
@@ -427,7 +445,54 @@ has coverwidth => (is => 'rw',
 
 has nocoverpage => (is => 'rw', isa => Bool, default => sub { 0 });
 has notoc       => (is => 'rw', isa => Bool, default => sub { 0 });
-has headings    => (is => 'rw', isa => Bool, default => sub { 0 });
+
+sub all_headings {
+    my @headings = (
+                    {
+                     name => 'title_subtitle',
+                     desc => 'Title and subtitle',
+                    },
+                    {
+                     name => 'author_title',
+                     desc => 'Author and title',
+                    },
+                    {
+                     name => 'section_subsection',
+                     desc => 'Section and subsection',
+                    },
+                    {
+                     name => 'chapter_section',
+                     desc => 'Chapter and section',
+                    },
+                    {
+                     name => 'title_section',
+                     desc => 'Title and section',
+                    },
+                    {
+                     name => 'title_chapter',
+                     desc => 'Title and chapter',
+                    },
+                    {
+                     name => '0',
+                     desc => 'None',
+                    },
+                    {
+                     name => '',
+                     desc => 'None',
+                    },
+                    {
+                     name => 1,
+                     desc => 'Author and title',
+                    }
+                   );
+    return @headings;
+}
+
+
+has headings    => (is => 'rw',
+                    isa => Enum[ map { $_->{name} } __PACKAGE__->all_headings ],
+                    default => sub { 0 });
+
 
 =head2 Slides
 
@@ -572,6 +637,15 @@ sub config_output {
     foreach my $method ($self->config_setters) {
         if (my $alias = $replace{$method}) {
             $out{$method} = $self->$alias;
+        }
+        elsif ($method eq 'headings') {
+            # here we pass an hashref for Template::Tiny if there is a value
+            if (my $value = $self->headings) {
+                if ($value eq '1') {
+                    $value = 'author_title';
+                }
+                $out{headings} = { $value => 1 };
+            }
         }
         else {
             $out{$method} = $self->$method;

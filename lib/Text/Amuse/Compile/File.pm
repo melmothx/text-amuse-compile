@@ -187,6 +187,10 @@ sub _escape_options_hashref {
                     $out{$k} = $checked;
                 }
             }
+            elsif (ref($ref->{$k})) {
+                # pass it verbatim
+                $out{$k} = $ref->{$k};
+            }
             else {
                 $out{$k} = muse_format_line($format, $ref->{$k});
             }

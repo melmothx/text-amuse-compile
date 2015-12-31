@@ -121,7 +121,7 @@ test_file($file_with_full_header, {
           qr/usekomafont{title}{\\huge TitleT/,
           qr/usekomafont{date}{DateT/,
           qr/usekomafont{subtitle}{SubtitleT/,
-          qr/\\pagestyle\{headings\}/,
+          qr/\\pagestyle\{scrheadings\}/,
          );
 
 test_file($file_with_toc, {

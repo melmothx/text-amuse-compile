@@ -400,21 +400,35 @@ one.
 Generate the running headings in the document. Beware that this will
 get you overfull headings if you have long titles.
 
-Available values (which should be self-descriptive).
+The behaviour changes if it's a oneside document.
+
+Available values:
 
 =over 4
 
-=item title_subtitle
+=item * title_subtitle
 
-=item author_title
+Title on the left page, subtitle on right page. Oneside: title.
 
-=item section_subsection
+=item * author_title
 
-=item chapter_section
+Author on the left, title on the right. Oneside: title
 
-=item title_section
+=item * section_subsection
 
-=item title_chapter
+Section on the left, subsection on the right. Oneside: section name
+
+=item * chapter_section
+
+Chapter on the left, section on the right. Oneside: chapter name
+
+=item * title_section
+
+Title on the left, section on the right. Oneside: section name
+
+=item * title_chapter
+
+Title on the left, chapter on the right. Oneside: chapter name
 
 =back
 
@@ -449,32 +463,32 @@ has notoc       => (is => 'rw', isa => Bool, default => sub { 0 });
 sub all_headings {
     my @headings = (
                     {
+                     name => '0',
+                     desc => 'None',
+                    },
+                    {
                      name => 'title_subtitle',
-                     desc => 'Title and subtitle',
+                     desc => 'Title and subtitle. If one side document: title.',
                     },
                     {
                      name => 'author_title',
-                     desc => 'Author and title',
-                    },
-                    {
-                     name => 'section_subsection',
-                     desc => 'Section and subsection',
+                     desc => 'Author and title. If one side document: title.',
                     },
                     {
                      name => 'chapter_section',
-                     desc => 'Chapter and section',
+                     desc => 'Chapter and section. If one side document: chapter.',
                     },
                     {
-                     name => 'title_section',
-                     desc => 'Title and section',
+                     name => 'section_subsection',
+                     desc => 'Section and subsection. If one side document: section.',
                     },
                     {
                      name => 'title_chapter',
-                     desc => 'Title and chapter',
+                     desc => 'Title and chapter. If one side document: chapter.',
                     },
                     {
-                     name => '0',
-                     desc => 'None',
+                     name => 'title_section',
+                     desc => 'Title and section.  If one side document: section.',
                     },
                     {
                      name => '',
@@ -482,8 +496,8 @@ sub all_headings {
                     },
                     {
                      name => 1,
-                     desc => 'Author and title',
-                    }
+                     desc => 'Author and title. If one side document: title.',
+                    },
                    );
     return @headings;
 }

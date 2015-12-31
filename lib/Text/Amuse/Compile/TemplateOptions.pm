@@ -492,11 +492,11 @@ sub all_headings {
                     },
                     {
                      name => '',
-                     desc => 'None',
+                     desc => '',
                     },
                     {
                      name => 1,
-                     desc => 'Author and title. If one side document: title.',
+                     desc => '',
                     },
                    );
     return @headings;
@@ -709,6 +709,17 @@ the available Beamer themes and color themes:
 =item beamer_colorthemes
 
 =item beamer_themes
+
+=back
+
+=head2 Headings style listing
+
+=over 4
+
+=item all_headings
+
+Return a list of hashrefs with C<name> and C<desc>. Legacy options
+have an empty description.
 
 =back
 

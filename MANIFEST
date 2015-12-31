@@ -26,6 +26,7 @@ t/epub.t
 t/failures.t
 t/filenames.t
 t/header.t
+t/headings.t
 t/html.t
 t/langs.t
 t/leaks.t

@@ -400,6 +400,38 @@ one.
 Generate the running headings in the document. Beware that this will
 get you overfull headings if you have long titles.
 
+The behaviour changes if it's a oneside document.
+
+Available values:
+
+=over 4
+
+=item * title_subtitle
+
+Title on the left page, subtitle on right page. Oneside: title.
+
+=item * author_title
+
+Author on the left, title on the right. Oneside: title
+
+=item * section_subsection
+
+Section on the left, subsection on the right. Oneside: section name
+
+=item * chapter_section
+
+Chapter on the left, section on the right. Oneside: chapter name
+
+=item * title_section
+
+Title on the left, section on the right. Oneside: section name
+
+=item * title_chapter
+
+Title on the left, chapter on the right. Oneside: chapter name
+
+=back
+
 =back
 
 =cut
@@ -427,7 +459,54 @@ has coverwidth => (is => 'rw',
 
 has nocoverpage => (is => 'rw', isa => Bool, default => sub { 0 });
 has notoc       => (is => 'rw', isa => Bool, default => sub { 0 });
-has headings    => (is => 'rw', isa => Bool, default => sub { 0 });
+
+sub all_headings {
+    my @headings = (
+                    {
+                     name => '0',
+                     desc => 'None',
+                    },
+                    {
+                     name => 'title_subtitle',
+                     desc => 'Title and subtitle. If one side document: title.',
+                    },
+                    {
+                     name => 'author_title',
+                     desc => 'Author and title. If one side document: title.',
+                    },
+                    {
+                     name => 'chapter_section',
+                     desc => 'Chapter and section. If one side document: chapter.',
+                    },
+                    {
+                     name => 'section_subsection',
+                     desc => 'Section and subsection. If one side document: section.',
+                    },
+                    {
+                     name => 'title_chapter',
+                     desc => 'Title and chapter. If one side document: chapter.',
+                    },
+                    {
+                     name => 'title_section',
+                     desc => 'Title and section.  If one side document: section.',
+                    },
+                    {
+                     name => '',
+                     desc => '',
+                    },
+                    {
+                     name => 1,
+                     desc => '',
+                    },
+                   );
+    return @headings;
+}
+
+
+has headings    => (is => 'rw',
+                    isa => Enum[ map { $_->{name} } __PACKAGE__->all_headings ],
+                    default => sub { 0 });
+
 
 =head2 Slides
 
@@ -573,6 +652,15 @@ sub config_output {
         if (my $alias = $replace{$method}) {
             $out{$method} = $self->$alias;
         }
+        elsif ($method eq 'headings') {
+            # here we pass an hashref for Template::Tiny if there is a value
+            if (my $value = $self->headings) {
+                if ($value eq '1') {
+                    $value = 'author_title';
+                }
+                $out{headings} = { $value => 1 };
+            }
+        }
         else {
             $out{$method} = $self->$method;
         }
@@ -621,6 +709,17 @@ the available Beamer themes and color themes:
 =item beamer_colorthemes
 
 =item beamer_themes
+
+=back
+
+=head2 Headings style listing
+
+=over 4
+
+=item all_headings
+
+Return a list of hashrefs with C<name> and C<desc>. Legacy options
+have an empty description.
 
 =back
 

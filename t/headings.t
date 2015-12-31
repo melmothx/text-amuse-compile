@@ -18,7 +18,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-my $tmpdir = File::Temp->newdir(CLEANUP => 0);
+my $tmpdir = File::Temp->newdir(CLEANUP => !$ENV{NOCLEANUP});
 
 diag "Working on $tmpdir";
 

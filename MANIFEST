@@ -63,6 +63,7 @@ t/recursive-dir/f/not_reported.muse
 t/recursive-dir/z/zf/z-file.muse
 t/recursive.t
 t/templates.t
+t/testfile/attachment.png
 t/testfile/broken.muse
 t/testfile/deep/deep/dir/logo.png
 t/testfile/deep/deep/dir/manual.muse

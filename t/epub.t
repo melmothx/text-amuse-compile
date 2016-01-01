@@ -3,14 +3,21 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 22;
+use Test::More tests => 28;
 use File::Spec;
 use Text::Amuse::Compile;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use File::Temp;
 use Text::Amuse::Compile::Utils qw/read_file write_file/;
 
-my $c = Text::Amuse::Compile->new(epub => 1);
+my $cover = File::Spec->rel2abs(File::Spec->catfile(qw/t manual logo.png/));
+
+ok (-f $cover, "$cover is here");
+
+my $c = Text::Amuse::Compile->new(epub => 1,
+                                  extra => { cover  => $cover,
+                                             coverwidth => 0.70,
+                                           });
 
 my $target_base = File::Spec->catfile(qw/t testfile for-epub/);
 
@@ -60,4 +67,19 @@ foreach my $file (qw/piece000001.xhtml
     like($css, qr/font-size: 10pt;/, "Found the correct font size");
     like($css, qr/font-family:\s*serif;/, "Found the serif font family");
 
+}
+
+{
+    my $manifest = read_file(File::Spec->catfile($tmpdir->dirname,
+                                                 'content.opf'));
+    like ($manifest, qr{href="attachment.png" media-type="image/png"});
+    like ($manifest, qr{href="logo.png" media-type="image/png"});
+    ok (-f File::Spec->catfile($tmpdir->dirname, 'logo.png'), "Found logo.png");
+}
+
+{
+    my $titlepage = read_file(File::Spec->catfile($tmpdir->dirname,
+                                                  'titlepage.xhtml'));
+    like ($titlepage, qr{pinco.*pallino.*tizio}, "titlepage has the author");
+    like ($titlepage, qr{src="logo.png"}, "titlepage has the image");
 }

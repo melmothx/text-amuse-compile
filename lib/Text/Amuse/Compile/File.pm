@@ -18,6 +18,7 @@ use EBook::EPUB::Lite;
 use File::Copy;
 use File::Spec;
 use IO::Pipe;
+use File::Basename ();
 
 # ours
 use PDF::Imposition;
@@ -629,7 +630,7 @@ sub epub {
     # build the title page and some metadata
     my $header = $text->header_as_html;
 
-    my $titlepage = '';
+    my $titlepage = qq{<div style="text-align:center">\n};
 
     if ($text->header_defined->{author}) {
         my $author = $header->{author};
@@ -659,6 +660,24 @@ sub epub {
 
     $epub->add_language($text->language_code);
 
+    if (my $cover = $self->html_options->{cover}) {
+        if (-f $cover) {
+            if (my $basename = File::Basename::basename($cover)) {
+                my $width = 100;
+                if ($self->html_options->{coverwidth}) {
+                    $width = int($self->html_options->{coverwidth} * 100) || 100;
+                }
+                $titlepage .= <<"COVER";
+<div style="margin-left: auto; margin-right: auto; padding: 20px; width: ${width}%;">
+  <img src="$basename" alt="$basename" />
+</div>
+COVER
+                $epub->copy_file($cover, $basename,
+                                 $self->_mime_for_attachment($basename));
+            }
+        }
+    }
+
     if ($text->header_defined->{source}) {
         my $source = $header->{source};
         $epub->add_source($self->_clean_html($source));
@@ -670,7 +689,7 @@ sub epub {
         $epub->add_description($self->_clean_html($notes));
         $titlepage .= "<p>$notes</p>" if $text->wants_postamble;
     }
-
+    $titlepage .= "</div>\n";
     # create the front page
     my $firstpage = '';
     $self->tt->process($self->templates->minimal_html,
@@ -725,17 +744,7 @@ sub epub {
     # attachments
     foreach my $att ($text->attachments) {
         $self->log_fatal("$att doesn't exist!") unless -f $att;
-        my $mime;
-        if ($att =~ m/\.jpe?g$/) {
-            $mime = "image/jpeg";
-        }
-        elsif ($att =~ m/\.png$/) {
-            $mime = "image/png";
-        }
-        else {
-            $self->log_fatal("Unrecognized attachment $att!");
-        }
-        $epub->copy_file($att, $att, $mime);
+        $epub->copy_file($att, $att, $self->_mime_for_attachment($att));
     }
     if (my $fonts = $self->webfonts) {
         foreach my $style (qw/regular italic bold bolditalic/) {
@@ -1021,6 +1030,7 @@ sub _looks_like_a_sane_name {
     $name =~ s!\\!/!g;
     # is it a sensible path? those chars are not special for latex or html
     if ($name =~ m/\A[a-zA-Z0-9\-\:\/]+(\.(pdf|jpe?g|png))?\z/) {
+        print "$name is ok\n" if DEBUG;
         return $name;
     }
     else {
@@ -1028,5 +1038,20 @@ sub _looks_like_a_sane_name {
     }
 }
 
+sub _mime_for_attachment {
+    my ($self, $att) = @_;
+    die "Missing argument" unless $att;
+    my $mime;
+    if ($att =~ m/\.jpe?g$/) {
+        $mime = "image/jpeg";
+    }
+    elsif ($att =~ m/\.png$/) {
+        $mime = "image/png";
+    }
+    else {
+        $self->log_fatal("Unrecognized attachment $att!");
+    }
+    return $mime;
+}
 
 1;

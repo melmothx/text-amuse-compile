@@ -624,6 +624,7 @@ sub latex {
 
 % global style
 [% IF safe_options.headings %]
+\setlength{\headsep}{\baselineskip}
 \usepackage{scrlayer-scrpage}
 \pagestyle{scrheadings}
   [% IF safe_options.twoside %]

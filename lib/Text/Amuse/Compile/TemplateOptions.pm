@@ -5,6 +5,7 @@ use strict;
 use warnings FATAL => 'all';
 use Types::Standard qw/Str Bool Enum/;
 use Pod::Usage qw//;
+use File::Spec;
 use Moo;
 
 use constant {
@@ -324,18 +325,17 @@ At the bottom of the page
 
 =cut
 
-sub _check_filename {
-    my $filename = $_[0];
+sub check_filename {
+    my ($filename) = @_;
     # false value, accept, will not be inserted.
     return unless $filename;
     # windows thing, in case
     $filename =~ s!\\!/!g;
     # is a path? test if it exists
     if ($filename =~ m!/!) {
-        # non-ascii things will never match here
-        # because of the decoding. I see this as a feature
         if (-f $filename and
-            $filename =~ m/^[a-zA-Z0-9\-\:\/]+\.(pdf|jpe?g|png)$/s) {
+            $filename =~ m/[a-zA-Z0-9]+\.(pdf|jpe?g|png)\z/ and
+            File::Spec->file_name_is_absolute($filename)) {
             return $filename;
         }
         else {
@@ -358,7 +358,7 @@ has sitename   => (is => 'rw', isa => Str, default => sub { '' });
 has siteslogan => (is => 'rw', isa => Str, default => sub { '' });
 has site       => (is => 'rw', isa => Str, default => sub { '' });
 has logo       => (is => 'rw',
-                   isa => \&_check_filename,
+                   isa => \&check_filename,
                    default => sub { '' },
                   );
 
@@ -442,7 +442,7 @@ Title on the left, chapter on the right. Oneside: chapter name
 =cut
 
 has cover      => (is => 'rw',
-                   isa => \&_check_filename,
+                   isa => \&check_filename,
                    default => sub { '' },
                   );
 
@@ -749,6 +749,15 @@ have an empty description.
 =head3 show_options
 
 Print out the relevant stanza of the POD.
+
+=cut
+
+=head1 INTERNALS
+
+=head2 check_filename($filename)
+
+Return true if the path is absolute (and looks like a pdf/jpg/png
+file) or if it's a bare filename, even without extension.
 
 =cut
 

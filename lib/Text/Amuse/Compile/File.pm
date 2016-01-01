@@ -928,7 +928,7 @@ sub _prepare_tex_tokens {
     my $parsed = eval { Text::Amuse::Compile::TemplateOptions->new(%options) };
     unless ($parsed) {
         $parsed = Text::Amuse::Compile::TemplateOptions->new;
-        print "Validation failed: $@, setting one by one\n";
+        $self->log_info("Validation failed: $@, setting one by one\n");
         foreach my $method ($parsed->config_setters) {
             if (exists $options{$method}) {
                 eval { $parsed->$method($options{$method}) };
@@ -1026,15 +1026,17 @@ sub _prepare_tex_tokens {
 sub _looks_like_a_sane_name {
     my ($self, $name) = @_;
     return unless defined $name;
-    # windows thing, in case
-    $name =~ s!\\!/!g;
-    # is it a sensible path? those chars are not special for latex or html
-    if ($name =~ m/\A[a-zA-Z0-9\-\:\/]+(\.(pdf|jpe?g|png))?\z/) {
-        print "$name is ok\n" if DEBUG;
-        return $name;
+    my $out;
+    eval {
+        $out = Text::Amuse::Compile::TemplateOptions::check_filename($name);
+    };
+    if (!$out || $@) {
+        $self->log_info("$name is not good: $@");
+        return;
     }
     else {
-        return;
+        $self->log_info("$name is good");
+        return $out;
     }
 }
 

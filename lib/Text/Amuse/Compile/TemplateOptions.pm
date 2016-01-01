@@ -378,11 +378,16 @@ found by C<kpsewhich>. If the path is not valid and sane (from the
 LaTeX point of view: no spaces, no strange chars), the value is
 ignored.
 
+With EPUB output, the cover is used in the title page.
+
 =item * coverwidth (dimension ratio with the text width, eg. '0.85')
 
 Option to control the cover width, when is set (ignored otherwise).
 Defaults to the full text width (i.e., 1). You have to pass a float
 here with the ratio to the text width, like C<0.5>, C<1>.
+
+With EPUB output, this affects the maximum width, not the actual
+width.
 
 =item * nocoverpage
 

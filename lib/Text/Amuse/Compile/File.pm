@@ -928,7 +928,7 @@ sub _prepare_tex_tokens {
     my $parsed = eval { Text::Amuse::Compile::TemplateOptions->new(%options) };
     unless ($parsed) {
         $parsed = Text::Amuse::Compile::TemplateOptions->new;
-        $self->log_info("Validation failed: $@, setting one by one\n");
+        $self->log_info("# Validation failed: $@, setting one by one\n");
         foreach my $method ($parsed->config_setters) {
             if (exists $options{$method}) {
                 eval { $parsed->$method($options{$method}) };
@@ -1031,11 +1031,11 @@ sub _looks_like_a_sane_name {
         $out = Text::Amuse::Compile::TemplateOptions::check_filename($name);
     };
     if (!$out || $@) {
-        $self->log_info("$name is not good: $@");
+        $self->log_info("$name is not good: $@") if DEBUG;
         return;
     }
     else {
-        $self->log_info("$name is good");
+        $self->log_info("$name is good") if DEBUG;
         return $out;
     }
 }

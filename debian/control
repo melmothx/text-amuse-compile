@@ -1,0 +1,31 @@
+Source: libtext-amuse-compile-perl
+Section: perl
+Priority: optional
+Maintainer: Marco Pessotto <melmothx@gmail.com>
+Build-Depends: debhelper (>= 9)
+Build-Depends-Indep: libarchive-zip-perl,
+ libebook-epub-lite-perl (>= 0.71),
+ libmoo-perl (>= 1),
+ libpdf-imposition-perl (>= 0.14),
+ libtemplate-tiny-perl (>= 1.12),
+ libtext-amuse-perl (>= 0.54),
+ libtype-tiny-perl (>= 1),
+ perl
+Standards-Version: 3.9.6
+Homepage: https://metacpan.org/release/Text-Amuse-Compile
+
+Package: libtext-amuse-compile-perl
+Architecture: all
+Depends: ${misc:Depends}, ${perl:Depends},
+ libarchive-zip-perl,
+ libebook-epub-lite-perl (>= 0.71),
+ libmoo-perl (>= 1),
+ libpdf-imposition-perl (>= 0.14),
+ libtemplate-tiny-perl (>= 1.12),
+ libtext-amuse-perl (>= 0.54),
+ libtype-tiny-perl (>= 1)
+Description: Compiler for Text::Amuse
+ This module provides the libraries and the executable muse-compile.pl
+ to create EPUB, HTML, PDF files from Emacs Muse sources, in its
+ Text::Amuse dialect.
+ 

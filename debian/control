@@ -10,7 +10,15 @@ Build-Depends-Indep: libarchive-zip-perl,
  libtemplate-tiny-perl (>= 1.12),
  libtext-amuse-perl (>= 0.54),
  libtype-tiny-perl (>= 1),
- perl
+ perl,
+ fontconfig,
+ fonts-cmu, fonts-texgyre, fonts-sil-charis,
+ fonts-antykwa-poltawskiego, fonts-antykwa-torunska, fonts-nowacki,
+ fonts-droid, fonts-dejavu, fonts-linuxlibertine, fonts-sil-charis,
+ fonts-paratype, lmodern, fonts-lmodern,
+ texlive-base, texlive-latex-base, texlive-latex-recommended, texlive-latex-extra,
+ texlive-generic-recommended, texlive-fonts-recommended,
+ texlive-luatex, texlive-xetex, texlive-lang-all
 Standards-Version: 3.9.6
 Homepage: https://metacpan.org/release/Text-Amuse-Compile
 
@@ -23,7 +31,15 @@ Depends: ${misc:Depends}, ${perl:Depends},
  libpdf-imposition-perl (>= 0.14),
  libtemplate-tiny-perl (>= 1.12),
  libtext-amuse-perl (>= 0.54),
- libtype-tiny-perl (>= 1)
+ libtype-tiny-perl (>= 1),
+ fontconfig,
+ fonts-cmu, fonts-texgyre, fonts-sil-charis,
+ fonts-antykwa-poltawskiego, fonts-antykwa-torunska, fonts-nowacki,
+ fonts-droid, fonts-dejavu, fonts-linuxlibertine, fonts-sil-charis,
+ fonts-paratype, lmodern, fonts-lmodern,
+ texlive-base, texlive-latex-base, texlive-latex-recommended, texlive-latex-extra,
+ texlive-generic-recommended, texlive-fonts-recommended,
+ texlive-luatex, texlive-xetex, texlive-lang-all
 Description: Compiler for Text::Amuse
  This module provides the libraries and the executable muse-compile.pl
  to create EPUB, HTML, PDF files from Emacs Muse sources, in its

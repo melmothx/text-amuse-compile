@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.55 2016-02-25
+
+ - Removed footer/header from first page with nocoverpage option
+
 0.54 2015-01-01
 
  - Previous release was not installable because of too strict (and too

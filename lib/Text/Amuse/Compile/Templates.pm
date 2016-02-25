@@ -774,7 +774,9 @@ sub latex {
 \hyphenation{ [% doc.hyphenation %] }
 [% END %]
 
-[% UNLESS safe_options.nocoverpage %]
+[% IF safe_options.nocoverpage %]
+\thispagestyle{empty}
+[% ELSE %]
   \begin{titlepage}
 [% END %]
   \strut\vskip 2em

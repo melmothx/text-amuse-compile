@@ -760,6 +760,8 @@ sub latex {
 \sloppy
 \clubpenalty=10000
 \widowpenalty=10000
+% http://tex.stackexchange.com/questions/304802/how-not-to-hyphenate-the-last-word-of-a-paragraph
+\finalhyphendemerits=10000
 
 % given that we said footinclude=false, this should be safe
 \setlength{\footskip}{2\baselineskip}

@@ -94,7 +94,7 @@ is_deeply([$doc->raw_html_toc],
            {
              'index' => 1,
              'level' => 2,
-             'string' => 'start body'
+             'string' => 'First file'
            },
            {
              'level' => 1,
@@ -102,7 +102,7 @@ is_deeply([$doc->raw_html_toc],
              'string' => 'Second file'
            },
            {
-             'string' => 'start body',
+             'string' => 'Second file',
              'index' => 3,
              'level' => 2
            }

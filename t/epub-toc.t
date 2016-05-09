@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 78;
+use Test::More tests => 81;
 use File::Spec;
 use Text::Amuse::Compile;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
@@ -14,7 +14,7 @@ use Text::Amuse::Compile::Utils qw/read_file write_file/;
 
 my $testnotoc =<<'MUSE';
 #lang en
-#title helloooo
+#title helloooo <&!"'title>
 
 Hello
 
@@ -22,7 +22,7 @@ MUSE
 
 my $test_no_intro =<<'MUSE';
 #lang en
-#title Hullllooooo
+#title Hullllooooo <&!"'title>
 
 *** subsection
 
@@ -36,7 +36,7 @@ my $test_no_intro =<<'MUSE';
 MUSE
 
 my $testbody =<<'MUSE';
-#title hello world
+#title hello world <&!"'title>
 
 Hello world!
 
@@ -192,6 +192,13 @@ foreach my $muses (@tests) {
         my $got = $1;
         my $expected = shift @files;
         is $got, $expected, "Found $expected in file list";
+    }
+    if ($toc =~ m{docTitle>\s*<text>(.*?)</text>\s*</docTitle>}s) {
+        my $titlestring = $1;
+        like $toc, qr{playOrder="1">\s*<navLabel>\s.*<text>\Q$titlestring\E}, "Found the title $titlestring";
+    }
+    else {
+        ok(0, "No docTitle found");
     }
 }
 

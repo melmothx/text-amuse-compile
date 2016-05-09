@@ -694,7 +694,7 @@ COVER
     my $firstpage = '';
     $self->tt->process($self->templates->minimal_html,
                        {
-                        title => $self->_remove_tags($header->{title}),
+                        title => $self->_remove_tags($header->{title} || 'Untitled'),
                         text => $titlepage,
                         options => { %{$self->html_options} },
                        },
@@ -706,7 +706,7 @@ COVER
 
     # main loop
     my @navpoints = ({
-                      label => "titlepage",
+                      label => $self->_clean_html($header->{title} || 'Untitled'),
                       id => $tpid,
                       content => "titlepage.xhtml",
                       play_order => ++$order,

@@ -1,5 +1,13 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.56 2016-05-09
+
+ - Avoid hyphenation on the last word of a paragraph in PDF
+ - Improved toc removing strings like "start body" and "titlepage" in
+   ToCs (#4)
+ - Removed minimum perl version
+ - Let the image to expand on the EPUB covers (#3)
+
 0.55 2016-02-25
 
  - Removed footer/header from first page with nocoverpage option

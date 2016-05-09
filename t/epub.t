@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 28;
+use Test::More tests => 31;
 use File::Spec;
 use Text::Amuse::Compile;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
@@ -74,6 +74,8 @@ foreach my $file (qw/piece000001.xhtml
                                                  'content.opf'));
     like ($manifest, qr{href="attachment.png" media-type="image/png"});
     like ($manifest, qr{href="logo.png" media-type="image/png"});
+    like ($manifest, qr{<meta name="cover" content="id1" />});
+    like ($manifest, qr{<guide>\s*<reference href="coverpage.xhtml"\s*type="cover"}s);
     ok (-f File::Spec->catfile($tmpdir->dirname, 'logo.png'), "Found logo.png");
 }
 
@@ -81,5 +83,11 @@ foreach my $file (qw/piece000001.xhtml
     my $titlepage = read_file(File::Spec->catfile($tmpdir->dirname,
                                                   'titlepage.xhtml'));
     like ($titlepage, qr{pinco.*pallino.*tizio}, "titlepage has the author");
-    like ($titlepage, qr{src="logo.png"}, "titlepage has the image");
+    unlike ($titlepage, qr{src="logo.png"}, "titlepage has no image");
+}
+
+{
+    my $coverpage = read_file(File::Spec->catfile($tmpdir->dirname,
+                                                  'coverpage.xhtml'));
+    like ($coverpage, qr{xlink:href="logo.png"}, "coverpage has the image");
 }

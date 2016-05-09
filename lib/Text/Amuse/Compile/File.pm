@@ -630,6 +630,48 @@ sub epub {
     # build the title page and some metadata
     my $header = $text->header_as_html;
 
+    my @navpoints;
+    my $order = 0;
+
+    if (my $cover = $self->html_options->{cover}) {
+        if (-f $cover) {
+            if (my $basename = File::Basename::basename($cover)) {
+                my $coverpage = <<'HTML';
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Cover</title>
+    <style type="text/css" title="override_css">
+      @page {padding: 0pt; margin:0pt}
+      body { text-align: center; padding:0pt; margin: 0pt; }
+    </style>
+  </head>
+  <body>
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+         width="100%" height="100%" viewBox="0 0 573 800" preserveAspectRatio="xMidYMid meet">
+      <image width="573" height="800" xlink:href="__IMAGE__" />
+    </svg>
+  </body>
+</html>
+HTML
+                $coverpage =~ s/__IMAGE__/$basename/;
+                my $cover_id = $epub->copy_file($cover, $basename,
+                                                $self->_mime_for_attachment($basename));
+                $epub->add_meta_item(cover => $cover_id);
+                my $cpid = $epub->add_xhtml("coverpage.xhtml", $coverpage);
+                $epub->guide->add_reference(type => 'cover', href => "coverpage.xhtml");
+                push @navpoints, {
+                                  label => 'Cover',
+                                  id => $cpid,
+                                  content => "coverpage.xhtml",
+                                  play_order => ++$order,
+                                  level => 1,
+                                 };
+            }
+        }
+    }
+
     my $titlepage = qq{<div style="text-align:center">\n};
 
     if ($text->header_defined->{author}) {
@@ -660,24 +702,6 @@ sub epub {
 
     $epub->add_language($text->language_code);
 
-    if (my $cover = $self->html_options->{cover}) {
-        if (-f $cover) {
-            if (my $basename = File::Basename::basename($cover)) {
-                my $width = 100;
-                if ($self->html_options->{coverwidth}) {
-                    $width = int($self->html_options->{coverwidth} * 100) || 100;
-                }
-                $titlepage .= <<"COVER";
-<div style="margin-left: auto; margin-right: auto; padding: 20px; width: ${width}%;">
-  <img src="$basename" alt="$basename" />
-</div>
-COVER
-                $epub->copy_file($cover, $basename,
-                                 $self->_mime_for_attachment($basename));
-            }
-        }
-    }
-
     if ($text->header_defined->{source}) {
         my $source = $header->{source};
         $epub->add_source($self->_clean_html($source));
@@ -702,16 +726,15 @@ COVER
       or $self->log_fatal($self->tt->error);
 
     my $tpid = $epub->add_xhtml("titlepage.xhtml", $firstpage);
-    my $order = 0;
 
     # main loop
-    my @navpoints = ({
+    push @navpoints, {
                       label => $self->_clean_html($header->{title} || 'Untitled'),
                       id => $tpid,
                       content => "titlepage.xhtml",
                       play_order => ++$order,
                       level => 1,
-                     });
+                     };
     while (@pieces) {
         my $fi =    shift @pieces;
         my $index = shift @toc;

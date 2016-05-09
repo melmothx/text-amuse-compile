@@ -1,6 +1,5 @@
 package Text::Amuse::Compile::Templates;
 
-use 5.010001;
 use strict;
 use warnings FATAL => 'all';
 use utf8;

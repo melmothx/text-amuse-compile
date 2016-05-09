@@ -1,6 +1,5 @@
 package Text::Amuse::Compile::Utils;
 
-use 5.010001;
 use utf8;
 use strict;
 use warnings;

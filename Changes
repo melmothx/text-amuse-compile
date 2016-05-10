@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.57 2016-05-10
+
+ - Fixed syntax error on perl 5.8.9 (thanks to ribasushi)
+
 0.56 2016-05-09
 
  - Avoid hyphenation on the last word of a paragraph in PDF

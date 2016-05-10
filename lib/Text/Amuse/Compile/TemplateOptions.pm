@@ -270,15 +270,15 @@ sub all_fonts {
 }
 
 sub default_mainfont {
-    return (__PACKAGE__->serif_fonts)[0]{name};
+    return (__PACKAGE__->serif_fonts)[0]->{name};
 }
 
 sub default_sansfont {
-    return (__PACKAGE__->sans_fonts)[0]{name};
+    return (__PACKAGE__->sans_fonts)[0]->{name};
 }
 
 sub default_monofont {
-    return (__PACKAGE__->mono_fonts)[0]{name};
+    return (__PACKAGE__->mono_fonts)[0]->{name};
 }
 
 has mainfont   => (is => 'rw',

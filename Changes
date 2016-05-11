@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.58 2016-05-11
+
+ - Fixed tests for ancient perls 5.8.x
+
 0.57 2016-05-10
 
  - Fixed syntax error on perl 5.8.9 (thanks to ribasushi)

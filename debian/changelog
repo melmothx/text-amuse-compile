@@ -1,3 +1,9 @@
+libtext-amuse-compile-perl (0.58-1) unstable; urgency=medium
+
+  * New minor release
+
+ -- Marco Pessotto <melmothx@gmail.com>  Wed, 11 May 2016 16:14:37 +0200
+
 libtext-amuse-compile-perl (0.57-1) unstable; urgency=medium
 
   * New minor release

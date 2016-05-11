@@ -83,11 +83,11 @@ foreach my $spec (Text::Amuse::Compile::TemplateOptions->all_headings) {
 
         my $texbody = read_file($tex);
         if (!$spec->{name}) {
-            like($texbody, qr{headinclude=false,%$}m, "headinclude is false");
+            like($texbody, qr{headinclude=false\,\%$}m, "headinclude is false");
             like($texbody, qr!\\pagestyle{plain}!, "plain pagestyle");
             unlike($texbody, qr!\\pagestyle{scrheadings}!, "not custom pagestyle");
         } else {
-            like($texbody, qr{headinclude=true,%$}m, "headinclude is true");
+            like($texbody, qr{headinclude=true\,\%$}m, "headinclude is true");
             unlike($texbody, qr!\\pagestyle{plain}!, "not a plain pagestyle");
             like($texbody, qr!\\pagestyle{scrheadings}!, "custom pagestyle");
         }

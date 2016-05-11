@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 216;
+use Test::More tests => 215;
 use Text::Amuse::Compile;
 use File::Spec;
 use Text::Amuse::Compile::File;
@@ -10,8 +10,6 @@ use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::Utils qw/read_file/;
 use Text::Amuse::Compile::TemplateOptions;
 use Cwd;
-
-use_ok('Text::Amuse::Compile::TemplateOptions');
 
 my $templates = Text::Amuse::Compile::Templates->new;
 

@@ -3,14 +3,14 @@
 use strict;
 use warnings;
 
-use Test::More tests => 32;
+use Test::More tests => 30;
 use Text::Amuse::Compile::Utils qw/read_file write_file/;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use File::Spec;
 use File::Temp;
 
-use_ok('Text::Amuse::Compile::Webfonts', "use is ok");
-use_ok('Text::Amuse::Compile', "compiler class ok");
+use Text::Amuse::Compile::Webfonts;
+use Text::Amuse::Compile;
 
 my $dir = File::Spec->catdir(qw/t webfonts/);
 rmdir $dir;

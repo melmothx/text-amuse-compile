@@ -71,7 +71,7 @@ test_file($file_no_toc, {
                         },
           qr/\\end\{center\}\s*\\vskip 3em\s*\\par\s*\w/s,
           qr/\\setmainfont\{Iwona\}/,
-          qr/^\s+twoside\,\%$/m,
+          qr/\n\s+twoside\,\%\n/s,
           qr/BCOR=0mm/,
          );
 
@@ -83,7 +83,7 @@ test_file($file_with_toc, {
                           },
           qr/\\end\{titlepage\}\s*\\cleardoublepage\s*\\tableofcontents/s,
           qr/\\includegraphics\[width=0.1\\textwidth\]\{prova.png\}/,
-          qr/^\s+oneside\,\%$/m,
+          qr/\n\s+oneside\,\%\n/s,
           qr/BCOR=2.5cm/,
          );
 
@@ -94,7 +94,7 @@ test_file($file_with_toc, {
                            twoside => 1,
                           },
           qr/scrbook/,
-          qr/^\s+oneside\,\%$/m,
+          qr/\n\s+oneside\,\%\n/s,
           qr/^\\setmainlanguage\{russian\}/m,
           qr/\\renewcaptionname\{russian\}\{\\contentsname\}\{Содржина\}/,
           qr/\\russianfont\[Script=Cyrillic\]\{CMU\sSerif\}/,

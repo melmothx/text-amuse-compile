@@ -22,7 +22,7 @@ my $tmpdir = File::Temp->newdir(CLEANUP => !$ENV{NOCLEANUP});
 
 diag "Working on $tmpdir";
 
-my $random = "this is some text\n\n" x 60;
+my $random = "this is some text\n\n" x 3;
 
 my $muse =<< "MUSE";
 #title My title
@@ -83,13 +83,13 @@ foreach my $spec (Text::Amuse::Compile::TemplateOptions->all_headings) {
 
         my $texbody = read_file($tex);
         if (!$spec->{name}) {
-            like($texbody, qr{headinclude=false\,\%$}m, "headinclude is false");
-            like($texbody, qr!\\pagestyle{plain}!, "plain pagestyle");
-            unlike($texbody, qr!\\pagestyle{scrheadings}!, "not custom pagestyle");
+            like($texbody, qr{headinclude\=false\,\%}, "headinclude is false");
+            like($texbody, qr!\\pagestyle\{plain\}!, "plain pagestyle");
+            unlike($texbody, qr!\\pagestyle\{scrheadings\}!, "not custom pagestyle");
         } else {
-            like($texbody, qr{headinclude=true\,\%$}m, "headinclude is true");
-            unlike($texbody, qr!\\pagestyle{plain}!, "not a plain pagestyle");
-            like($texbody, qr!\\pagestyle{scrheadings}!, "custom pagestyle");
+            like($texbody, qr{headinclude\=true\,\%}, "headinclude is true");
+            unlike($texbody, qr!\\pagestyle\{plain\}!, "not a plain pagestyle");
+            like($texbody, qr!\\pagestyle\{scrheadings\}!, "custom pagestyle");
         }
 
       SKIP: {

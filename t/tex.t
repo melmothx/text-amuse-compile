@@ -117,10 +117,10 @@ test_file($file_with_full_header, {
                                    cover => 'prova.png',
                                    headings => 1,
                                   },
-          qr/usekomafont{author}{AuthorT/,
-          qr/usekomafont{title}{\\huge TitleT/,
-          qr/usekomafont{date}{DateT/,
-          qr/usekomafont{subtitle}{SubtitleT/,
+          qr/usekomafont\{author\}\{AuthorT/,
+          qr/usekomafont\{title\}\{\\huge TitleT/,
+          qr/usekomafont\{date\}\{DateT/,
+          qr/usekomafont\{subtitle\}\{SubtitleT/,
           qr/\\pagestyle\{scrheadings\}/,
          );
 

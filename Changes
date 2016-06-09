@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.60 2016-06-09
+
+ - Fixed tex.t (RT #115177), thanks to Slaven Rezić for the report.
+
 0.59 2016-05-12
 
  - Another round of test fixes for ancient perls

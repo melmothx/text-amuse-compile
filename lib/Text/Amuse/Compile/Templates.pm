@@ -830,6 +830,13 @@ sub latex {
 [% doc.as_latex %]
 
 \clearpage
+
+[% IF safe_options.twoside %]
+% if we are on an odd page, add another one, otherwise when imposing
+% the page would be odd on an even one.
+\ifthispageodd{\strut\thispagestyle{empty}\clearpage}{}
+[% END %]
+
 % new page for the colophon
 
 \thispagestyle{empty}

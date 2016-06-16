@@ -18,10 +18,10 @@ binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
 if ($ENV{TEST_WITH_LATEX}) {
-    plan tests => 157;
+    plan tests => 159;
 }
 else {
-    plan tests => 140;
+    plan tests => 142;
 }
 
 
@@ -39,6 +39,7 @@ test_file($file_no_toc, {
                          papersize => 'half-lt',
                          nocoverpage => 0,
                         },
+          [
           qr/scrbook/,
           qr/DIV=9/,
           qr/fontsize=11pt/,
@@ -47,6 +48,7 @@ test_file($file_no_toc, {
           qr/paper=5.5in:8.5in/,
           qr/\\end\{titlepage\}\s*\\cleardoublepage/s,
           qr/document\}\s*\\hyphenation\{\s*a-no-ther\ste-st\s*}/s,
+          ]
          );
 
 test_file($file_no_toc, {
@@ -55,24 +57,27 @@ test_file($file_no_toc, {
                          papersize => 'a6',
                          nocoverpage => 1,
                          bcor => '15mm',
-                        },
+                        }, [
           qr/\{scrartcl\}/,
           qr/DIV=9/,
           qr/fontsize=10pt/,
           qr/paper=a6/,
           qr/BCOR=15mm/,
           qr/\\end\{center\}\s*\\vskip 3em\s*\\par\s*\w/s,
+                           ]
          );
 
 test_file($file_no_toc, {
                          nocoverpage => 1,
                          mainfont => 'Iwona',
                          twoside => 1,
-                        },
+                        }, [
           qr/\\end\{center\}\s*\\vskip 3em\s*\\par\s*\w/s,
           qr/\\setmainfont\{Iwona\}/,
           qr/\n\s+twoside\,\%\n/s,
           qr/BCOR=0mm/,
+          qr/ifthispageodd/,
+                           ],
          );
 
 test_file($file_with_toc, {
@@ -80,11 +85,15 @@ test_file($file_with_toc, {
                            oneside => 1,
                            bcor => '2.5cm',
                            coverwidth => '0.1',
-                          },
+                          }, [
           qr/\\end\{titlepage\}\s*\\cleardoublepage\s*\\tableofcontents/s,
           qr/\\includegraphics\[width=0.1\\textwidth\]\{prova.png\}/,
           qr/\n\s+oneside\,\%\n/s,
           qr/BCOR=2.5cm/,
+                             ],
+          [
+           qr/ifthispageodd/,
+          ]
          );
 
 
@@ -92,7 +101,7 @@ test_file($file_with_toc, {
                            papersize => 'generic',
                            oneside => 1,
                            twoside => 1,
-                          },
+                          }, [
           qr/scrbook/,
           qr/\n\s+oneside\,\%\n/s,
           qr/^\\setmainlanguage\{russian\}/m,
@@ -100,6 +109,7 @@ test_file($file_with_toc, {
           qr/\\russianfont\[Script=Cyrillic\]\{CMU\sSerif\}/,
           qr/paper=210mm:11in/,
           qr/\\end\{titlepage\}\s*\\cleardoublepage/s,
+                             ]
          );
 
 
@@ -108,20 +118,22 @@ test_file($file_with_toc, {
                            oneside => 1,
                            twoside => 1,
                            cover => 'prova.png',
-                          },
+                          }, [
           qr/\\includegraphics\[width=1\\textwidth\]\{prova\.png\}/,
           qr/\\pagestyle\{plain\}/,
+                              ]
          );
 
 test_file($file_with_full_header, {
                                    cover => 'prova.png',
                                    headings => 1,
-                                  },
+                                  }, [
           qr/usekomafont\{author\}\{AuthorT/,
           qr/usekomafont\{title\}\{\\huge TitleT/,
           qr/usekomafont\{date\}\{DateT/,
           qr/usekomafont\{subtitle\}\{SubtitleT/,
           qr/\\pagestyle\{scrheadings\}/,
+                                     ]
          );
 
 test_file($file_with_toc, {
@@ -130,15 +142,18 @@ test_file($file_with_toc, {
                            twoside => 1,
                            cover => 'prova.png',
                            coverwidth => 'blablabla',
-                          },
-          qr/\\includegraphics\[width=1\\textwidth\]\{prova\.png\}/,);
+                          }, [
+                              qr/\\includegraphics\[width=1\\textwidth\]\{prova\.png\}/,
+                             ],
+         );
 
 
 test_file($file_with_toc, {
                            papersize => 'half-a4',
-                          },
+                          }, [
           qr/paper=a5/,
           qr/\\end\{titlepage\}\s*\\cleardoublepage/s,
+                             ],
          );
 
 test_file({
@@ -148,7 +163,7 @@ test_file({
            title => 'Merged',
           },
           {
-          },
+          }, [
           qr/croatian/,
           qr/russian/,
           qr/Pallino.*Pinco.*Second.*author/s,
@@ -159,6 +174,7 @@ test_file({
              \\russianfont\[Script=Cyrillic\]\{CMU\sSerif\}\s*
              \\setotherlanguages\{croatian\}\s*
              \\renewcaptionname\{russian\}\{\\contentsname\}\{Содржина\}/sx,
+             ],
          );
 
 test_file({
@@ -169,6 +185,7 @@ test_file({
           },
           {
           },
+          [
           qr/\\end\{titlepage\}\s*\\cleardoublepage/s,
           qr/mainlanguage\{croatian}.*selectlanguage\{russian}.*selectlanguage\{croatian}/s,
           qr/Second.*author.*Pallino.*Pinco/s,
@@ -178,6 +195,7 @@ test_file({
              \\setotherlanguages\{russian\}\s*
              \\newfontfamily\s*
              \\russianfont\[Script=Cyrillic\]\{CMU\sSerif\}/sx
+          ],
          );
 
 test_file({
@@ -188,6 +206,7 @@ test_file({
           },
           {
           },
+          [
           qr/mainlanguage\{russian}.*
              selectlanguage\{croatian}.*
              selectlanguage\{russian}.*
@@ -209,31 +228,35 @@ test_file({
              usekomafont\{date\}\{DateT.*
              SourceT.*
              NotesT/sx,
+           ],
           );
 
 
 my $outbody = test_file($file_with_toc, {
                                          notoc => 0,
                                          opening => 'right',
-                                        },
+                                        }, [
                         qr/open=right/,
+                                           ],
                        );
 like $outbody, qr/tableofcontents/;
 $outbody = test_file($file_with_toc, { notoc => 1,
                                        opening => 'any',
-                                     },
+                                     }, [
                      qr/open=any/,
+                                        ],
                     );
 unlike $outbody, qr/tableofcontents/;
 $outbody = test_file($file_no_toc, { notoc => 1,
                                      nocoverpage => 1,
                                      opening => 'any',
-                                   },
+                                   }, [
                      qr/\{scrartcl\}/,
+                                      ],
                     );
 unlike $outbody, qr/tableofcontents/;
 unlike $outbody, qr/open=any/, "No opening found, it has no toc";
-$outbody = test_file($file_no_toc, { notoc => 0 });
+$outbody = test_file($file_no_toc, { notoc => 0 }, []);
 unlike $outbody, qr/tableofcontents/;
 
 my $siteslogan =<<'EXPECTED';
@@ -250,13 +273,17 @@ $outbody = test_file($file_no_toc, {
                                     siteslogan => '#x$x%x^x&x_x{x}x~x\\',
                                     sitename => '*hello* t|h&r~_\\',
                                    },
+                     [
                      qr/\Q$siteslogan\E/,
                      qr/\Q$sitename\E/,
+                     ],
                     );
 sub test_file {
-    my ($file, $extra, @regexps) = @_;
+    my ($file, $extra, $like, $unlike) = @_;
     my $c = Text::Amuse::Compile->new(tex => 1, extra => $extra,
                                       pdf => !!$ENV{TEST_WITH_LATEX});
+    my @regexps = @$like;
+    my @unregexps = @{ $unlike || [] };
     $c->compile($file);
     my $out;
     if (ref($file)) {
@@ -279,6 +306,9 @@ sub test_file {
     unlike $body, qr/%\]/, "No closing template tokens found";
     foreach my $regexp (@regexps) {
         like($body, $regexp, "$regexp matches the body") or $error++;
+    }
+    foreach my $regexp (@unregexps) {
+        unlike($body, $regexp, "$regexp doesn't match the body") or $error++;
     }
     if (ref($file)) {
         my $index = 0;

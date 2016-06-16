@@ -128,6 +128,7 @@ has fileobj => (is => 'ro', isa => Maybe[Object]);
 has webfonts => (is => 'ro', isa => Maybe[Object]);
 has document => (is => 'lazy', isa => Object);
 has options => (is => 'ro', isa => HashRef, default => sub { +{} });
+has full_options => (is => 'lazy', isa => HashRef);
 has tex_options => (is => 'lazy', isa => HashRef);
 has html_options => (is => 'lazy', isa => HashRef);
 has wants_slides => (is => 'lazy', isa => Bool);
@@ -169,12 +170,19 @@ sub _build_document {
 
 sub _build_tex_options {
     my $self = shift;
-    return $self->_escape_options_hashref(ltx => $self->options);
+    return $self->_escape_options_hashref(ltx => $self->full_options);
 }
 
 sub _build_html_options {
     my $self = shift;
-    return $self->_escape_options_hashref(html => $self->options);
+    return $self->_escape_options_hashref(html => $self->full_options);
+}
+
+sub _build_full_options {
+    my $self = shift;
+    # merge the options with the ones found in the header.
+    my %options = %{ $self->options };
+    return \%options;
 }
 
 sub _escape_options_hashref {
@@ -947,7 +955,7 @@ sub _prepare_tex_tokens {
     }
     # now tokens have the unparsed options
     # now validate the options against the new shiny module
-    my %options = (%{ $self->options }, %args);
+    my %options = (%{ $self->full_options }, %args);
     my $parsed = eval { Text::Amuse::Compile::TemplateOptions->new(%options) };
     unless ($parsed) {
         $parsed = Text::Amuse::Compile::TemplateOptions->new;

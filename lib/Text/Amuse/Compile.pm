@@ -581,6 +581,11 @@ sub _muse_compile {
     sleep 5 if DEBUG;
 
     my @fatals;
+    my @warnings;
+    local $SIG{__WARN__} = sub {
+        push @warnings, @_;
+    };
+
     $muse->purge_all unless DEBUG;
     if ($muse->is_deleted) {
         $self->_write_status_file($fhlock, 'DELETED');
@@ -613,6 +618,9 @@ sub _muse_compile {
         $self->_write_status_file($fhlock, 'OK');
     }
     $muse->cleanup if $self->cleanup;
+    foreach my $warn (@warnings) {
+        $self->logger->("Warning: $warn") if $warn;
+    }
 }
 
 sub _suffix_for_method {

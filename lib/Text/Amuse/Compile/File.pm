@@ -182,6 +182,14 @@ sub _build_full_options {
     my $self = shift;
     # merge the options with the ones found in the header.
     my %options = %{ $self->options };
+    # these values are picked from the file, if not provided by the compiler
+    my $header = $self->file_header;
+    unless (exists $options{cover}) {
+        if (my $cover = $header->cover) {
+            $options{cover} = $cover;
+            $options{coverwidth} = $header->coverwidth;
+        }
+    }
     return \%options;
 }
 

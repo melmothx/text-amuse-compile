@@ -110,4 +110,53 @@ sub _build_is_deleted {
     return !!shift->header->{deleted};
 }
 
+has cover => (is => 'lazy', isa => Str);
+
+sub _build_cover {
+    my $self = shift;
+    if (my $cover = $self->header->{cover}) {
+        if ($cover =~ m/\A
+                        (
+                            [a-zA-Z0-9]
+                            [a-zA-Z0-9-]+
+                            [a-zA-Z0-9]
+                            \.(jpe?g|png)
+                        )\z
+                       /x) {
+            if (-f $cover) {
+                return $cover;
+            }
+        }
+    }
+    return '';
+}
+
+has coverwidth => (is => 'lazy', isa => Str);
+
+
+sub _build_coverwidth {
+    # compare with TemplateOptions
+    my $self = shift;
+    if ($self->cover) {
+        if (my $width = $self->header->{coverwidth}) {
+            if ($width =~ m/\A[01](\.[0-9][0-9]?)?\z/) {
+                return $width;
+            }
+            else {
+                warn "Invalid measure passed for coverwidth, should be 0.01 => 1.00\n";
+            }
+        }
+        return 1;
+    }
+    return 0;
+}
+
+has nocoverpage => (is => 'lazy', isa => Bool);
+
+sub _build_nocoverpage {
+    my $self = shift;
+    return !!$self->header->{nocoverpage};
+}
+
+
 1;

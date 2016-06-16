@@ -166,7 +166,9 @@ my $dummy = Text::Amuse::Compile::File->new(
                                             virtual => 1,
                                            );
 
+diag "Loading options from dummy file";
 my $html_options = $dummy->html_options;
+diag "Done";
 my $latex_options = $dummy->tex_options;
 
 is_deeply($html_options, {

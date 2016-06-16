@@ -447,6 +447,7 @@ has cover      => (is => 'rw',
                   );
 
 sub _check_coverwidth {
+    # compare with  MuseHeader
     my $width = $_[0];
     die "$width should be a number" unless $width;
     if ($width =~ m/\A[01](\.[0-9][0-9]?)?\z/) {

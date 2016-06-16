@@ -62,17 +62,17 @@ MUSE
 #deleted
 #lang it
 #slides yes
-#cover test.pdf
+#cover test.png
 
 deleted
 MUSE
     write_file($testfile, $muse);
-    write_file("test.pdf", "x");
+    write_file("test.png", "x");
     my $header = $c->parse_muse_header($testfile);
     ok !$header->is_deleted, "File is not deleted";
     is $header->language, "it", "Language is it";
     ok $header->wants_slides, "File wants slides";
-    is $header->cover, 'test.pdf', "Found the cover";
+    is $header->cover, 'test.png', "Found the cover";
     is $header->coverwidth, 1, "width is 1";
 }
 
@@ -82,18 +82,18 @@ MUSE
 #deleted
 #lang it
 #slides yes
-#cover test.pdf
+#cover test.png
 #coverwidth 0.5
 
 deleted
 MUSE
     write_file($testfile, $muse);
-    write_file("test.pdf", "x");
+    write_file("test.png", "x");
     my $header = $c->parse_muse_header($testfile);
     ok !$header->is_deleted, "File is not deleted";
     is $header->language, "it", "Language is it";
     ok $header->wants_slides, "File wants slides";
-    is $header->cover, 'test.pdf', "Found the cover";
+    is $header->cover, 'test.png', "Found the cover";
     is $header->coverwidth, '0.5', "width is 0.5";
 }
 
@@ -103,18 +103,18 @@ MUSE
 #deleted
 #lang it
 #slides yes
-#cover test.pdf
+#cover test.png
 #coverwidth 0.77
 
 deleted
 MUSE
     write_file($testfile, $muse);
-    write_file("test.pdf", "x");
+    write_file("test.png", "x");
     my $header = $c->parse_muse_header($testfile);
     ok !$header->is_deleted, "File is not deleted";
     is $header->language, "it", "Language is it";
     ok $header->wants_slides, "File wants slides";
-    is $header->cover, 'test.pdf', "Found the cover";
+    is $header->cover, 'test.png', "Found the cover";
     is $header->coverwidth, '0.77', "width is 0.5";
 }
 
@@ -124,19 +124,19 @@ MUSE
 #deleted
 #lang it
 #slides yes
-#cover test.pdf
+#cover test.png
 #coverwidth 0.771
 #nocoverpage 1
 
 deleted
 MUSE
     write_file($testfile, $muse);
-    write_file("test.pdf", "x");
+    write_file("test.png", "x");
     my $header = $c->parse_muse_header($testfile);
     ok !$header->is_deleted, "File is not deleted";
     is $header->language, "it", "Language is it";
     ok $header->wants_slides, "File wants slides";
-    is $header->cover, 'test.pdf', "Found the cover";
+    is $header->cover, 'test.png', "Found the cover";
     is $header->coverwidth, '1', "width is 1";
     is $header->nocoverpage, 1, "nocoverpage ok";
 }

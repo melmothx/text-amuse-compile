@@ -124,6 +124,7 @@ my $compile = Text::Amuse::Compile::File->new(
                                               document => $doc,
                                               name => 'test',
                                               suffix => '.muse',
+                                              virtual => 1,
                                               templates => $templates,
                                              );
 

@@ -163,6 +163,7 @@ my $dummy = Text::Amuse::Compile::File->new(
                                                         ciao => 1,
                                                         test => "Another great thing!",
                                                        },
+                                            virtual => 1,
                                            );
 
 my $html_options = $dummy->html_options;
@@ -198,6 +199,7 @@ $dummy = Text::Amuse::Compile::File->new(
                                                      cover => 'prova.pdf',
                                                      logo => 'c-i-a',
                                                     },
+                                         virtual => 1,
                                            );
 
 is $dummy->tex_options->{cover}, 'prova.pdf';
@@ -220,6 +222,7 @@ SKIP: {
                                                          cover => $testfile,
                                                          logo => $wintestfile,
                                                         },
+                                             virtual => 1,
                                             );
 
     ok $dummy->_looks_like_a_sane_name($testfile), "$testfile is valid";
@@ -236,6 +239,7 @@ SKIP: {
                                                          cover => 'a bc.pdf',
                                                          logo => 'c alsdkfl',
                                                         },
+                                             virtual => 1,
                                             );
     is $dummy->tex_options->{cover}, undef, "cover with spaces doesn't validate";
     is $dummy->tex_options->{logo}, undef, "logo with spaces doesn't validate";

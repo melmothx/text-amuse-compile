@@ -6,7 +6,7 @@ use File::Temp;
 use File::Basename qw/basename/;
 use File::Spec;
 use File::Copy qw/copy/;
-use Test::More tests => 141;
+use Test::More tests => 162;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use Text::Amuse::Compile::Utils qw/write_file read_file/;
 use Text::Amuse::Compile;
@@ -98,6 +98,38 @@ MUSE
     ok (!$zipobj->memberNamed("OPS/ignored.png"), "Ignored file cover in the epub");
 }
 
+foreach my $cover (@valid_in_option) {
+    my $wd = File::Temp->newdir(CLEANUP => 1);
+    my $file = File::Spec->catfile($wd, "test.muse");
+    diag "Creating and processing $file";
+    my $muse = <<"MUSE";
+#title Test
+#lang en
+#cover $cover
+
+Hello there
+MUSE
+    ok (-f $cover, "$cover exists");
+    write_file($file, $muse);
+    my $c = Text::Amuse::Compile->new(tex => 1, zip => 1, epub => 1);
+    $c->compile($file);
+    my $zip = my $tex = my $epub = $file;
+    $zip =~ s/\.muse/.zip/;
+    $tex =~ s/\.muse/.tex/;
+    $epub =~ s/\.muse/.epub/;
+    ok (-f $zip, "Zip found");
+    ok (-f $tex, "TeX found");
+    ok (-f $epub, "EPUB found");
+    my $basename = basename($cover);
+    my $body = read_file($tex);
+    unlike $body, qr/includegraphics/;
+    my $zipobj = Archive::Zip->new;
+    $zipobj->read($zip);
+    my $epubobj = Archive::Zip->new;
+    $epubobj->read($epub);
+    ok (!$zipobj->memberNamed("test/$basename"), "Ignored file $basename the cover in the zip");
+    ok (!$epubobj->memberNamed("OPS/$basename"), "Ignored file $basename the cover in the epub");
+}
 
 foreach my $cover (@invalid) {
     for my $inoption (0,1) {

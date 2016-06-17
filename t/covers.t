@@ -60,7 +60,7 @@ MUSE
     ok ($epubobj->memberNamed("OPS/$cover"), "Found the cover in the epub");
     $c = Text::Amuse::Compile->new(tex => 1, zip => 1, epub => 1, extra => { cover => 0 });
     $c->compile($file);
-    my $body = read_file($tex);
+    $body = read_file($tex);
     unlike $body, qr/includegraphics/;
     $zipobj = Archive::Zip->new;
     $zipobj->read($zip);

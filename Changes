@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.62 2016-06-17
+
+ - Fixed tests
+
 0.61 2016-06-17
 
  - Obey #cover and #coverwidth if found in the muse file (with proper

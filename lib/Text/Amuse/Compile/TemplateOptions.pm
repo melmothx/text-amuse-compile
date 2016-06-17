@@ -344,7 +344,9 @@ sub check_filename {
     }
     elsif ($filename =~ m/\A
                           (
-                              [a-zA-Z0-9-]+
+                              [a-zA-Z0-9]
+                              [a-zA-Z0-9-]*
+                              [a-zA-Z0-9]
                               (\.(pdf|jpe?g|png))?
                           )
                           \z/x) {

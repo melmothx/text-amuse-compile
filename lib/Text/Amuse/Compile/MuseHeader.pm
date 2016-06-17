@@ -118,7 +118,7 @@ sub _build_cover {
         if ($cover =~ m/\A
                         (
                             [a-zA-Z0-9]
-                            [a-zA-Z0-9-]+
+                            [a-zA-Z0-9-]*
                             [a-zA-Z0-9]
                             \.(jpe?g|png)
                         )\z

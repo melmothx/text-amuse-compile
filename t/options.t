@@ -176,12 +176,16 @@ is_deeply($html_options, {
                           prova => 'hello <em>there</em> &amp; \stuff',
                           ciao => 1,
                           test => "Another great thing!",
+                          nocoverpage => 0,
+                          coverwidth => 1,
                          }, "html escaped and interpreted ok");
 is_deeply($latex_options, {
                            prova => 'hello \emph{there} \& \textbackslash{}stuff',
                            pippo => '\href{http://test.org}{test}',
                            ciao => 1,
                            test => "Another great thing!",
+                           nocoverpage => 0,
+                           coverwidth => 1,
                           }, "latex escaped and interpreted ok");
 
 is_deeply($dummy->tex_options, $latex_options);

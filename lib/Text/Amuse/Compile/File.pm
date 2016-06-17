@@ -663,6 +663,12 @@ sub zip {
         copy($attach, $tempdirname)
           or $self->log_fatal("Couldn't copy $attach to $tempdirname $!");
     }
+    if (my $cover = $self->cover) {
+        if (-f $cover) {
+            copy($cover, $tempdirname)
+              or $self->log_info("Cannot find the cover to attach");
+        }
+    }
     my $zip = Archive::Zip->new;
     $zip->addTree($tempdirname, $self->name) == AZ_OK
       or $self->log_fatal("Failure zipping $tempdirname");
@@ -698,7 +704,7 @@ sub epub {
     my @navpoints;
     my $order = 0;
 
-    if (my $cover = $self->html_options->{cover}) {
+    if (my $cover = $self->cover) {
         if (-f $cover) {
             if (my $basename = File::Basename::basename($cover)) {
                 my $coverpage = <<'HTML';

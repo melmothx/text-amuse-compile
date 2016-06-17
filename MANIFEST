@@ -21,6 +21,7 @@ t/compile-merged.t
 t/compile.t
 t/concurrency.t
 t/coverpage.t
+t/covers.t
 t/epub-toc.t
 t/epub.t
 t/failures.t
@@ -62,6 +63,9 @@ t/recursive-dir/f/ff/first-file.muse
 t/recursive-dir/f/not_reported.muse
 t/recursive-dir/z/zf/z-file.muse
 t/recursive.t
+t/resources/t-a-test.jpeg
+t/resources/t-a-test.jpg
+t/resources/test.png
 t/templates.t
 t/testfile/attachment.png
 t/testfile/broken.muse

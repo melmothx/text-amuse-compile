@@ -128,11 +128,16 @@ has fileobj => (is => 'ro', isa => Maybe[Object]);
 has webfonts => (is => 'ro', isa => Maybe[Object]);
 has document => (is => 'lazy', isa => Object);
 has options => (is => 'ro', isa => HashRef, default => sub { +{} });
+has full_options => (is => 'lazy', isa => HashRef);
 has tex_options => (is => 'lazy', isa => HashRef);
 has html_options => (is => 'lazy', isa => HashRef);
 has wants_slides => (is => 'lazy', isa => Bool);
 has is_deleted => (is => 'lazy', isa => Bool);
 has file_header => (is => 'lazy', isa => Object);
+has cover => (is => 'lazy', isa => Str);
+has coverwidth => (is => 'lazy', isa => Str);
+has nocoverpage => (is => 'lazy', isa => Bool);
+
 
 sub _build_file_header {
     my $self = shift;
@@ -169,12 +174,72 @@ sub _build_document {
 
 sub _build_tex_options {
     my $self = shift;
-    return $self->_escape_options_hashref(ltx => $self->options);
+    return $self->_escape_options_hashref(ltx => $self->full_options);
 }
 
 sub _build_html_options {
     my $self = shift;
-    return $self->_escape_options_hashref(html => $self->options);
+    return $self->_escape_options_hashref(html => $self->full_options);
+}
+
+sub _build_full_options {
+    my $self = shift;
+    # merge the options with the ones found in the header.
+    # print "Building full options\n";
+    my %options = %{ $self->options };
+    # these values are picked from the file, if not provided by the compiler
+    foreach my $override (qw/cover coverwidth nocoverpage/) {
+        $options{$override} = $self->$override;
+    }
+    return \%options;
+}
+
+sub _build_cover {
+    my $self = shift;
+    # options passed take precendence
+    if (exists $self->options->{cover}) {
+        if ($self->_looks_like_a_sane_name($self->options->{cover})) {
+            return $self->options->{cover};
+        }
+        else {
+            return '';
+        }
+    }
+    if (my $cover = $self->file_header->cover) {
+        # already validated by the MuseHeader class
+        return $cover;
+    }
+}
+
+sub _build_coverwidth {
+    my $self = shift;
+    # print "Building coverwidth\n";
+    # validation here is not crucial, as the TeX routine will pass it
+    # through the class.
+    if (exists $self->options->{coverwidth}) {
+        # print "Picking coverwidth from options\n";
+        return $self->options->{coverwidth};
+    }
+    # obey this thing only if the file set the cover
+    if ($self->file_header->cover) {
+        # print "Picking coverwidth from file\n";
+        return $self->file_header->coverwidth || 1;
+    }
+    return 1;
+}
+
+sub _build_nocoverpage {
+    my $self = shift;
+    # here the file takes precedence, dunno why.
+    if ($self->file_header->nocoverpage) {
+        return 1;
+    }
+    elsif ($self->options->{nocoverpage}) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 sub _escape_options_hashref {
@@ -598,6 +663,12 @@ sub zip {
         copy($attach, $tempdirname)
           or $self->log_fatal("Couldn't copy $attach to $tempdirname $!");
     }
+    if (my $cover = $self->cover) {
+        if (-f $cover) {
+            copy($cover, $tempdirname)
+              or $self->log_info("Cannot find the cover to attach");
+        }
+    }
     my $zip = Archive::Zip->new;
     $zip->addTree($tempdirname, $self->name) == AZ_OK
       or $self->log_fatal("Failure zipping $tempdirname");
@@ -633,7 +704,7 @@ sub epub {
     my @navpoints;
     my $order = 0;
 
-    if (my $cover = $self->html_options->{cover}) {
+    if (my $cover = $self->cover) {
         if (-f $cover) {
             if (my $basename = File::Basename::basename($cover)) {
                 my $coverpage = <<'HTML';
@@ -947,7 +1018,8 @@ sub _prepare_tex_tokens {
     }
     # now tokens have the unparsed options
     # now validate the options against the new shiny module
-    my %options = (%{ $self->options }, %args);
+    my %options = (%{ $self->full_options }, %args);
+    # print Dumper($self->full_options);
     my $parsed = eval { Text::Amuse::Compile::TemplateOptions->new(%options) };
     unless ($parsed) {
         $parsed = Text::Amuse::Compile::TemplateOptions->new;
@@ -974,7 +1046,7 @@ sub _prepare_tex_tokens {
 
     # no cover page
     unless ($doc->wants_toc) {
-        if ($doc->header_as_latex->{nocoverpage} || $tokens{nocoverpage}) {
+        if ($self->nocoverpage) {
             $parsed{nocoverpage} = 1;
             $parsed{class} = 'scrartcl';
             delete $parsed{opening}; # not needed for article.

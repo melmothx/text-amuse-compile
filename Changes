@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.61 2016-06-17
+
+ - Obey #cover and #coverwidth if found in the muse file (with proper
+   filtering).
+
 0.60 2016-06-09
 
  - Fixed tex.t (RT #115177), thanks to Slaven Rezić for the report.

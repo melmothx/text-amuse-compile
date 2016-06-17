@@ -6,7 +6,7 @@ use File::Temp;
 use File::Basename qw/basename/;
 use File::Spec;
 use File::Copy qw/copy/;
-use Test::More tests => 162;
+use Test::More tests => 174;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use Text::Amuse::Compile::Utils qw/write_file read_file/;
 use Text::Amuse::Compile;
@@ -50,6 +50,7 @@ MUSE
     ok (-f $tex, "TeX found");
     ok (-f $epub, "EPUB found");
     my $body = read_file($tex);
+    like $body, qr/includegraphics/;
     like $body, qr{\Q$cover\E}, "Found $cover in the body";
     my $zipobj = Archive::Zip->new;
     $zipobj->read($zip);
@@ -57,6 +58,16 @@ MUSE
     my $epubobj = Archive::Zip->new;
     $epubobj->read($epub);
     ok ($epubobj->memberNamed("OPS/$cover"), "Found the cover in the epub");
+    $c = Text::Amuse::Compile->new(tex => 1, zip => 1, epub => 1, extra => { cover => 0 });
+    $c->compile($file);
+    my $body = read_file($tex);
+    unlike $body, qr/includegraphics/;
+    $zipobj = Archive::Zip->new;
+    $zipobj->read($zip);
+    ok (!$zipobj->memberNamed("test/$cover"), "No cover in the zip");
+    $epubobj = Archive::Zip->new;
+    $epubobj->read($epub);
+    ok (!$epubobj->memberNamed("OPS/$cover"), "No cover in the epub");
 }
 
 foreach my $cover (@valid_in_option) {

@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.63 2016-06-18
+
+ - Fixed tests on windows
+
 0.62 2016-06-17
 
  - Fixed tests

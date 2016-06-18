@@ -70,7 +70,8 @@ MUSE
     ok (!$epubobj->memberNamed("OPS/$cover"), "No cover in the epub");
 }
 
-foreach my $cover (@valid_in_option) {
+foreach my $file (@valid_in_option) {
+    my $cover = $file;
     my $wd = File::Temp->newdir(CLEANUP => 1);
     my $file = File::Spec->catfile($wd, "test.muse");
     diag "Creating and processing $file";
@@ -97,6 +98,7 @@ MUSE
     ok (-f $tex, "TeX found");
     ok (-f $epub, "EPUB found");
     my $body = read_file($tex);
+    $cover =~ s!\\!/!g;
     like $body, qr{\Q$cover\E}, "Found $cover in the body";
     unlike $body, qr{ignored\.png}, "Ignored file cover in the body";
     my $zipobj = Archive::Zip->new;

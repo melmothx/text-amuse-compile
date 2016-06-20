@@ -799,7 +799,7 @@ sub latex {
 [% UNLESS safe_options.nocoverpage %]
    [% IF safe_options.cover %]
       \vskip 3em
-      \includegraphics[width=[% safe_options.coverwidth %]\textwidth]{[% safe_options.cover %]}
+      \includegraphics[keepaspectratio=true,height=0.5\textheight,width=[% safe_options.coverwidth %]\textwidth]{[% safe_options.cover %]}
    [% END %]
    \vfill
 [% END %]

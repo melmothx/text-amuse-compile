@@ -99,7 +99,7 @@ for (1..2) {
         like $c, qr/oneside/, "oneside enforced on single pdf";
         like $c, qr/BCOR=0mm/, "BCOR validated and enforced";
         unlike $c, qr/\\maketitle/;
-        like $c, qr/includegraphics\[width=1\\textwidth\]\{mycover.pdf\}/;
+        like $c, qr/includegraphics\[.*width=1\\textwidth\]\{mycover.pdf\}/;
         like $c, qr/\\tableofcontents/;
     }
 
@@ -147,7 +147,7 @@ for (1..2) {
     unlike $c, qr/oneside/, "oneside not enforced";
     like $c, qr/BCOR=0mm/, "BCOR enforced";
     unlike $c, qr/\\maketitle/;
-    like $c, qr/includegraphics\[width=1\\textwidth\]\{mycover.pdf\}/;
+    like $c, qr/includegraphics\[.*width=1\\textwidth\]\{mycover.pdf\}/;
     like $c, qr/\\tableofcontents/;
     unlink $texfile or die $!;
 }

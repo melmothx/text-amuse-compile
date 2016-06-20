@@ -87,7 +87,7 @@ test_file($file_with_toc, {
                            coverwidth => '0.1',
                           }, [
           qr/\\end\{titlepage\}\s*\\cleardoublepage\s*\\tableofcontents/s,
-          qr/\\includegraphics\[width=0.1\\textwidth\]\{prova.png\}/,
+          qr/\\includegraphics\[.*width=0.1\\textwidth\]\{prova.png\}/,
           qr/\n\s+oneside\,\%\n/s,
           qr/BCOR=2.5cm/,
                              ],
@@ -119,7 +119,7 @@ test_file($file_with_toc, {
                            twoside => 1,
                            cover => 'prova.png',
                           }, [
-          qr/\\includegraphics\[width=1\\textwidth\]\{prova\.png\}/,
+          qr/\\includegraphics\[.*width=1\\textwidth\]\{prova\.png\}/,
           qr/\\pagestyle\{plain\}/,
                               ]
          );
@@ -143,7 +143,7 @@ test_file($file_with_toc, {
                            cover => 'prova.png',
                            coverwidth => 'blablabla',
                           }, [
-                              qr/\\includegraphics\[width=1\\textwidth\]\{prova\.png\}/,
+                              qr/\\includegraphics\[.*width=1\\textwidth\]\{prova\.png\}/,
                              ],
          );
 

@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.64 2016-06-20
+
+ - Try to always keep the cover image on the first page, enforcing the height to
+   0.5 of the text height (and keeping the aspect ratio).
+
 0.63 2016-06-18
 
  - Fixed tests on windows

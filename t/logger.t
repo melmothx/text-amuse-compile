@@ -27,6 +27,7 @@ my $logger = sub {
 my @errors;
 
 my $c = Text::Amuse::Compile->new(logger => $logger,
+                                  tex => 1,
                                   report_failure_sub => sub {
                                       push @errors, $_[0];
                                   });
@@ -65,3 +66,8 @@ foreach my $r (@report) {
     like $r, qr/Missing character: There is no . in font/, "Found $r";
 }
 
+# there was an infinite loop here
+if ($ENV{RELEASE_TESTING}) {
+    $c->logger(sub{ warn @_ });
+    $c->compile(File::Spec->catfile(qw/t testfile invalid.muse/));
+}

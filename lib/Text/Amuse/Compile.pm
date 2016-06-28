@@ -582,9 +582,6 @@ sub _muse_compile {
 
     my @fatals;
     my @warnings;
-    local $SIG{__WARN__} = sub {
-        push @warnings, @_;
-    };
 
     $muse->purge_all unless DEBUG;
     if ($muse->is_deleted) {
@@ -598,7 +595,12 @@ sub _muse_compile {
                 next;
             }
         }
-        my $output = eval { $muse->$method };
+        my $output = eval {
+            local $SIG{__WARN__} = sub {
+                push @warnings, @_;
+            };
+            $muse->$method
+        };
         if ($@) {
             push @fatals, $@;
             last;

@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.65 2016-06-28
+
+ - Fix an infinite loop which is triggered when Text::Amuse spits warnings and the logger
+   calls warn().
+
 0.64 2016-06-20
 
  - Try to always keep the cover image on the first page, enforcing the height to

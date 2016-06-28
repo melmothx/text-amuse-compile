@@ -73,6 +73,7 @@ t/testfile/deep/deep/dir/logo.png
 t/testfile/deep/deep/dir/manual.muse
 t/testfile/deleted.muse
 t/testfile/for-epub.muse
+t/testfile/invalid.muse
 t/testfile/slides.muse
 t/testfile/test.muse
 t/tex.t

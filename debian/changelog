@@ -1,3 +1,9 @@
+libtext-amuse-compile-perl (0.65-1) unstable; urgency=medium
+
+  * Bugfix release for infinite loop on logger
+
+ -- Marco Pessotto <melmothx@gmail.com>  Tue, 28 Jun 2016 11:28:43 +0200
+
 libtext-amuse-compile-perl (0.64-1) unstable; urgency=medium
 
   * New minor release

@@ -806,14 +806,40 @@ HTML
                       play_order => ++$order,
                       level => 1,
                      };
+
+    my %internal_links;
+    {
+        my $piecenumber = 0;
+        foreach my $piece (@pieces) {
+            # we insert these in Text::Amuse, so it's not a wild regexp.
+            while ($piece =~ m/<a id="(text-amuse-label-.+?)"><\/a>/g) {
+                my $label = $1;
+                $internal_links{$label} =
+                  $self->_format_epub_fragment($toc[$piecenumber]{index});
+            }
+            $piecenumber++;
+        }
+    }
+    my $fix_link = sub {
+        my ($target) = @_;
+        die unless $target;
+        if (my $file = $internal_links{$target}) {
+            return $file . '#' . $target;
+        }
+        else {
+            # broken link
+            return '#' . $target;
+        }
+    };
     while (@pieces) {
         my $fi =    shift @pieces;
         my $index = shift @toc;
         my $xhtml = "";
         # print Dumper($index);
-        my $filename = sprintf('piece%06d.xhtml', $index->{index});
+        my $filename = $self->_format_epub_fragment($index->{index});
         my $prefix = '*' x $index->{level};
         my $title = $prefix . " " . $index->{string};
+        $fi =~ s/(<a class="text-amuse-link" href=")#(text-amuse-label-.+?)"/$1 . $fix_link->($2) .  '"'/ge;
 
         $self->tt->process($self->templates->minimal_html,
                            {
@@ -1149,6 +1175,11 @@ sub _mime_for_attachment {
         $self->log_fatal("Unrecognized attachment $att!");
     }
     return $mime;
+}
+
+sub _format_epub_fragment {
+    my ($self, $index) = @_;
+    return sprintf('piece%06d.xhtml', $index || 0);
 }
 
 1;

@@ -172,7 +172,7 @@ diag "Done";
 my $latex_options = $dummy->tex_options;
 
 is_deeply($html_options, {
-                          pippo => '<a href="http://test.org">test</a>',
+                          pippo => '<a class="text-amuse-link" href="http://test.org">test</a>',
                           prova => 'hello <em>there</em> &amp; \stuff',
                           ciao => 1,
                           test => "Another great thing!",

@@ -50,10 +50,10 @@ foreach my $file (qw/piece000001.xhtml
         like $page, qr{<a id="text-amuse-label}, "Found anchor";
     }
     if ($file eq 'piece000003.xhtml') {
+        my $exp = '<a class="text-amuse-link" href="piece00000';
         for my $num (1..3) {
-            like $page,
-              qr{"<a class="text-amuse-link" href="piece00000\Q${num}\E\.xhtml#text},
-              "Found href to file";
+            my $explink = $exp . $num . '.xhtml#text-amuse-label-';
+            like $page, qr{\Q$explink\E}, "Found href $explink";
         }
     }
     unlike $page, qr{\& }, "no lonely & on $file";

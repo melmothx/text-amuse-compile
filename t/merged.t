@@ -98,13 +98,13 @@ is_deeply([$doc->raw_html_toc],
            },
            {
              'index' => 2,
-             'level' => '3',
+             'level' => '2',
              'string' => 'Another chap'
            },
            {
              'index' => 3,
              'string' => 'Chap',
-             'level' => '3'
+             'level' => '2'
            },
            {
              'level' => 1,
@@ -119,11 +119,11 @@ is_deeply([$doc->raw_html_toc],
            {
              'index' => 6,
              'string' => 'Another chap',
-             'level' => '3'
+             'level' => '2'
            },
            {
              'index' => 7,
-             'level' => '3',
+             'level' => '2',
              'string' => 'Chap'
            }
           ],

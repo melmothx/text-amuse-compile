@@ -12,11 +12,11 @@ First *file* text
 #internal
 This is linked
 
-*** Another chap
+** Another chap
 
 #other
 
-*** Chap
+** Chap
 
 #same
 

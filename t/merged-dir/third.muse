@@ -6,6 +6,7 @@
 
 ** Thing in MK [2]
 
+#other
 Here [3]
 
 
@@ -16,11 +17,9 @@ Cosa [5]
 #internal
 This is linked
 
-*** Another chap
+** Another chap
 
-#other
-
-*** Chap
+** Chap
 
 #same
 

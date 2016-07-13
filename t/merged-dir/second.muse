@@ -15,14 +15,15 @@ Second file *text*
 [[logo-1.png]]
 
 
+
 #internal
 This is linked
 
-*** Another chap
+** Another chap
 
 #other
 
-*** Chap
+** Chap
 
 #same
 

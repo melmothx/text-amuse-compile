@@ -50,6 +50,19 @@ Test [2]
 предвиденное мной прозвание благотворительной организации, объяснить
 
 
+#internal
+This is linked
+
+*** Another chap
+
+#other
+
+*** Chap
+
+#same
+
+[[#internal][Internal link]] [[#internal]] [[#same]] [[#other]] [[#other][other with desc]]
+
 
 [1] Test
 

@@ -15,7 +15,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-my $testnum = 84;
+my $testnum = 132;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
@@ -114,7 +114,7 @@ foreach my $text (@texts) {
     foreach my $piece ($museobj->as_splat_html) {
         my $current = index($epub_html, $piece, $htmlindex);
         ok($current > $htmlindex, "$current is greater than $htmlindex")
-          or diag "$piece was not found in the output";
+          or diag "$piece was not found in the output $epub_html";
         # diag substr($epub_html, $htmlindex, $current - $htmlindex);
         $htmlindex = $current + length($piece);
     }
@@ -164,8 +164,10 @@ sub _get_epub_xhtml {
     closedir $dh;
     my @html;
     foreach my $piece ('toc.ncx', 'titlepage.xhtml', @pieces) {
-        push @html, "<!-- $piece -->\n",
-          read_file(File::Spec->catfile($tmpdir->dirname, $piece));
+        my $html_piece = read_file(File::Spec->catfile($tmpdir->dirname, $piece));
+        # neutralize internal linking for testing purposes
+        $html_piece =~ s/(href=")piece[0-9]+\.xhtml(#.*?")/$1$2/g;
+        push @html, "<!-- $piece -->\n", $html_piece;
     }
     return join('', @html);
 }

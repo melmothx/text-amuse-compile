@@ -13,6 +13,20 @@ Here [3]
 
 Cosa [5]
 
+#internal
+This is linked
+
+*** Another chap
+
+#other
+
+*** Chap
+
+#same
+
+[[#internal][Internal link]] [[#internal]] [[#same]] [[#other]] [[#other][other with desc]]
+
+
 [1] uno
 
 [2] due

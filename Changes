@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.70 2016-07-13
+
+ - Add support for internal linking in epub, partials and merged files.
+
 0.65 2016-06-28
 
  - Fix an infinite loop which is triggered when Text::Amuse spits warnings and the logger

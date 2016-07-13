@@ -1,3 +1,9 @@
+libtext-amuse-compile-perl (0.70-1) unstable; urgency=medium
+
+  * New release with internal linking
+
+ -- Marco Pessotto <melmothx@gmail.com>  Wed, 13 Jul 2016 12:24:58 +0200
+
 libtext-amuse-compile-perl (0.65-1) unstable; urgency=medium
 
   * Bugfix release for infinite loop on logger

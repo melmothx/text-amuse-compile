@@ -172,13 +172,25 @@ Return a list of HTML fragments.
 sub as_splat_html {
     my $self = shift;
     my @out;
+    my $counter = 0;
     foreach my $doc ($self->docs) {
+        $counter++;
         # we need to add a title page for each fragment
         my $title_page = '';
         $self->tt->process($self->templates->title_page_html,
                            { doc => $doc },
                            \$title_page);
-        push @out, $title_page, $doc->as_splat_html;
+
+        # add a prefix to disambiguate anchors
+        my $prefix = sprintf('piece%06d', $counter);
+        my @pieces = $doc->as_splat_html;
+        foreach my $piece (@pieces) {
+            $piece =~ s/(<a\x{20}
+                            (?:class="text-amuse-link"\x{20} href="\#
+                            |id=")
+                            text-amuse-label)/$1-$prefix/gx;
+        }
+        push @out, $title_page, @pieces;
     }
     return @out;
 }
@@ -250,7 +262,10 @@ sub as_latex {
                         macedonian => 'russian',
                         serbian    => 'croatian',
                        );
+    my $counter = 0;
     foreach my $doc ($self->docs) {
+        $counter++;
+        my $prefix = sprintf('piece%06d', $counter);
         my $output = "\n\n";
 
         my $doc_language = $doc->language;
@@ -271,6 +286,14 @@ sub as_latex {
         $self->tt->process($self->templates->bare_latex,
                            { doc => $doc },
                            \$template_output);
+        # disambiguate the refs names when merging
+        $template_output =~ s/(
+                                  \\hyper(def|ref\{\})
+                                  \{
+                              )
+                              amuse
+                              (\})
+                             /$1${prefix}amuse$3/gx;
         $output .= $template_output;
         push @out, $output;
     }

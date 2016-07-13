@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 31;
+use Test::More tests => 37;
 use File::Spec;
 use Text::Amuse::Compile;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
@@ -46,6 +46,16 @@ foreach my $file (qw/piece000001.xhtml
                                              $file));
     like $page, qr{<title>.*\&amp\;.*\&amp\;.*</title>}, "Title escaped on $file";
     like $page, qr{\&amp\;.*\&amp\;}, "& escaped on $file";
+    if ($file =~ m/piece000/) {
+        like $page, qr{<a id="text-amuse-label}, "Found anchor";
+    }
+    if ($file eq 'piece000003.xhtml') {
+        my $exp = '<a class="text-amuse-link" href="piece00000';
+        for my $num (1..3) {
+            my $explink = $exp . $num . '.xhtml#text-amuse-label-';
+            like $page, qr{\Q$explink\E}, "Found href $explink";
+        }
+    }
     unlike $page, qr{\& }, "no lonely & on $file";
     if ($page =~ m{<title>(.*)</title>}) {
         my $title = $1;

@@ -97,16 +97,37 @@ is_deeply([$doc->raw_html_toc],
              'string' => 'First file'
            },
            {
-             'level' => 1,
              'index' => 2,
+             'level' => '2',
+             'string' => 'Another chap'
+           },
+           {
+             'index' => 3,
+             'string' => 'Chap',
+             'level' => '2'
+           },
+           {
+             'level' => 1,
+             'index' => 4,
              'string' => 'Second file'
            },
            {
              'string' => 'Second file',
-             'index' => 3,
+             'index' => 5,
              'level' => 2
+           },
+           {
+             'index' => 6,
+             'string' => 'Another chap',
+             'level' => '2'
+           },
+           {
+             'index' => 7,
+             'level' => '2',
+             'string' => 'Chap'
            }
-         ], "Toc looks ok");
+          ],
+          "Toc looks ok") or diag Dumper([$doc->raw_html_toc]);
 
 is (scalar($doc->raw_html_toc), scalar(@html_frags), "Number of entries match");
 

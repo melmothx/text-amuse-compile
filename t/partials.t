@@ -7,7 +7,7 @@ use File::Spec::Functions qw/catfile catdir/;
 use Text::Amuse::Compile;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use Text::Amuse::Compile::Utils qw/read_file write_file/;
-use Test::More tests => 133;
+use Test::More tests => 141;
 my $builder = Test::More->builder;
 binmode $builder->output,         ":utf8";
 binmode $builder->failure_output, ":utf8";
@@ -20,14 +20,20 @@ my $muse = <<'MUSE';
 #author The author ()
 #notes just a test notes field
 
+<br>
+
+#begin
+
 First chunk àà (0)
 
 * First part (1)
 
+#one
 First part body ćđ (1)
 
 ** First chapter (2)
 
+#two
 First chapter body (2)
 
 *** First section (3)
@@ -36,16 +42,19 @@ First section body (3)
 
 **** First subsection (4)
 
+#four
 First subsection (4)
 
  Item :: Blabla (4)
 
 * Second part (5)
 
+#five
 Second part body (5)
 
 ** Second chapter (6)
 
+#six
 Second chapter body (6)
 
 *** Second section (7)
@@ -60,11 +69,15 @@ Second subsection (8)
 
 *** Third section (9)
 
+[[#begin]] [[#one]] [[#six]] [[#five]]
+
 Third section (9)
 
  Item :: Blabla
 
 *** Fourth section (10)
+
+[[#six]] [[#five]] [[#begin]] [[#one]] 
 
 Blabla (10)
 
@@ -142,11 +155,25 @@ my $check_body = qr/Hello\ World
     $epub_body =~ s/\n\n+/\n/gs;
     like $epub_body, $check_body, "epub looks fine";
     unlike $epub_body, $missing, "epub has not the excluded parts";
+    foreach my $string ('piece000004.xhtml#text-amuse-label-piece000002-begin',
+                        '"#text-amuse-label-piece000002-one"', # the missing one
+                       ) {
+        like $epub_body, qr{\Q$string\E}, "Found $string in EPUB";
+    }
+
     foreach my $ext ('.tex') {
         # html has no support for merged, yet
         my $ext_body = read_file(catfile($wd, 'new-test' . $ext));
         like $ext_body, $check_body, "body for $ext is ok";
         unlike $ext_body, $missing, "body for $ext has no excluded pieces";
+        foreach my $string ('\hyperdef{piece000001amuse}{one}{}%',
+                            '\hyperdef{piece000002amuse}{begin}{}%',
+                            '\hyperref{}{piece000002amuse}{begin}{begin}',
+                            '\hyperref{}{piece000002amuse}{one}{one}',
+                            '\hyperref{}{piece000003amuse}{begin}{begin}',
+                            '\hyperref{}{piece000003amuse}{one}{one}') {
+            like $ext_body, qr{\Q$string\E}, "Found altered refs and defs";
+        }
     }
   SKIP: {
         skip "Not testing pdf", 1 unless $ENV{TEST_WITH_LATEX};

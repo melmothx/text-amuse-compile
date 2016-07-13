@@ -15,7 +15,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-my $testnum = 84;
+my $testnum = 140;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
@@ -72,6 +72,14 @@ like $outtex, qr/\\setotherlanguages\{.*russian.*\}/, "Found russian lang";
 like $outtex, qr/\\setotherlanguages\{.*english.*\}/, "Found english lang";
 like $outtex, qr/\\russianfont/, "Found russian font";
 
+foreach my $pnum (1..4) {
+    like $outtex, qr{hyperref\{\}\{piece00000\Q$pnum\Eamuse\}},
+      "Found hyperref with $pnum piece";
+    like $outtex, qr{hyperdef\{piece00000\Q$pnum\Eamuse\}},
+      "Found hyperdef with $pnum piece";
+}
+
+
 if ($xelatex) {
     ok(-f "$base.pdf", "$base.pdf created");
 }
@@ -114,7 +122,7 @@ foreach my $text (@texts) {
     foreach my $piece ($museobj->as_splat_html) {
         my $current = index($epub_html, $piece, $htmlindex);
         ok($current > $htmlindex, "$current is greater than $htmlindex")
-          or diag "$piece was not found in the output";
+          or diag "$piece was not found in the output $epub_html";
         # diag substr($epub_html, $htmlindex, $current - $htmlindex);
         $htmlindex = $current + length($piece);
     }
@@ -145,10 +153,12 @@ like $epub_html, qr{My <em>new</em> shiny test}, "Found the title";
 like $epub_html, qr{Another <em>one</em>}, "Found the author";
 like $epub_html, qr{<em>Today</em>!}, "Found the date";
 
-foreach my $ext (qw/aux log pdf tex toc status epub/) {
-    my $remove = "$base.$ext";
-    if (-f $remove) {
-        unlink $remove or warn $!;
+unless ($ENV{NO_CLEANUP}) {
+    foreach my $ext (qw/aux log pdf tex toc status epub/) {
+        my $remove = "$base.$ext";
+        if (-f $remove) {
+            unlink $remove or warn $!;
+        }
     }
 }
 
@@ -164,8 +174,11 @@ sub _get_epub_xhtml {
     closedir $dh;
     my @html;
     foreach my $piece ('toc.ncx', 'titlepage.xhtml', @pieces) {
-        push @html, "<!-- $piece -->\n",
-          read_file(File::Spec->catfile($tmpdir->dirname, $piece));
+        my $html_piece = read_file(File::Spec->catfile($tmpdir->dirname, $piece));
+        # neutralize internal linking for testing purposes
+        $html_piece =~ s/(href=")piece[0-9]+\.xhtml(#.*?")/$1$2/g;
+        $html_piece =~ s/(text-amuse-label-)piece[0-9]+-/$1/g;
+        push @html, "<!-- $piece -->\n", $html_piece;
     }
     return join('', @html);
 }

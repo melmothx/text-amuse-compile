@@ -8,3 +8,17 @@
 First *file* text
 
 [[logo.png]]
+
+#internal
+This is linked
+
+** Another chap
+
+#other
+
+** Chap
+
+#same
+
+[[#internal][Internal link]] [[#internal]] [[#same]] [[#other]] [[#other][other with desc]]
+

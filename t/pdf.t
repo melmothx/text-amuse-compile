@@ -7,14 +7,14 @@ use File::Spec;
 use Text::Amuse::Compile;
 
 if ($ENV{TEST_WITH_LATEX}) {
-    plan tests => 6;
+    plan tests => 12;
 }
 else {
     plan skip_all => "No TEST_WITH_LATEX set, skipping";
 }
 
-my $file = File::Spec->catfile(qw/t manual manual.muse/);
-
+foreach my $file (File::Spec->catfile(qw/t manual manual.muse/),
+                  File::Spec->catfile(qw/t manual br-in-footnotes.muse/)) {
 ok (-f $file, "$file found");
 
 my $output = $file;
@@ -37,7 +37,7 @@ $c->compile($file);
 ok (-f $output);
 unlink $output or die "Cannot unlink $output $!";
 like first_line($log), qr{This is LuaTeX};
-
+}
 
 sub first_line {
     my $file = shift;

@@ -34,6 +34,7 @@ t/leaks.t
 t/log-encoding.log
 t/logger.t
 t/manifest.t
+t/manual/br-in-footnotes.muse
 t/manual/logo.png
 t/manual/manual.muse
 t/memory.t

@@ -22,7 +22,7 @@ t/testfile/*
 !t/testfile/*.png
 t/merged-dir/*status
 t/manual/*
-!t/manual/manual.muse
+!t/manual/*.muse
 !t/manual/logo.png
 debian/files
 debian/libtext-amuse-compile-perl*

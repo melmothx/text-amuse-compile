@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.72 2016-07-21
+
+ - Permit font dimensions from 9 to 14 (and stop people complaining
+   about fonts being too small)
+
 0.71 2016-07-19
 
  - Assert we can compile texts with multiline footnotes in the title names

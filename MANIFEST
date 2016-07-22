@@ -26,6 +26,7 @@ t/epub-toc.t
 t/epub.t
 t/failures.t
 t/filenames.t
+t/fontsizes.t
 t/header.t
 t/headings.t
 t/html.t

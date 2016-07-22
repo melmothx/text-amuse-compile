@@ -295,10 +295,13 @@ has monofont   => (is => 'rw',
                   );
 
 has fontsize   => (is => 'rw',
-                   isa => Enum[9..12],
+                   isa => Enum[ __PACKAGE__->all_fontsizes ],
                    default => sub { 10 },
                   );
 
+sub all_fontsizes {
+    return (9..14);
+}
 
 
 =head2 Colophon
@@ -704,6 +707,8 @@ can be called on the class.
 =item serif_fonts
 
 =item all_fonts
+
+=item all_fontsizes
 
 =back
 

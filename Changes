@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.73 2016-09-02
+
+ - Embed authors and topics in the EPUB under the relevant fields
+
 0.72 2016-07-21
 
  - Permit font dimensions from 9 to 14 (and stop people complaining

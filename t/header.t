@@ -7,7 +7,7 @@ use Text::Amuse::Compile;
 use Text::Amuse::Compile::Utils qw/write_file read_file/;
 use File::Temp;
 use File::Spec::Functions qw/catdir catfile/;
-use Test::More tests => 32;
+use Test::More tests => 42;
 use Cwd;
 
 my $cwd = getcwd();
@@ -139,6 +139,79 @@ MUSE
     is $header->cover, 'test.png', "Found the cover";
     is $header->coverwidth, '1', "width is 1";
     is $header->nocoverpage, 1, "nocoverpage ok";
+}
+
+{
+    my $muse = <<MUSE;
+#title blah
+#topics first, second, third
+#authors second; first, last
+
+x
+MUSE
+    write_file($testfile, $muse);
+    my $header = $c->parse_muse_header($testfile);
+    is_deeply ($header->topics, [qw/first second third/]);
+    is_deeply ($header->authors, ['second', 'first, last']);
+}
+
+{
+    my $muse = <<MUSE;
+#title blah
+#topics first, last;
+#authors ;
+
+x
+MUSE
+    write_file($testfile, $muse);
+    my $header = $c->parse_muse_header($testfile);
+    is_deeply ($header->topics, [q/first, last/]);
+    is_deeply ($header->authors, []);
+}
+
+{
+    my $muse = <<MUSE;
+#title blah
+#sorttopics first, last
+#sortauthors ;
+#cat bla foo, try
+
+x
+MUSE
+    write_file($testfile, $muse);
+    my $header = $c->parse_muse_header($testfile);
+    is_deeply ($header->topics, [qw/bla foo try first last/]);
+    is_deeply ($header->authors, []);
+}
+
+{
+    my $muse = <<MUSE;
+#title blah
+#SORTtopics *first*, =last=;
+#SORTauthors my **fist, <em>author<em>;
+#cat bla foo, try
+
+x
+MUSE
+    write_file($testfile, $muse);
+    my $header = $c->parse_muse_header($testfile);
+    is_deeply ($header->topics, [qw/bla foo try/, "first, last"]);
+    is_deeply ($header->authors, ['my fist, author']);
+}
+
+{
+    my $muse = <<MUSE;
+#title blah
+#SORTtopics >first, =&'last=<;
+#SORTauthors my **fist, <em>"author"<em>;
+#cat bla foo, try
+
+x
+MUSE
+    write_file($testfile, $muse);
+    my $header = $c->parse_muse_header($testfile);
+    is_deeply ($header->topics, [qw/bla foo try/, ">first, &'last<"]);
+    is_deeply ($header->authors, ['my fist, "author"']);
 }
 
 

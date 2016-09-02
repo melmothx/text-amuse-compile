@@ -7,7 +7,7 @@ use Text::Amuse::Compile;
 use Text::Amuse::Compile::Utils qw/write_file read_file/;
 use File::Temp;
 use File::Spec::Functions qw/catdir catfile/;
-use Test::More tests => 42;
+use Test::More tests => 46;
 use Cwd;
 
 my $cwd = getcwd();
@@ -188,30 +188,39 @@ MUSE
     my $muse = <<MUSE;
 #title blah
 #SORTtopics *first*, =last=;
-#SORTauthors my **fist, <em>author<em>;
+#SORTauthors my **fist, <em>author</em>;
 #cat bla foo, try
 
 x
 MUSE
     write_file($testfile, $muse);
     my $header = $c->parse_muse_header($testfile);
-    is_deeply ($header->topics, [qw/bla foo try/, "first, last"]);
-    is_deeply ($header->authors, ['my fist, author']);
+    is_deeply ($header->topics, [qw/bla foo try/, "*first*, =last="]);
+    is_deeply ([$header->topics_as_html_list],
+               [qw/bla foo try/, "<em>first</em>, <code>last</code>"],
+               'html ok for topics');
+    is_deeply ($header->authors, ['my **fist, <em>author</em>']);
+    is_deeply ([$header->authors_as_html_list],
+               ['my **fist, <em>author</em>'], 'html for authors ok');
 }
 
 {
     my $muse = <<MUSE;
 #title blah
 #SORTtopics >first, =&'last=<;
-#SORTauthors my **fist, <em>"author"<em>;
+#SORTauthors my **fist, <em>"author"</em>;
 #cat bla foo, try
 
 x
 MUSE
     write_file($testfile, $muse);
     my $header = $c->parse_muse_header($testfile);
-    is_deeply ($header->topics, [qw/bla foo try/, ">first, &'last<"]);
-    is_deeply ($header->authors, ['my fist, "author"']);
+    is_deeply ($header->topics, [qw/bla foo try/, ">first, =&'last=<"]);
+    is_deeply ([$header->topics_as_html_list],
+               [qw/bla foo try/, "&gt;first, <code>&amp;&#x27;last</code>&lt;"]);
+    is_deeply ($header->authors, ['my **fist, <em>"author"</em>']);
+    is_deeply ([$header->authors_as_html_list],
+               ['my **fist, <em>&quot;author&quot;</em>']);
 }
 
 

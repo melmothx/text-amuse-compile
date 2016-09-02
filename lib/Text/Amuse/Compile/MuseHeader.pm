@@ -2,6 +2,7 @@ package Text::Amuse::Compile::MuseHeader;
 
 use Moo;
 use Types::Standard qw/HashRef Bool Str ArrayRef/;
+use Text::Amuse::Functions qw/muse_format_line/;
 
 =head1 NAME
 
@@ -45,6 +46,14 @@ An arrayref with the authors from C<sortauthors> and C<authors>
 fields.
 
 Fields split at semicolon if present, otherwise at comma.
+
+=head2 topics_as_html_list
+
+Same as C<topics>, but returns a plain list of HTML formatted topics.
+
+=head2 authors_as_html_list
+
+Same as C<authors>, but returns a plain list of HTML formatted authors.
 
 =head1 INTERNALS
 
@@ -196,6 +205,25 @@ sub _build_authors {
     return \@authors;
 }
 
+sub authors_as_html_list {
+    my $self = shift;
+    return $self->_html_strings($self->authors);
+}
+
+sub topics_as_html_list {
+    my $self = shift;
+    return $self->_html_strings($self->topics);
+}
+
+sub _html_strings {
+    my ($self, $list) = @_;
+    my @out;
+    foreach my $el (@$list) {
+        push @out, muse_format_line(html => $el);
+    }
+    return @out;
+}
+
 sub _parse_topic_or_author {
     my ($self, $field) = @_;
     my $header = $self->header;
@@ -212,11 +240,6 @@ sub _parse_topic_or_author {
     if (exists $header->{$field}) {
         my $string = $header->{$field};
         if (defined $string and length $string) {
-            # strip tags
-            $string =~ s/<.*?>//g;
-            # strip * and =
-            $string =~ s/[\*\=]//g;
-            # special case, "cat"
             my $separator = qr{\s*\,\s*};
             if ($field eq 'cat') {
                 $separator = qr{[\s;,]+};

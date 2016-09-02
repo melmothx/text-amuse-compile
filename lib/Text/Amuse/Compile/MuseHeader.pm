@@ -1,7 +1,8 @@
 package Text::Amuse::Compile::MuseHeader;
 
 use Moo;
-use Types::Standard qw/HashRef Bool Str/;
+use Types::Standard qw/HashRef Bool Str ArrayRef/;
+use Text::Amuse::Functions qw/muse_format_line/;
 
 =head1 NAME
 
@@ -31,6 +32,28 @@ ignored.
 =head2 language
 
 Defaults to en if not present.
+
+=head2 topics
+
+An arrayref with topics from C<sorttopics>, C<topics> and C<cat>
+fields. The C<cat> field is meant to be reserved from fixed category
+list, so it splits at space too, while the others split at semicolon
+(if present) or at comma.
+
+=head2 authors
+
+An arrayref with the authors from C<sortauthors> and C<authors>
+fields.
+
+Fields split at semicolon if present, otherwise at comma.
+
+=head2 topics_as_html_list
+
+Same as C<topics>, but returns a plain list of HTML formatted topics.
+
+=head2 authors_as_html_list
+
+Same as C<authors>, but returns a plain list of HTML formatted authors.
 
 =head1 INTERNALS
 
@@ -158,5 +181,76 @@ sub _build_nocoverpage {
     return !!$self->header->{nocoverpage};
 }
 
+
+
+has topics => (is => 'lazy', isa => ArrayRef);
+
+sub _build_topics {
+    my $self = shift;
+    my @topics;
+    foreach my $field (qw/cat sorttopics topics/) {
+        push @topics, $self->_parse_topic_or_author($field);
+    }
+    return \@topics;
+}
+
+has authors => (is => 'lazy', isa => ArrayRef);
+
+sub _build_authors {
+    my $self = shift;
+    my @authors;
+    foreach my $field (qw/authors sortauthors/) {
+        push @authors, $self->_parse_topic_or_author($field);
+    }
+    return \@authors;
+}
+
+sub authors_as_html_list {
+    my $self = shift;
+    return $self->_html_strings($self->authors);
+}
+
+sub topics_as_html_list {
+    my $self = shift;
+    return $self->_html_strings($self->topics);
+}
+
+sub _html_strings {
+    my ($self, $list) = @_;
+    my @out;
+    foreach my $el (@$list) {
+        push @out, muse_format_line(html => $el);
+    }
+    return @out;
+}
+
+sub _parse_topic_or_author {
+    my ($self, $field) = @_;
+    my $header = $self->header;
+    my %fields = (
+                  cat => 1,
+                  sorttopics => 1,
+                  sortauthors => 1,
+                  topics => 1,
+                  authors => 1,
+                 );
+    die "Called _parse_topic_or_author for unknown field $field"
+      unless $fields{$field};
+    my @out;
+    if (exists $header->{$field}) {
+        my $string = $header->{$field};
+        if (defined $string and length $string) {
+            my $separator = qr{\s*\,\s*};
+            if ($field eq 'cat') {
+                $separator = qr{[\s;,]+};
+            }
+            elsif ($string =~ m/\;/) {
+                $separator = qr{\s*\;\s*};
+            }
+            @out = grep { /\w/ } split(/$separator/, $string);
+        }
+    }
+    return @out;
+}
 
 1;

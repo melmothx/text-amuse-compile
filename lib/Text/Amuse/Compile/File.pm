@@ -750,7 +750,13 @@ HTML
         $epub->add_author($self->_clean_html($author));
         $titlepage .= "<h2>$author</h2>\n" if $text->wants_preamble;
     }
-
+    my $muse_header = $self->file_header;
+    foreach my $aut ($muse_header->authors_as_html_list) {
+        $epub->add_author($self->_clean_html($aut));
+    }
+    foreach my $topic ($muse_header->topics_as_html_list) {
+        $epub->add_subject($self->_clean_html($topic));
+    }
     if ($text->header_defined->{title}) {
         my $t = $header->{title};
         $epub->add_title($self->_clean_html($t));

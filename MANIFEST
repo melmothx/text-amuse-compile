@@ -22,6 +22,7 @@ t/compile.t
 t/concurrency.t
 t/coverpage.t
 t/covers.t
+t/epub-meta.t
 t/epub-toc.t
 t/epub.t
 t/failures.t
@@ -74,6 +75,7 @@ t/testfile/broken.muse
 t/testfile/deep/deep/dir/logo.png
 t/testfile/deep/deep/dir/manual.muse
 t/testfile/deleted.muse
+t/testfile/epub-meta.muse
 t/testfile/for-epub.muse
 t/testfile/invalid.muse
 t/testfile/slides.muse

@@ -996,14 +996,14 @@ sub bare_latex {
 [% IF doc.wants_preamble %]
 % start titlepage
 
+[% IF doc.wants_toc %]
 \strut
-
 \thispagestyle{empty}
+\vspace{0.1\textheight}
+[% END %]
 
 \phantomsection
 \addcontentsline{toc}{part}{[% doc.header_as_latex.title %]}
-
-\vspace{0.1\textheight}
 
 \begin{center}
   \strut\vskip 2em
@@ -1024,7 +1024,11 @@ sub bare_latex {
 
 % end titlepage
 
+[% IF doc.wants_toc %]
 \cleardoublepage
+[% ELSE %]
+\strut\vskip 2em
+[% END %]
 
 [% END %]
 

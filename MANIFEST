@@ -44,6 +44,7 @@ t/merged-dir/first.muse
 t/merged-dir/forth.muse
 t/merged-dir/logo-1.png
 t/merged-dir/logo.png
+t/merged-dir/nosections.muse
 t/merged-dir/second.muse
 t/merged-dir/third.muse
 t/merged.t

@@ -15,7 +15,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-my $testnum = 140;
+my $testnum = 143;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 if ($xelatex) {
@@ -40,7 +40,7 @@ diag "Try to compile";
 
 $c->compile({
              path  => File::Spec->catdir(qw/t merged-dir/),
-             files => [qw/first forth second third/],
+             files => [qw/first forth second third nosections/],
              name  => 'my-new-test',
              title => 'My new shiny test',
              subtitle => 'Another one',
@@ -71,6 +71,9 @@ like $outtex, qr/\\setmainlanguage\{french\}/, "Found language selection";
 like $outtex, qr/\\setotherlanguages\{.*russian.*\}/, "Found russian lang";
 like $outtex, qr/\\setotherlanguages\{.*english.*\}/, "Found english lang";
 like $outtex, qr/\\russianfont/, "Found russian font";
+like $outtex, qr/No sections/;
+like $outtex, qr/pippo no section/;
+like $outtex, qr/Here the body goes/;
 
 foreach my $pnum (1..4) {
     like $outtex, qr{hyperref\{\}\{piece00000\Q$pnum\Eamuse\}},

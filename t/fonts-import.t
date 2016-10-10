@@ -7,6 +7,7 @@ use Test::More;
 use Data::Dumper;
 use File::Spec;
 use JSON::MaybeXS;
+use Text::Amuse::Compile::Fonts;
 
 my $output = File::Spec->catfile(qw/t fontspec.json/);
 unlink $output if -f $output;
@@ -41,3 +42,9 @@ ok (-f $output);
     my $data = decode_json($body);
     is_deeply $data, $imported;
 }
+my $from_file = Text::Amuse::Compile::Fonts->new($output);
+my $from_data = Text::Amuse::Compile::Fonts->new($imported);
+ok ($from_file);
+ok ($from_data);
+is_deeply($from_file->list, $from_data->list, "Loaded ok");
+diag Dumper($from_file->list);

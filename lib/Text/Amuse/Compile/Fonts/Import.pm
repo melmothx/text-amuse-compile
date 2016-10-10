@@ -158,7 +158,7 @@ sub import {
                 my $files = $found->{files};
                 if (%$files and scalar(keys %$files) == 4) {
                     push @out, {
-                                family => $font,
+                                name => $font,
                                 desc => $font,
                                 type => $type,
                                 regular => $files->{regular},

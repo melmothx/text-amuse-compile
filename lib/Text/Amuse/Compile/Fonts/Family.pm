@@ -1,8 +1,9 @@
 package Text::Amuse::Compile::Fonts::Family;
+use utf8;
 use strict;
 use warnings;
-use utf8;
-use Types::Standard qw/Str Enum RegexpRef InstanceOf/;
+use Types::Standard qw/Str Enum StrMatch InstanceOf/;
+use Moo;
 
 =head1 NAME
 
@@ -44,9 +45,10 @@ physical location of the files, not just its name.
 
 =cut
 
-has family => (is => 'ro',
-               isa => RegexpRef[qr{\A[a-zA-Z0-9 ]+\z}],
-               required => 1);
+
+has name => (is => 'ro',
+             isa => StrMatch[ qr{\A[a-zA-Z0-9 ]+\z} ],
+             required => 1);
 
 has desc => (is => 'ro',
              isa => Str,

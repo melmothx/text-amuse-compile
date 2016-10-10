@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Test::More;
 use Text::Amuse::Compile::Fonts::File;
+use Text::Amuse::Compile::Fonts;
 use File::Temp;
 use File::Spec;
 use Text::Amuse::Compile::Utils qw/write_file/;
@@ -17,7 +18,7 @@ my %files = ('file.ttf' => 'truetype',
              'file.woff' => 'woff',
              'file.WOFF' => 'woff');
 
-plan tests => scalar(keys %files) * 18;
+plan tests => scalar(keys %files) * 18 + 6;
 
 foreach my $file (sort keys %files) {
     my $path = File::Spec->catfile($wd, $file);
@@ -67,4 +68,55 @@ foreach my $file (sort keys %files) {
         }
     }
 }
-             
+
+{
+    # no list provided, use the defaults
+    my $fonts = Text::Amuse::Compile::Fonts->new;
+    my $default = $fonts->list->[0];
+    ok !$default->has_files, $default->name . ' has no files';
+}
+{
+    my $fonts = Text::Amuse::Compile::Fonts->new([ { name => 'Pippo', type => 'serif' } ]);
+    my $default = $fonts->list->[0];
+    ok !$default->has_files, $default->name . ' has no files';
+}
+
+{
+    my $fonts;
+    eval {
+        $fonts = Text::Amuse::Compile::Fonts->new([ { name => 'Pippo',
+                                                     type => 'serif',
+                                                     italic => 'x',
+                                                       } ]);
+    };
+    ok($@, "Found error passing a file which doesn't exist as italic $@");
+    ok(!$fonts, "No font object initialized");
+}
+{
+    my $file = File::Spec->catfile($wd, 'file.ttf');
+    my $fonts = Text::Amuse::Compile::Fonts->new([
+                                                  {
+                                                   name => 'Pippo',
+                                                   type => 'serif',
+                                                   italic => $file,
+                                                   bold => $file,
+                                                   bolditalic => $file,
+                                                  },
+                                                 ]);
+    ok !$fonts->list->[0]->has_files;
+}
+
+{
+    my $file = File::Spec->catfile($wd, 'file.ttf');
+    my $fonts = Text::Amuse::Compile::Fonts->new([
+                                                  {
+                                                   name => 'Pippo',
+                                                   type => 'serif',
+                                                   italic => $file,
+                                                   bold => $file,
+                                                   bolditalic => $file,
+                                                   regular => $file,
+                                                  },
+                                                 ]);
+    ok $fonts->list->[0]->has_files;
+}

@@ -38,7 +38,8 @@ sub BUILDARGS {
     }
     $list ||= $class->_default_font_list;
     my @out;
-    foreach my $font (@$list) {
+    foreach my $fontref (@$list) {
+        my $font = { %$fontref }; # do a copy do avoid mangling hte argument.
         if ($font->{name} and $font->{type}) {
             $font->{desc} ||= $font->{name};
             foreach my $type (qw/regular bold italic bolditalic/) {

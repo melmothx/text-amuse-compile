@@ -12,6 +12,26 @@ use Try::Tiny;
 has list => (is => 'ro',
              isa => ArrayRef[InstanceOf['Text::Amuse::Compile::Fonts::Family']]);
 
+sub all_fonts {
+    my $self = shift;
+    return @{$self->list};
+}
+
+sub serif_fonts {
+    my $self = shift;
+    return grep { $_->is_serif } @{$self->list};
+}
+
+sub mono_fonts {
+    my $self = shift;
+    return grep { $_->is_mono } @{$self->list};
+}
+
+sub sans_fonts {
+    my $self = shift;
+    return grep { $_->is_sans } @{$self->list};
+}
+
 sub BUILDARGS {
     my ($class, $arg) = @_;
     my $list;
@@ -109,21 +129,6 @@ sub _default_font_list {
              type => 'serif',
             },
             {
-             name => 'CMU Typewriter Text',
-             desc => 'Computer Modern Typewriter Text',
-             type => 'mono',
-            },
-            {
-             name => 'DejaVu Sans Mono',
-             desc => 'DejaVu Sans Mono',
-             type => 'mono',
-            },
-            {
-             name => 'TeX Gyre Cursor',
-             desc => 'TeX Gyre Cursor (Courier)',
-             type => 'mono',
-            },
-            {
              name => 'CMU Sans Serif',
              desc => 'Computer Modern Sans Serif',
              type => 'sans',
@@ -157,6 +162,21 @@ sub _default_font_list {
              name => 'PT Sans',
              desc => 'PT Sans (cyrillic)',
              type => 'sans',
+            },
+            {
+             name => 'CMU Typewriter Text',
+             desc => 'Computer Modern Typewriter Text',
+             type => 'mono',
+            },
+            {
+             name => 'DejaVu Sans Mono',
+             desc => 'DejaVu Sans Mono',
+             type => 'mono',
+            },
+            {
+             name => 'TeX Gyre Cursor',
+             desc => 'TeX Gyre Cursor (Courier)',
+             type => 'mono',
             },
            ];
 }

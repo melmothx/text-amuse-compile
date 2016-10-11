@@ -1,8 +1,13 @@
 bin/muse-compile.pl
+bin/muse-create-font-file.pl
 Changes
 lib/Text/Amuse/Compile.pm
 lib/Text/Amuse/Compile/File.pm
 lib/Text/Amuse/Compile/FileName.pm
+lib/Text/Amuse/Compile/Fonts.pm
+lib/Text/Amuse/Compile/Fonts/Family.pm
+lib/Text/Amuse/Compile/Fonts/File.pm
+lib/Text/Amuse/Compile/Fonts/Import.pm
 lib/Text/Amuse/Compile/Merged.pm
 lib/Text/Amuse/Compile/MuseHeader.pm
 lib/Text/Amuse/Compile/TemplateOptions.pm
@@ -27,6 +32,9 @@ t/epub-toc.t
 t/epub.t
 t/failures.t
 t/filenames.t
+t/fonts-compat.t
+t/fonts-import.t
+t/fonts.t
 t/fontsizes.t
 t/header.t
 t/headings.t

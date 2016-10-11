@@ -74,4 +74,16 @@ sub has_files {
     return 0;
 }
 
+sub is_serif {
+    return shift->type eq 'serif';
+}
+
+sub is_mono {
+    return shift->type eq 'mono';
+}
+
+sub is_sans {
+    return shift->type eq 'sans';
+}
+
 1;

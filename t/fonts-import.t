@@ -6,19 +6,19 @@ use Text::Amuse::Compile::Fonts::Import;
 use Test::More;
 use Data::Dumper;
 use File::Spec;
+use File::Temp;
 use JSON::MaybeXS;
 use Text::Amuse::Compile::Fonts;
 
-my $output = File::Spec->catfile(qw/t fontspec.json/);
-unlink $output if -f $output;
-die "Cannot unlink $output" if -f $output;
+my $wd = File::Temp->newdir;
+my $output = File::Spec->catfile($wd, 'fontspec.json');
 my $importer = Text::Amuse::Compile::Fonts::Import->new(output => $output);
 
 if (!$ENV{RELEASE_TESTING}) {
     plan skip_all => 'Importer test not required';
 }
 elsif ($importer->use_fclist && $importer->use_imagemagick) {
-    plan tests => 5;
+    plan tests => 8;
 }
 else {
     plan skip_all => 'Cannot test the font importer';

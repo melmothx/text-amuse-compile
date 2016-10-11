@@ -30,7 +30,10 @@ WriteMakefile(
         'JSON::MaybeXS' => 0,
         'Try::Tiny' => 0,
     },
-    EXE_FILES => [ 'bin/muse-compile.pl' ],
+    EXE_FILES => [
+        'bin/muse-compile.pl',
+        'bin/muse-create-font-file.pl',
+       ],
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Text-Amuse-Compile-*' },
     META_MERGE => {

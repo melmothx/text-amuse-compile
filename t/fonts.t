@@ -1,5 +1,5 @@
 #!perl
-
+use utf8;
 use strict;
 use warnings;
 use Test::More;
@@ -8,6 +8,7 @@ use Text::Amuse::Compile::Fonts;
 use File::Temp;
 use File::Spec;
 use Text::Amuse::Compile::Utils qw/write_file/;
+use JSON::MaybeXS;
 
 my $wd = File::Temp->newdir;
 
@@ -18,7 +19,7 @@ my %files = ('file.ttf' => 'truetype',
              'file.woff' => 'woff',
              'file.WOFF' => 'woff');
 
-plan tests => scalar(keys %files) * 18 + 6;
+plan tests => scalar(keys %files) * 18 + 18;
 
 foreach my $file (sort keys %files) {
     my $path = File::Spec->catfile($wd, $file);
@@ -119,4 +120,47 @@ foreach my $file (sort keys %files) {
                                                   },
                                                  ]);
     ok $fonts->list->[0]->has_files;
+}
+
+{
+    my $file = File::Spec->catfile($wd, 'fontspec.json');
+    my $fontfile = File::Spec->catfile($wd, 'file.ttf');
+    my @list = ({
+                 name => 'Pippo Serif',
+                 type => 'serif',
+                 italic     => $fontfile,
+                 bold       => $fontfile,
+                 bolditalic => $fontfile,
+                 regular    => $fontfile,
+                },
+                {
+                 name => 'Pippo Mono',
+                 type => 'mono',
+                 regular => $fontfile,
+                },
+                {
+                 name => 'Pippo Sans',
+                 desc => 'Pippo ž Sans',
+                 type => 'sans',
+                },
+               );
+    # we're doing the encoding ourselves, so utf8 => 0
+    my $json = JSON::MaybeXS->new(pretty => 1, canonical => 1, utf8 => 0)->encode(\@list);
+    write_file($file, $json);
+    my $fonts = Text::Amuse::Compile::Fonts->new($file);
+    my ($sans) = $fonts->sans_fonts;
+    my ($serif) = $fonts->serif_fonts;
+    my ($mono)  = $fonts->mono_fonts;
+    ok ($serif, "Found the serif font");
+    is $serif->desc, $list[0]{name};
+    is $serif->name, $list[0]{name};
+    ok $serif->has_files, $serif->name . " has files";
+    ok ($mono, "Found the mono font");
+    is $mono->desc, $list[1]{name};
+    is $mono->name, $list[1]{name};
+    ok !$mono->has_files, $mono->name . " has no files";
+    ok $mono->regular, "but has the regular file";
+    ok ($sans, "Found the sans font");
+    is $sans->desc, $list[2]{desc};
+    is $sans->name, $list[2]{name};
 }

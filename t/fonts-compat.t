@@ -2,7 +2,7 @@
 use utf8;
 use strict;
 use warnings;
-use Test::More tests => 4;
+use Test::More tests => 7;
 use Text::Amuse::Compile::TemplateOptions;
 use Data::Dumper;
 
@@ -180,4 +180,8 @@ is_deeply([ Text::Amuse::Compile::TemplateOptions->all_fonts ],
                   desc => 'TeX Gyre Cursor (Courier)',
                  }
           ]);
+
+is (Text::Amuse::Compile::TemplateOptions->default_mainfont, 'CMU Serif');
+is (Text::Amuse::Compile::TemplateOptions->default_monofont, 'CMU Typewriter Text');
+is (Text::Amuse::Compile::TemplateOptions->default_sansfont, 'CMU Sans Serif');
 

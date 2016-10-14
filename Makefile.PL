@@ -27,8 +27,13 @@ WriteMakefile(
         'Template::Tiny' => 1.12, # version in wheezy
         'IO::Pipe' => 0,
         'Archive::Zip' => 0, # alread a requirement of EBook::EPUB
+        'JSON::MaybeXS' => 0,
+        'Try::Tiny' => 0,
     },
-    EXE_FILES => [ 'bin/muse-compile.pl' ],
+    EXE_FILES => [
+        'bin/muse-compile.pl',
+        'bin/muse-create-font-file.pl',
+       ],
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Text-Amuse-Compile-*' },
     META_MERGE => {

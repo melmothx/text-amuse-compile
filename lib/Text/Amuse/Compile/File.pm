@@ -28,7 +28,7 @@ use Text::Amuse::Functions qw/muse_fast_scan_header
 
 use Text::Amuse::Compile::TemplateOptions;
 use Text::Amuse::Compile::MuseHeader;
-use Types::Standard qw/Str Bool Object Maybe CodeRef HashRef/;
+use Types::Standard qw/Str Bool Object Maybe CodeRef HashRef InstanceOf/;
 use Moo;
 
 =encoding utf8
@@ -112,6 +112,10 @@ Remove auxiliary files (like the complete file and the status file)
 
 Use luatex instead of xetex
 
+=item fonts
+
+The optional L<Text::Amuse::Compile::Fonts::Selected> object.
+
 =back
 
 =cut
@@ -137,7 +141,7 @@ has file_header => (is => 'lazy', isa => Object);
 has cover => (is => 'lazy', isa => Str);
 has coverwidth => (is => 'lazy', isa => Str);
 has nocoverpage => (is => 'lazy', isa => Bool);
-
+has fonts => (is => 'ro', isa => Maybe[InstanceOf['Text::Amuse::Compile::Fonts::Selected']]);
 
 sub _build_file_header {
     my $self = shift;
@@ -694,8 +698,37 @@ sub epub {
     my $epub = EBook::EPUB::Lite->new;
 
     # embedded CSS
+    my $webfonts = $self->webfonts;
+    if (my $fonts = $self->fonts) {
+        my $main = $fonts->main;
+        if ($main->has_files) {
+            # this is not 100% accurate, to be fixed when webfonts
+            # will be deprecated.
+            $webfonts = {
+                         family => $main->name,
+                         regular => $main->regular->basename,
+                         bold => $main->bold->basename,
+                         italic => $main->italic->basename,
+                         bolditalic => $main->bolditalic->basename,
+                         format => $main->regular->format,
+                        };
+            my %options = %{$self->full_options};
+            if ($options{fontsize}) {
+                if ($options{fontsize} =~ m/\A([1-9][0-9]?)\z/) {
+                    $webfonts->{size} = $1;
+                }
+            }
+            $webfonts->{size} ||= 10;
+            foreach my $shape (qw/bold italic bolditalic regular/) {
+                my $fontfile = $main->$shape;
+                $epub->copy_file($fontfile->file,
+                                 $fontfile->basename,
+                                 $fontfile->mimetype);
+            }
+        }
+    }
     my $css = $self->_render_css(epub => 1,
-                                 webfonts => $self->webfonts );
+                                 webfonts => $webfonts );
     $epub->add_stylesheet("stylesheet.css" => $css);
 
     # build the title page and some metadata
@@ -1075,6 +1108,13 @@ sub _prepare_tex_tokens {
                   mainlanguage_script => '',
                   wants_toc => 0,
                  );
+
+    if (my $fonts = $self->fonts) {
+        # these are validated and sane.
+        $parsed{mainfont} = $fonts->main->name;
+        $parsed{sansfont} = $fonts->sans->name;
+        $parsed{monofont} = $fonts->mono->name;
+    }
 
     # no cover page
     unless ($doc->wants_toc) {

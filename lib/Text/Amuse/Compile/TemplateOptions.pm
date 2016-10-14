@@ -7,6 +7,7 @@ use Types::Standard qw/Str Bool Enum/;
 use Pod::Usage qw//;
 use File::Spec;
 use Moo;
+use Text::Amuse::Compile::Fonts;
 
 use constant {
     TEX_MEASURE => qr{[0-9]+(\.[0-9]+)?(cm|mm|in|pt)},
@@ -168,104 +169,24 @@ The size of the body font (9, 10, 11, 12) as integer, meaning points
 =cut
 
 sub serif_fonts {
-    my @fonts = (
-                 {
-                  name => 'CMU Serif',
-                  desc => 'Computer Modern',
-                 },
-                 {
-                  name => 'Linux Libertine O',
-                  desc => 'Linux Libertine'
-                 },
-                 {
-                  name => 'TeX Gyre Termes',
-                  desc => 'TeX Gyre Termes (Times)',
-                 },
-                 {
-                  name => 'TeX Gyre Pagella',
-                  desc => 'TeX Gyre Pagella (Palatino)',
-                 },
-                 {
-                  name => 'TeX Gyre Schola',
-                  desc => 'TeX Gyre Schola (Century)',
-                 },
-                 {
-                  name => 'TeX Gyre Bonum',
-                  desc => 'TeX Gyre Bonum (Bookman)',
-                 },
-                 {
-                  name => 'Antykwa Poltawskiego',
-                  desc => 'Antykwa Półtawskiego',
-                 },
-                 {
-                  name => 'Antykwa Torunska',
-                  desc => 'Antykwa Toruńska',
-                 },
-                 {
-                  name => 'Charis SIL',
-                  desc => 'Charis SIL (Bitstream Charter)',
-                 },
-                 {
-                  name => 'PT Serif',
-                  desc => 'Paratype (cyrillic)',
-                 },
-                );
+    my @fonts = map { +{ name => $_->name, desc => $_->desc } }
+      Text::Amuse::Compile::Fonts->new->serif_fonts;
     return @fonts;
 }
 sub mono_fonts {
-    my @fonts = (
-                 {
-                  name => 'CMU Typewriter Text',
-                  desc => 'Computer Modern Typewriter Text',
-                 },
-                 {
-                  name => 'DejaVu Sans Mono',
-                  desc => 'DejaVu Sans Mono',
-                 },
-                 {
-                  name => 'TeX Gyre Cursor',
-                  desc => 'TeX Gyre Cursor (Courier)',
-                 }
-                );
+    my @fonts = map { +{ name => $_->name, desc => $_->desc } }
+      Text::Amuse::Compile::Fonts->new->mono_fonts;
+    return @fonts;
 }
 sub sans_fonts {
-    my @fonts = (
-                 {
-                  name => 'CMU Sans Serif',
-                  desc => 'Computer Modern Sans Serif',
-                 },
-                 {
-                  name => 'TeX Gyre Heros',
-                  desc => 'TeX Gyre Heros (Helvetica)',
-                 },
-                 {
-                  name => 'TeX Gyre Adventor',
-                  desc => 'TeX Gyre Adventor (Avant Garde Gothic)',
-                 },
-                 {
-                  name => 'Iwona',
-                  desc => 'Iwona',
-                 },
-                 {
-                  name => 'Linux Biolinum O',
-                  desc => 'Linux Biolinum',
-                 },
-                 {
-                  name => 'DejaVu Sans',
-                  desc => 'DejaVu Sans',
-                 },
-                 {
-                  name => 'PT Sans',
-                  desc => 'PT Sans (cyrillic)',
-                 },
-
-                );
+    my @fonts = map { +{ name => $_->name, desc => $_->desc } }
+      Text::Amuse::Compile::Fonts->new->sans_fonts;
     return @fonts;
 }
 
 sub all_fonts {
-    my $self = shift;
-    my @all = ($self->serif_fonts, $self->sans_fonts, $self->mono_fonts);
+    my @all = map { +{ name => $_->name, desc => $_->desc } }
+      Text::Amuse::Compile::Fonts->new->all_fonts;
     return @all;
 }
 

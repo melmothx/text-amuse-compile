@@ -19,11 +19,13 @@ use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Merged;
 use Text::Amuse::Compile::MuseHeader;
 use Text::Amuse::Compile::FileName;
+use Text::Amuse::Compile::Fonts;
+use Text::Amuse::Compile::Fonts::Selected;
 
 use Cwd;
 use Fcntl qw/:flock/;
 use Moo;
-use Types::Standard qw/Maybe Bool Str HashRef CodeRef Object ArrayRef/;
+use Types::Standard qw/Maybe Bool Str HashRef CodeRef Object ArrayRef InstanceOf/;
 
 =head1 NAME
 
@@ -64,6 +66,13 @@ Remove auxiliary files after compilation (.status)
 If you want to embed fonts in the EPUB, pass the directory with the
 fonts and the specification file (see
 L<Text::Amuse::Compile::Webfonts>) in this option.
+
+=item fontspec
+
+Argument for L<Text::Amuse::Compile::Fonts> constructor. Passing these
+triggers a new way to select fonts. The validation happens against a
+list of font you can provide and you don't need the Webfonts mess
+above.
 
 =item luatex
 
@@ -135,6 +144,18 @@ will have C<.sl.pdf> extension.
 
 Alias for sl_pdf.
 
+=item selected_font_main
+
+The selected main font if fontspec was specified.
+
+=item selected_font_sans
+
+The selected sans font if fontspec was specified.
+
+=item selected_font_mono
+
+The selected mono font if fontspec was specified.
+
 =item extra_opts
 
 An hashref of key/value pairs to pass to each template in the
@@ -193,6 +214,41 @@ has templates => (is => 'lazy', isa => Object);
 
 has webfontsdir => (is => 'ro', isa => Maybe[Str]);
 has webfonts  => (is => 'lazy', isa => Maybe[Object]);
+
+has fontspec => (is => 'ro');
+has fonts => (is => 'lazy', isa => Maybe[InstanceOf['Text::Amuse::Compile::Fonts::Selected']]);
+
+sub _build_fonts {
+    my $self = shift;
+    if (my $specs = $self->fontspec) {
+        my $fonts = Text::Amuse::Compile::Fonts->new($specs);
+        my %args;
+        foreach my $type (qw/sans mono serif/) {
+            my $method = $type . '_fonts';
+            my @all = $fonts->$method;
+            die "Missing $type font in the specification" unless @all;
+            my $store = $type eq 'serif' ? 'main' : $type;
+            my $smethod = "selected_font_${store}";
+            if (my $selected = $self->$smethod) {
+                my ($got) = grep { $_->name eq $selected } @all;
+                $args{$store} = $got;
+            }
+            unless ($args{$store}) {
+                $self->logger->("$store font not found, using the default\n");
+                $args{$store} = $all[0]; # if everything fails
+            }
+        }
+        return Text::Amuse::Compile::Fonts::Selected->new(%args);
+    }
+    else {
+        return undef;
+    }
+}
+
+has selected_font_main => (is => 'ro', isa => Maybe[Str]);
+has selected_font_sans => (is => 'ro', isa => Maybe[Str]);
+has selected_font_mono => (is => 'ro', isa => Maybe[Str]);
+
 has standalone => (is => 'lazy', isa => Bool);
 has extra_opts => (is => 'ro', isa => HashRef, default => sub { +{} });
 
@@ -223,6 +279,12 @@ sub BUILDARGS {
         if (exists $params{$dir} and defined $params{$dir} and -d $params{$dir}) {
             my $abs = File::Spec->rel2abs($params{$dir});
             $params{$dir} = $abs;
+        }
+    }
+    # if fontspec is passed, take out the fonts from the extra.
+    if ($params{fontspec}) {
+        foreach my $type (qw/main sans mono/) {
+            $params{"selected_font_$type"} = delete $params{extra_opts}{"${type}font"};
         }
     }
     return \%params;
@@ -306,6 +368,11 @@ templates string references.
 
 The L<Text::Amuse::Compile::Webfonts> object, constructed from the the
 C<webfontsdir> option.
+
+=head3 fonts
+
+The L<Text::Amuse::Compile::Fonts::Selected> object, constructed from
+the fontspec argument and eventual C<extra> font keys passed.
 
 =head3 version
 
@@ -522,6 +589,7 @@ sub _compile_virtual_file {
                                                virtual => 1,
                                                standalone => $self->standalone,
                                                webfonts => $self->webfonts,
+                                               fonts => $self->fonts,
                                               );
     $self->_muse_compile($muse);
 }
@@ -547,6 +615,7 @@ sub _compile_file {
                 logger => $self->logger,
                 standalone => $self->standalone,
                 webfonts => $self->webfonts,
+                fonts => $self->fonts,
                 luatex => $self->luatex,
                 fileobj => $fileobj,
                );

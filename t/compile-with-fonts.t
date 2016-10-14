@@ -8,7 +8,7 @@ use File::Temp;
 use File::Spec;
 use JSON::MaybeXS;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
-use Test::More tests => 52;
+use Test::More tests => 53;
 use Data::Dumper;
 
 my $wd = File::Temp->newdir;
@@ -126,7 +126,18 @@ eval {
     my $c = Text::Amuse::Compile->new(epub => 1,
                                       tex => 1,
                                       fontspec => [ @fonts, { name => 'asdlf/baf', type => 'serif' }],
-                                      extra => { mainfont => '' },
+                                      pdf => $xelatex);
+    # trigger the crash
+    $c->fonts;
+};
+ok ($@, "bad specification: $@");
+
+# dangerous names in the specification
+eval {
+    my $c = Text::Amuse::Compile->new(epub => 1,
+                                      tex => 1,
+                                      fontspec => [ @fonts, { name => 'asdlfbaf', type => 'serif',
+                                                              regular => '/this-can-t-really-exist-i-hope' }],
                                       pdf => $xelatex);
     # trigger the crash
     $c->fonts;

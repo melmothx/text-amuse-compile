@@ -9,3 +9,4 @@ TMP     = $(CURDIR)/debian/$(PACKAGE)
 override_dh_auto_install:
 	dh_auto_install
 	sed -i '1s,^#!.*perl,#!/usr/bin/perl,' $(TMP)/usr/bin/muse-compile.pl
+	sed -i '1s,^#!.*perl,#!/usr/bin/perl,' $(TMP)/usr/bin/muse-create-font-file.pl

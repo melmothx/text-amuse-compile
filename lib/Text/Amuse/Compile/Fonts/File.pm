@@ -4,6 +4,7 @@ use warnings;
 use utf8;
 
 use Moo;
+use File::Basename qw//;
 use Types::Standard qw/Maybe Str Enum/;
 
 =head1 NAME
@@ -34,7 +35,10 @@ otf, ttf or woff.
 
 has file => (is => 'ro',
              required => 1,
-             isa => sub { die "$_[0] is not a file" unless $_[0] && -f $_[0] });
+             isa => sub {
+                 die "$_[0] is not a font file"
+                   unless $_[0] && -f $_[0] && $_[0] =~ m/\.(woff|ttf|otf)\z/i
+               });
 
 has shape => (is => 'ro',
               required => 1,
@@ -74,6 +78,11 @@ sub _build_mimetype {
         return $map{$format};
     }
     return;
+}
+
+sub basename {
+    my $self = shift;
+    return File::Basename::basename($self->file);
 }
 
 1;

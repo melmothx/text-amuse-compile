@@ -29,6 +29,7 @@ GetOptions (\%options,
                pdf
                zip
                ttdir=s
+               fontspec=s
                webfontsdir=s
                output-templates
                log=s

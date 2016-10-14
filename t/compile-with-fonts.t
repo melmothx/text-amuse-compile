@@ -48,6 +48,7 @@ foreach my $fs ($file, \@fonts) {
                                       fontspec => $fs,
                                       extra => { mainfont => 'DejaVu Serif' },
                                       pdf => $xelatex);
+    ok $c->fonts, "Font accessor built";
     $c->compile($muse_file);
     {
         my $tex = $muse_file;

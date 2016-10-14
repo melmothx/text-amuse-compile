@@ -35,9 +35,10 @@ foreach my $file (sort keys %files) {
     ok $@, "Error found $@";
     {
         write_file($path . 'asdf', 'x');
-        my $font = Text::Amuse::Compile::Fonts::File->new(file => $path . 'asdf',
-                                                          shape => 'italic');
-        eval { $font->format };
+        eval {
+            my $font = Text::Amuse::Compile::Fonts::File->new(file => $path . 'asdf',
+                                                              shape => 'italic');
+        };
         ok $@, "Crash with bad file extension";
     }
     ok $@, "Error found with bad path $@";

@@ -8,7 +8,7 @@ use File::Temp;
 use File::Spec;
 use JSON::MaybeXS;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
-use Test::More tests => 53;
+use Test::More tests => 75;
 use Data::Dumper;
 
 my $wd = File::Temp->newdir;
@@ -144,3 +144,58 @@ eval {
 };
 ok ($@, "bad specification: $@");
 
+# here we use a fontspec list which, being without the files, sets the
+# fonts in the .tex, but not in the EPUB
+
+{
+    my $c = Text::Amuse::Compile->new(epub => 1,
+                                      tex => 1,
+                                      fontspec => [
+                                                   map {
+                                                       +{
+                                                         name => $_->{name},
+                                                         type => $_->{type},
+                                                        }
+                                                   } @fonts
+                                                  ],
+                                      pdf => $xelatex,
+                                      extra => {
+                                                mainfont => 'DejaVuSerif',
+                                                sansfont => 'DejaVuSans',
+                                                monofont => 'DejaVuSansMono',
+                                               },
+                                     );
+
+    $c->compile($muse_file);
+    {
+        ok (-f $tex, "$tex produced");
+        my $texbody = read_file($tex);
+        like $texbody, qr/mainfont\{DejaVuSerif\}/;
+        like $texbody, qr/monofont.*\{DejaVuSansMono\}/;
+        like $texbody, qr/sansfont.*\{DejaVuSans\}/ or die Dumper($c);
+    }
+  SKIP: {
+        skip "No pdf required", 1 unless $xelatex;
+        ok (-f $pdf);
+    }
+    {
+        ok (-f $epub);
+        my $tmpdir = File::Temp->newdir(CLEANUP => 1);
+        my $zip = Archive::Zip->new;
+        die "Couldn't read $epub" if $zip->read($epub) != AZ_OK;
+        $zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
+          or die "Couldn't extract $epub OPS into " . $tmpdir->dirname ;
+        my $css = read_file(File::Spec->catfile($tmpdir->dirname, "stylesheet.css"));
+        unlike $css, qr/font-family: "DejaVuSerif"/, "font-family not found";
+        like $css, qr/font-size: 10pt/;
+        unlike $css, qr/font-size:\s*pt/;
+        my $manifest = read_file(File::Spec->catfile($tmpdir, "content.opf"));
+        foreach my $file (qw/regular.otf bold.otf italic.otf bolditalic.otf/) {
+            my $epubfile = File::Spec->catfile($tmpdir, $file);
+            ok (! -f $epubfile, "$epubfile not embedded");
+            unlike $css, qr/src: url\("\Q$file\E"\)/, "Found the css rules for $file";
+            unlike $manifest, qr/href="\Q$file\E"/, "Found the font in the manifest";
+        }
+        unlike $manifest, qr{(application/x-font.*){4}}s;
+    }
+}

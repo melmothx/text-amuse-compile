@@ -233,7 +233,10 @@ sub _build_fonts {
                 my ($got) = grep { $_->name eq $selected } @all;
                 $args{$store} = $got;
             }
-            $args{$store} ||= $all[0]; # if everything fails
+            unless ($args{$store}) {
+                $self->logger->("$store font not found, using the default\n");
+                $args{$store} = $all[0]; # if everything fails
+            }
         }
         return Text::Amuse::Compile::Fonts::Selected->new(%args);
     }

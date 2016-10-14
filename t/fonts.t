@@ -19,7 +19,7 @@ my %files = ('file.ttf' => 'truetype',
              'file.woff' => 'woff',
              'file.WOFF' => 'woff');
 
-plan tests => scalar(keys %files) * 18 + 18;
+plan tests => scalar(keys %files) * 18 + 38;
 
 foreach my $file (sort keys %files) {
     my $path = File::Spec->catfile($wd, $file);
@@ -147,20 +147,70 @@ foreach my $file (sort keys %files) {
     # we're doing the encoding ourselves, so utf8 => 0
     my $json = JSON::MaybeXS->new(pretty => 1, canonical => 1, utf8 => 0)->encode(\@list);
     write_file($file, $json);
-    my $fonts = Text::Amuse::Compile::Fonts->new($file);
-    my ($sans) = $fonts->sans_fonts;
-    my ($serif) = $fonts->serif_fonts;
-    my ($mono)  = $fonts->mono_fonts;
-    ok ($serif, "Found the serif font");
-    is $serif->desc, $list[0]{name};
-    is $serif->name, $list[0]{name};
-    ok $serif->has_files, $serif->name . " has files";
-    ok ($mono, "Found the mono font");
-    is $mono->desc, $list[1]{name};
-    is $mono->name, $list[1]{name};
-    ok !$mono->has_files, $mono->name . " has no files";
-    ok $mono->regular, "but has the regular file";
-    ok ($sans, "Found the sans font");
-    is $sans->desc, $list[2]{desc};
-    is $sans->name, $list[2]{name};
+    for my $arg ($file, [ @list ]) {
+        my $fonts = Text::Amuse::Compile::Fonts->new($arg);
+        my ($sans) = $fonts->sans_fonts;
+        my ($serif) = $fonts->serif_fonts;
+        my ($mono)  = $fonts->mono_fonts;
+        ok ($serif, "Found the serif font");
+        is $serif->desc, $list[0]{name};
+        is $serif->name, $list[0]{name};
+        ok $serif->has_files, $serif->name . " has files";
+        ok ($mono, "Found the mono font");
+        is $mono->desc, $list[1]{name};
+        is $mono->name, $list[1]{name};
+        ok !$mono->has_files, $mono->name . " has no files";
+        ok $mono->regular, "but has the regular file";
+        ok ($sans, "Found the sans font");
+        is $sans->desc, $list[2]{desc}, "Found the font desc";
+        is $sans->name, $list[2]{name}, "Found the font name";
+    }
+}
+
+# SYNOPSIS
+
+{
+    my %fontfiles = map { $_ => File::Spec->catfile($wd, $_ . '.otf') } (qw/regular italic
+                                                                            bold bolditalic/);
+    foreach my $file (values %fontfiles) {
+        diag "Creating file $file";
+        write_file($file, 'x');
+    }
+    my $fonts = Text::Amuse::Compile::Fonts->new([
+                                                  {
+                                                   name => 'Example Serif',
+                                                   type => 'serif',
+                                                   desc => 'example font',
+                                                   regular => $fontfiles{regular},
+                                                   italic => $fontfiles{italic},
+                                                   bold => $fontfiles{bold},
+                                                   bolditalic => $fontfiles{bolditalic},
+                                                  },
+                                                  {
+                                                   name => 'Example Sans',
+                                                   type => 'sans',
+                                                   desc => 'example sans font',
+                                                   regular => $fontfiles{regular},
+                                                   italic => $fontfiles{italic},
+                                                   bold => $fontfiles{bold},
+                                                   bolditalic => $fontfiles{bolditalic},
+                                                  },
+                                                  {
+                                                   name => 'Example Mono',
+                                                   type => 'mono',
+                                                   desc => 'example font',
+                                                   regular => $fontfiles{regular},
+                                                   italic => $fontfiles{italic},
+                                                   bold => $fontfiles{bold},
+                                                   bolditalic => $fontfiles{bolditalic},
+                                                  },
+
+                                                  # more fonts here
+                                                 ]);
+    foreach my $method (qw/all_fonts sans_fonts mono_fonts serif_fonts
+                           all_fonts_with_files sans_fonts_with_files
+                           mono_fonts_with_files serif_fonts_with_files/) {
+        my $name = ($fonts->$method)[0]->name;
+        ok $name, "$method return $name";
+    }
 }

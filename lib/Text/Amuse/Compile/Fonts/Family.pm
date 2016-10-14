@@ -43,6 +43,18 @@ an instance of L<Text::Amuse::Compile::Fonts::File>.
 Return true if all the 4 font slots are filled. This means we know the
 physical location of the files, not just its name.
 
+=head2 is_sans
+
+Return true if the family is a sans font
+
+=head2 is_mono
+
+Return true if the family is a mono font
+
+=head2 is_serif
+
+Return true if the family is a serif font
+
 =cut
 
 

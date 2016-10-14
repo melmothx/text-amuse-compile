@@ -6,6 +6,57 @@ use IO::Pipe;
 use JSON::MaybeXS ();
 use Moo;
 
+
+=head1 NAME
+
+Text::Amuse::Compile::Fonts::Import - create a list of fonts to be used with Text::Amuse::Compile
+
+=head1 DESCRIPTION
+
+This module is basically an hack. It parses the output of fc-list or
+identify (from imagemagick) to get a list of font paths.
+
+It should work on Windows if imagemagick is installed.
+
+=head1 ACCESSOR
+
+=head2 output
+
+The output file to write the json to. If not provided, it will print on the STDOUT.
+
+=head1 PUBLIC METHODS
+
+=head2 import_and_save
+
+Parse the font list and output it to the file, if provided to the
+constructor, otherwise print the JSON on the standard output.
+
+=head1 INTERNAL METHODS
+
+=over 4
+
+=item use_fclist
+
+=item use_imagemagick
+
+=item try_list
+
+=item all_fonts
+
+=item import_with_fclist
+
+=item import_with_imagemagick
+
+=item import
+
+=item as_json
+
+=back
+
+
+=cut
+
+
 has output => (is => 'ro');
 
 sub use_fclist {

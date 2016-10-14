@@ -712,6 +712,12 @@ sub epub {
                          bolditalic => $main->bolditalic->basename,
                          format => $main->regular->format,
                         };
+            my %options = %{$self->full_options};
+            if ($options{fontsize}) {
+                if ($options{fontsize} =~ m/\A([1-9][0-9]?)\z/) {
+                    $webfonts->{size} = $1;
+                }
+            }
             foreach my $shape (qw/bold italic bolditalic regular/) {
                 my $fontfile = $main->$shape;
                 $epub->copy_file($fontfile->file,

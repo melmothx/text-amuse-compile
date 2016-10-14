@@ -112,6 +112,10 @@ Remove auxiliary files (like the complete file and the status file)
 
 Use luatex instead of xetex
 
+=item fonts
+
+The optional L<Text::Amuse::Compile::Fonts::Selected> object.
+
 =back
 
 =cut

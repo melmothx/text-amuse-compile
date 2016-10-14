@@ -67,6 +67,13 @@ If you want to embed fonts in the EPUB, pass the directory with the
 fonts and the specification file (see
 L<Text::Amuse::Compile::Webfonts>) in this option.
 
+=item fontspec
+
+Argument for L<Text::Amuse::Compile::Fonts> constructor. Passing these
+triggers a new way to select fonts. The validation happens against a
+list of font you can provide and you don't need the Webfonts mess
+above.
+
 =item luatex
 
 Use lualatex instead of xelatex.
@@ -136,6 +143,18 @@ will have C<.sl.pdf> extension.
 =item slides
 
 Alias for sl_pdf.
+
+=item selected_font_main
+
+The selected main font if fontspec was specified.
+
+=item selected_font_sans
+
+The selected sans font if fontspec was specified.
+
+=item selected_font_mono
+
+The selected mono font if fontspec was specified.
 
 =item extra_opts
 
@@ -346,6 +365,11 @@ templates string references.
 
 The L<Text::Amuse::Compile::Webfonts> object, constructed from the the
 C<webfontsdir> option.
+
+=head3 fonts
+
+The L<Text::Amuse::Compile::Fonts::Selected> object, constructed from
+the fontspec argument and eventual C<extra> font keys passed.
 
 =head3 version
 

@@ -31,6 +31,10 @@ otf, ttf or woff.
 Built lazily from the filename, validating it and crashing if it's not
 otf, ttf or woff.
 
+=head2 basename
+
+The basename of the font.
+
 =cut
 
 has file => (is => 'ro',

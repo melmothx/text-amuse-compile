@@ -73,6 +73,8 @@ foreach my $fs ($file, \@fonts) {
           or die "Couldn't extract $epub OPS into " . $tmpdir->dirname ;
         my $css = read_file(File::Spec->catfile($tmpdir->dirname, "stylesheet.css"));
         like $css, qr/font-family: "DejaVuSerif"/, "Found font-family";
+        like $css, qr/font-size: 10pt/;
+        unlike $css, qr/font-size:\s*pt/;
         foreach my $file (qw/regular.otf bold.otf italic.otf bolditalic.otf/) {
             my $epubfile = File::Spec->catfile($tmpdir, $file);
             ok (-f $epubfile, "$epubfile embedded");

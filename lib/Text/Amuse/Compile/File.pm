@@ -718,6 +718,7 @@ sub epub {
                     $webfonts->{size} = $1;
                 }
             }
+            $webfonts->{size} ||= 10;
             foreach my $shape (qw/bold italic bolditalic regular/) {
                 my $fontfile = $main->$shape;
                 $epub->copy_file($fontfile->file,

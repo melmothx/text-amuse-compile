@@ -19,17 +19,17 @@ foreach my $file (values %fontfiles) {
 }
 my @fonts = (
              {
-              name => 'DejaVu Serif',
+              name => 'DejaVuSerif',
               type => 'serif',
               %fontfiles,
              },
              {
-              name => 'DejaVu Sans',
+              name => 'DejaVuSans',
               type => 'mono',
               %fontfiles,
              },
              {
-              name => 'DejaVu Mono',
+              name => 'DejaVuSansMono',
               type => 'sans',
               %fontfiles,
              },
@@ -46,7 +46,7 @@ foreach my $fs ($file, \@fonts) {
     my $c = Text::Amuse::Compile->new(epub => 1,
                                       tex => 1,
                                       fontspec => $fs,
-                                      extra => { mainfont => 'DejaVu Serif' },
+                                      extra => { mainfont => 'DejaVuSerif' },
                                       pdf => $xelatex);
     ok $c->fonts, "Font accessor built";
     $c->compile($muse_file);
@@ -54,7 +54,7 @@ foreach my $fs ($file, \@fonts) {
         my $tex = $muse_file;
         $tex =~ s/\.muse/.tex/;
         ok (-f $tex, "$tex produced");
-        like read_file($tex), qr/mainfont\{DejaVu Serif\}/;
+        like read_file($tex), qr/mainfont\{DejaVuSerif\}/;
     }
   SKIP: {
         skip "No pdf required", 1 unless $xelatex;
@@ -72,7 +72,7 @@ foreach my $fs ($file, \@fonts) {
         $zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
           or die "Couldn't extract $epub OPS into " . $tmpdir->dirname ;
         my $css = read_file(File::Spec->catfile($tmpdir->dirname, "stylesheet.css"));
-        like $css, qr/font-family: "DejaVu Serif"/, "Found font-family";
+        like $css, qr/font-family: "DejaVuSerif"/, "Found font-family";
         foreach my $file (qw/regular.otf bold.otf italic.otf bolditalic.otf/) {
             my $epubfile = File::Spec->catfile($tmpdir, $file);
             ok (-f $epubfile, "$epubfile embedded");

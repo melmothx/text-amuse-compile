@@ -8,6 +8,7 @@ lib/Text/Amuse/Compile/Fonts.pm
 lib/Text/Amuse/Compile/Fonts/Family.pm
 lib/Text/Amuse/Compile/Fonts/File.pm
 lib/Text/Amuse/Compile/Fonts/Import.pm
+lib/Text/Amuse/Compile/Fonts/Selected.pm
 lib/Text/Amuse/Compile/Merged.pm
 lib/Text/Amuse/Compile/MuseHeader.pm
 lib/Text/Amuse/Compile/TemplateOptions.pm
@@ -23,6 +24,7 @@ t/beamer.t
 t/changes.t
 t/compile-file.t
 t/compile-merged.t
+t/compile-with-fonts.t
 t/compile.t
 t/concurrency.t
 t/coverpage.t

@@ -125,9 +125,20 @@ As above, but on Letter paper.
 The directory with the templates. Optional and somehow discouraged for
 normal usage.
 
+=item --fontspec fontspec.json
+
+A specification JSON file with the list of fonts. This permits you to
+use arbitrary fonts. To create one with the default list, you can use
+the command L<muse-create-font-file.pl>, generate one, then pass it to
+this script together with --extra mainfont="Font Name".
+
 =item --webfontsdir
 
 For EPUB output, embed the fonts in that directory.
+
+This option is DEPRECATED now. The preferred way is to pass a fontspec
+file and pass --extra mainfont "Font Name", which ensure the
+consistency between the EPUB and the PDF.
 
 In this directory the program expects to find 4 fonts, a regular, an
 italic, a bold and a bold italic one. Given that the names are

@@ -7,8 +7,6 @@ use JSON::MaybeXS qw/decode_json/;
 use Text::Amuse::Compile::Fonts::Family;
 use Text::Amuse::Compile::Fonts::File;
 use Moo;
-use Try::Tiny;
-
 
 =head1 NAME
 
@@ -205,15 +203,14 @@ sub BUILDARGS {
             }
         }
         else {
-            try {
+            eval {
                 open (my $fh, '<', $arg) or die "Cannot open $arg $!";
                 local $/ = undef;
                 my $body = <$fh>;
                 close $fh;
                 $list = decode_json($body);
-            } catch {
-                $list = undef;
             };
+            $list = undef if $@;
         }
     }
     $list ||= $class->_default_font_list;

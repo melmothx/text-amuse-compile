@@ -47,7 +47,7 @@ constructor, otherwise print the JSON on the standard output.
 
 =item import_with_imagemagick
 
-=item import
+=item import_list
 
 =item as_json
 
@@ -197,7 +197,7 @@ sub import_with_imagemagick {
     return \%specs;
 }
 
-sub import {
+sub import_list {
     my $self = shift;
     my $list = $self->try_list;
     my $specs = $self->import_with_fclist || $self->import_with_imagemagick;
@@ -226,7 +226,7 @@ sub import {
 
 sub as_json {
     my $self = shift;
-    my $list = $self->import;
+    my $list = $self->import_list;
     return JSON::MaybeXS->new(pretty => 1,
                               canonical => 1,
                              )->encode($list);

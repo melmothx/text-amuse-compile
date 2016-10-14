@@ -30,8 +30,8 @@ my $im = $importer->import_with_imagemagick;
 foreach my $exp ('Charis SIL', 'TeX Gyre Pagella') {
     is_deeply($fclist->{$exp}, $im->{$exp}, "Same $exp specifications from identify and fc-list");
 }
-my $imported = $importer->import;
-ok($importer->import);
+my $imported = $importer->import_list;
+ok($importer->import_list);
 $importer->import_and_save;
 ok (-f $output);
 {

@@ -59,7 +59,7 @@ if ($options{version}) {
 
 =head1 NAME
 
-muse-compile.pl -- format your muse document using Text::Amuse
+muse-compile.pl - format your muse document using Text::Amuse
 
 =head1 SYNOPSIS
 

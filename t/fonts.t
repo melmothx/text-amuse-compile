@@ -13,13 +13,13 @@ use JSON::MaybeXS;
 my $wd = File::Temp->newdir;
 
 my %files = ('file.ttf' => 'truetype',
-             'file.TTF' => 'truetype',
-             'file.OTF' => 'opentype',
+             'fileuc.TTF' => 'truetype',
+             'fileuc.OTF' => 'opentype',
              'file.otf' => 'opentype',
              'file.woff' => 'woff',
-             'file.WOFF' => 'woff');
+             'fileuc.WOFF' => 'woff');
 
-plan tests => scalar(keys %files) * 18 + 38;
+plan tests => scalar(keys %files) * 18 + 32;
 
 foreach my $file (sort keys %files) {
     my $path = File::Spec->catfile($wd, $file);
@@ -27,21 +27,18 @@ foreach my $file (sort keys %files) {
         Text::Amuse::Compile::Fonts::File->new(file => $path,
                                                shape => 'garbage');
     };
-    ok $@, "Error found with wrong shape $@";
+    ok !!$@, "Error found with wrong shape $@ for $file";
     eval {
         Text::Amuse::Compile::Fonts::File->new(file => $path,
                                                shape => 'italic');
     };
-    ok $@, "Error found $@";
-    {
-        write_file($path . 'asdf', 'x');
-        eval {
-            my $font = Text::Amuse::Compile::Fonts::File->new(file => $path . 'asdf',
-                                                              shape => 'italic');
-        };
-        ok $@, "Crash with bad file extension";
-    }
-    ok $@, "Error found with bad path $@";
+    ok !!$@, "Error found $@ for $file";
+    write_file($path . 'asdf', 'x');
+    eval {
+        my $font = Text::Amuse::Compile::Fonts::File->new(file => $path . 'asdf',
+                                                          shape => 'italic');
+    };
+    ok !!$@, "Error found with bad path $@ for $file";
     diag "Testing $path";
     write_file($path, 'x');
     eval {

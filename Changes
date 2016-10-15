@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.81 2016-10-14
+
+ - Fixed tests for case insensitive file systems
+
 0.80 2016-10-14
 
  - New way to select the fonts. To activate it, you need to pass

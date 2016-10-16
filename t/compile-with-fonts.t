@@ -8,7 +8,7 @@ use File::Temp;
 use File::Spec;
 use JSON::MaybeXS;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
-use Test::More tests => 75;
+use Test::More tests => 117;
 use Data::Dumper;
 
 my $wd = File::Temp->newdir;
@@ -93,6 +93,52 @@ foreach my $fs ($file, \@fonts) {
         like $manifest, qr{(application/x-font.*){4}}s;
     }
 }
+
+# disable EPUB font embedding
+foreach my $fs ($file, \@fonts) {
+    my $c = Text::Amuse::Compile->new(epub => 1,
+                                      tex => 1,
+                                      fontspec => $fs,
+                                      extra => {
+                                                mainfont => 'DejaVuSerif',
+                                                sansfont => 'DejaVuSans',
+                                                monofont => 'DejaVuSansMono',
+                                               },
+                                      epub_embed_fonts => 0,
+                                      pdf => $xelatex);
+    ok $c->fonts, "Font accessor built";
+    $c->compile($muse_file);
+    {
+        ok (-f $tex, "$tex produced");
+        my $texbody = read_file($tex);
+        like $texbody, qr/mainfont\{DejaVuSerif\}/;
+        like $texbody, qr/monofont.*\{DejaVuSansMono\}/;
+        like $texbody, qr/sansfont.*\{DejaVuSans\}/ or die Dumper($c);
+    }
+  SKIP: {
+        skip "No pdf required", 1 unless $xelatex;
+        ok (-f $pdf);
+    }
+    {
+        ok (-f $epub);
+        my $tmpdir = File::Temp->newdir(CLEANUP => 1);
+        my $zip = Archive::Zip->new;
+        die "Couldn't read $epub" if $zip->read($epub) != AZ_OK;
+        $zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
+          or die "Couldn't extract $epub OPS into " . $tmpdir->dirname ;
+        my $css = read_file(File::Spec->catfile($tmpdir->dirname, "stylesheet.css"));
+        unlike $css, qr/font-family: "DejaVuSerif"/, "font-family not found";
+        my $manifest = read_file(File::Spec->catfile($tmpdir, "content.opf"));
+        foreach my $file (qw/regular.otf bold.otf italic.otf bolditalic.otf/) {
+            my $epubfile = File::Spec->catfile($tmpdir, $file);
+            ok (! -f $epubfile, "$epubfile not embedded");
+            unlike $css, qr/src: url\("\Q$file\E"\)/, "No css rules for $file";
+            unlike $manifest, qr/href="\Q$file\E"/, "The fonts are not in the manifest";
+        }
+        unlike $manifest, qr{(application/x-font.*){4}}s;
+    }
+}
+
 
 # missing sans font in the spec
 eval {

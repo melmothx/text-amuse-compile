@@ -116,6 +116,10 @@ Use luatex instead of xetex
 
 The optional L<Text::Amuse::Compile::Fonts::Selected> object.
 
+=item epub_embed_fonts
+
+Boolean (default to true) which triggers the epub font embedding.
+
 =back
 
 =cut
@@ -142,6 +146,7 @@ has cover => (is => 'lazy', isa => Str);
 has coverwidth => (is => 'lazy', isa => Str);
 has nocoverpage => (is => 'lazy', isa => Bool);
 has fonts => (is => 'ro', isa => Maybe[InstanceOf['Text::Amuse::Compile::Fonts::Selected']]);
+has epub_embed_fonts => (is => 'ro', isa => Bool, default => sub { 1 });
 
 sub _build_file_header {
     my $self = shift;
@@ -698,32 +703,43 @@ sub epub {
     my $epub = EBook::EPUB::Lite->new;
 
     # embedded CSS
-    my $webfonts = $self->webfonts;
-    if (my $fonts = $self->fonts) {
-        my $main = $fonts->main;
-        if ($main->has_files) {
-            # this is not 100% accurate, to be fixed when webfonts
-            # will be deprecated.
-            $webfonts = {
-                         family => $main->name,
-                         regular => $main->regular->basename,
-                         bold => $main->bold->basename,
-                         italic => $main->italic->basename,
-                         bolditalic => $main->bolditalic->basename,
-                         format => $main->regular->format,
-                        };
-            my %options = %{$self->full_options};
-            if ($options{fontsize}) {
-                if ($options{fontsize} =~ m/\A([1-9][0-9]?)\z/) {
-                    $webfonts->{size} = $1;
-                }
+    my $webfonts;
+    if ($self->epub_embed_fonts) {
+        if (my $legacy = $self->webfonts) {
+            $webfonts = $legacy;
+            foreach my $style (qw/regular italic bold bolditalic/) {
+                $epub->copy_file(File::Spec->catfile($legacy->srcdir,
+                                                     $legacy->$style),
+                                 $legacy->$style,
+                                 $legacy->mimetype);
             }
-            $webfonts->{size} ||= 10;
-            foreach my $shape (qw/bold italic bolditalic regular/) {
-                my $fontfile = $main->$shape;
-                $epub->copy_file($fontfile->file,
-                                 $fontfile->basename,
-                                 $fontfile->mimetype);
+        }
+        if (my $fonts = $self->fonts) {
+            my $main = $fonts->main;
+            if ($main->has_files) {
+                # this is not 100% accurate, to be fixed when webfonts
+                # will be deprecated.
+                $webfonts = {
+                             family => $main->name,
+                             regular => $main->regular->basename,
+                             bold => $main->bold->basename,
+                             italic => $main->italic->basename,
+                             bolditalic => $main->bolditalic->basename,
+                             format => $main->regular->format,
+                            };
+                my %options = %{$self->full_options};
+                if ($options{fontsize}) {
+                    if ($options{fontsize} =~ m/\A([1-9][0-9]?)\z/) {
+                        $webfonts->{size} = $1;
+                    }
+                }
+                $webfonts->{size} ||= 10;
+                foreach my $shape (qw/bold italic bolditalic regular/) {
+                    my $fontfile = $main->$shape;
+                    $epub->copy_file($fontfile->file,
+                                     $fontfile->basename,
+                                     $fontfile->mimetype);
+                }
             }
         }
     }
@@ -905,15 +921,6 @@ HTML
         $self->log_fatal("$att doesn't exist!") unless -f $att;
         $epub->copy_file($att, $att, $self->_mime_for_attachment($att));
     }
-    if (my $fonts = $self->webfonts) {
-        foreach my $style (qw/regular italic bold bolditalic/) {
-            $epub->copy_file(File::Spec->catfile($fonts->srcdir,
-                                                 $fonts->$style),
-                             $fonts->$style,
-                             $fonts->mimetype);
-        }
-    }
-
     # finish
     $epub->pack_zip($epubname);
     return $epubname;

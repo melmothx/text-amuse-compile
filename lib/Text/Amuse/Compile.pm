@@ -74,6 +74,10 @@ triggers a new way to select fonts. The validation happens against a
 list of font you can provide and you don't need the Webfonts mess
 above.
 
+=item epub_embed_fonts
+
+Boolean (default to true) which triggers the epub font embedding.
+
 =item luatex
 
 Use lualatex instead of xelatex.
@@ -217,6 +221,7 @@ has webfonts  => (is => 'lazy', isa => Maybe[Object]);
 
 has fontspec => (is => 'ro');
 has fonts => (is => 'lazy', isa => Maybe[InstanceOf['Text::Amuse::Compile::Fonts::Selected']]);
+has epub_embed_fonts => (is => 'ro', isa => Bool, default => sub { 1 });
 
 sub _build_fonts {
     my $self = shift;
@@ -590,6 +595,7 @@ sub _compile_virtual_file {
                                                standalone => $self->standalone,
                                                webfonts => $self->webfonts,
                                                fonts => $self->fonts,
+                                               epub_embed_fonts => $self->epub_embed_fonts,
                                               );
     $self->_muse_compile($muse);
 }
@@ -616,6 +622,7 @@ sub _compile_file {
                 standalone => $self->standalone,
                 webfonts => $self->webfonts,
                 fonts => $self->fonts,
+                epub_embed_fonts => $self->epub_embed_fonts,
                 luatex => $self->luatex,
                 fileobj => $fileobj,
                );

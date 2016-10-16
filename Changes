@@ -1,6 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
-0.81 2016-10-14
+0.82 2016-10-16
+
+ - New options: epub_embed_fonts (defaults to true)
+
+0.81 2016-10-15
 
  - Fixed tests for case insensitive file systems
 

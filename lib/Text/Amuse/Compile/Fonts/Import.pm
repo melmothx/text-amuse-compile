@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use IO::Pipe;
 use JSON::MaybeXS ();
+use Text::Amuse::Compile::Fonts;
 use Moo;
 
 
@@ -68,38 +69,17 @@ sub use_imagemagick {
 }
 
 sub try_list {
-    return {
-            serif => [
-                      'CMU Serif',
-                      'Linux Libertine O',
-                      'Charis SIL',
-                      'TeX Gyre Termes',
-                      'TeX Gyre Pagella',
-                      'TeX Gyre Schola',
-                      'TeX Gyre Bonum',
-                      'Antykwa Poltawskiego',
-                      'Antykwa Torunska',
-                      'PT Serif',
-                      'Droid Serif',
-                      'Noto Serif',
-                     ],
-            sans => [
-                     'CMU Sans Serif',
-                     'Linux Biolinum O',
-                     'Iwona',
-                     'TeX Gyre Heros',
-                     'TeX Gyre Adventor',
-                     'Droid Sans',
-                     'Noto Sans',
-                     'DejaVu Sans',
-                     'PT Sans',
-                    ],
-            mono => [
-                     'CMU Typewriter Text',
-                     'DejaVu Sans Mono',
-                     'TeX Gyre Cursor',
-                    ],
-           };
+    # pick the default list from the Fonts class and add Noto
+    my $fonts = Text::Amuse::Compile::Fonts->new;
+    my %all = (
+               serif => [ map { $_->name } $fonts->serif_fonts ],
+               mono  => [ map { $_->name } $fonts->mono_fonts ],
+               sans  => [ map { $_->name } $fonts->sans_fonts ],
+              );
+    push @{$all{serif}}, "Noto Serif";
+    push @{$all{sans}}, "Noto Sans";
+    push @{$all{mono}}, "Noto Mono";
+    return \%all;
 }
 
 sub all_fonts {

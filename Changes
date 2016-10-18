@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.84 2016-10-18
+
+ - Support consistent font selection across all the formats.
+
 0.83 2016-10-18
 
  - Fixed font validation (it was too strict, preventing sans or mono

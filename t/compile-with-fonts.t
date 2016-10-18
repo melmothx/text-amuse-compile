@@ -8,7 +8,7 @@ use File::Temp;
 use File::Spec;
 use JSON::MaybeXS;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
-use Test::More tests => 117;
+use Test::More tests => 139;
 use Data::Dumper;
 
 my $wd = File::Temp->newdir;
@@ -243,5 +243,54 @@ ok ($@, "bad specification: $@");
             unlike $manifest, qr/href="\Q$file\E"/, "Found the font in the manifest";
         }
         unlike $manifest, qr{(application/x-font.*){4}}s;
+    }
+}
+
+# here is all valid, but we mix main, sans, mono. So people can use a
+# sans or even mono font as the main font.
+
+{
+    my $c = Text::Amuse::Compile->new(epub => 1,
+                                      tex => 1,
+                                      fontspec => [ @fonts ],
+                                      pdf => $xelatex,
+                                      extra => {
+                                                mainfont => 'DejaVuSansMono',
+                                                sansfont => 'DejaVuSerif',
+                                                monofont => 'DejaVuSans',
+                                               },
+                                     );
+
+    $c->compile($muse_file);
+    {
+        ok (-f $tex, "$tex produced");
+        my $texbody = read_file($tex);
+        like $texbody, qr/mainfont\{DejaVuSansMono\}/;
+        like $texbody, qr/monofont.*\{DejaVuSans\}/;
+        like $texbody, qr/sansfont.*\{DejaVuSerif\}/;
+    }
+  SKIP: {
+        skip "No pdf required", 1 unless $xelatex;
+        ok (-f $pdf);
+    }
+    {
+        ok (-f $epub);
+        my $tmpdir = File::Temp->newdir(CLEANUP => 1);
+        my $zip = Archive::Zip->new;
+        die "Couldn't read $epub" if $zip->read($epub) != AZ_OK;
+        $zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
+          or die "Couldn't extract $epub OPS into " . $tmpdir->dirname ;
+        my $css = read_file(File::Spec->catfile($tmpdir->dirname, "stylesheet.css"));
+        like $css, qr/font-family: "DejaVuSansMono"/, "font-family found";
+        like $css, qr/font-size: 10pt/;
+        unlike $css, qr/font-size:\s*pt/;
+        my $manifest = read_file(File::Spec->catfile($tmpdir, "content.opf"));
+        foreach my $file (qw/regular.otf bold.otf italic.otf bolditalic.otf/) {
+            my $epubfile = File::Spec->catfile($tmpdir, $file);
+            ok (-f $epubfile, "$epubfile embedded");
+            like $css, qr/src: url\("\Q$file\E"\)/, "Found the css rules for $file";
+            like $manifest, qr/href="\Q$file\E"/, "Found the font in the manifest";
+        }
+        like $manifest, qr{(application/x-font.*){4}}s;
     }
 }

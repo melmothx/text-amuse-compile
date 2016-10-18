@@ -228,6 +228,7 @@ sub _build_fonts {
     if (my $specs = $self->fontspec) {
         my $fonts = Text::Amuse::Compile::Fonts->new($specs);
         my %args;
+        my @all_fonts = $fonts->all_fonts;
         foreach my $type (qw/sans mono serif/) {
             my $method = $type . '_fonts';
             my @all = $fonts->$method;
@@ -235,7 +236,7 @@ sub _build_fonts {
             my $store = $type eq 'serif' ? 'main' : $type;
             my $smethod = "selected_font_${store}";
             if (my $selected = $self->$smethod) {
-                my ($got) = grep { $_->name eq $selected } @all;
+                my ($got) = grep { $_->name eq $selected } @all_fonts;
                 $args{$store} = $got;
             }
             unless ($args{$store}) {

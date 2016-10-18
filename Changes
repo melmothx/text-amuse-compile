@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.85 2016-10-18
+
+ - Improved fontspec.json creator
+
 0.84 2016-10-18
 
  - Support consistent font selection across all the formats.

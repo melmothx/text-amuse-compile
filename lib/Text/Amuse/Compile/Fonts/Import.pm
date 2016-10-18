@@ -6,6 +6,7 @@ use IO::Pipe;
 use JSON::MaybeXS ();
 use Text::Amuse::Compile::Fonts;
 use Moo;
+use Data::Dumper;
 
 
 =head1 NAME
@@ -104,16 +105,20 @@ sub import_with_fclist {
     $pipe->autoflush;
     while (<$pipe>) {
         chomp;
-        if (m/(.+?)\s*:\s*(.+?)(\,.+)?\s*:\s*style=(Bold|Italic|Regular|Book|Bold\s*Italic|Oblique|Bold\s*Oblique)$/) {
+        if (m/(.+?)\s*:
+              \s*(.+?)(\,.+)?\s*:
+              \s*style=(
+                  Book|Roman|Medium|Regular|
+                  Italic|Oblique|
+                  Bold|
+                  Bold\s*Italic|Bold\s*Oblique)$/x) {
             my $file = $1;
             my $name = $2;
             my $style = lc($4);
             $style =~ s/\s//g;
-            $style =~ s/oblique/italic/;
-            $style =~ s/book/regular/;
             next unless $all{$name};
             if ($specs{$name}{files}{$style}) {
-                # warn "Duplicated font! $file $name $style $specs{$name}{files}{$style}\n";
+                warn "Duplicated font! $file $name $style $specs{$name}{files}{$style}\n";
             }
             else {
                 $specs{$name}{files}{$style} = $file;
@@ -187,16 +192,20 @@ sub import_list {
         foreach my $font (@{$list->{$type}}) {
             if (my $found = $specs->{$font}) {
                 my $files = $found->{files};
-                if (%$files and scalar(keys %$files) == 4) {
-                    push @out, {
-                                name => $font,
-                                desc => $font,
-                                type => $type,
-                                regular => $files->{regular},
-                                italic => $files->{italic},
-                                bold => $files->{bold},
-                                bolditalic => $files->{bolditalic},
-                               };
+                my %styles = (
+                              bold => $files->{bold},
+                              bolditalic => $files->{bolditalic} || $files->{boldoblique},
+                              italic => $files->{italic} || $files->{oblique},
+                              regular => $files->{regular} || $files->{book} || $files->{roman} || $files->{medium},
+                              name => $font,
+                              desc => $font,
+                              type => $type,
+                             );
+                if (grep { !$_ } values %styles) {
+                    warn "Discarding $font, missing styles: " . Dumper(\%styles);
+                }
+                else {
+                    push @out, \%styles;
                 }
             }
         }

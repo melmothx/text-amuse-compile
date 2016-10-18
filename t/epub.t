@@ -75,7 +75,7 @@ foreach my $file (qw/piece000001.xhtml
     like($css, qr/text-align: justify/, "Justify found in the body");
     unlike($css, qr/\@font-face/, "\@font-face not found");
     like($css, qr/font-size: 10pt;/, "Found the correct font size");
-    like($css, qr/font-family:\s*serif;/, "Found the serif font family");
+    like($css, qr/font-family: "CMU Serif", serif;/, "Found the serif font family");
 
 }
 

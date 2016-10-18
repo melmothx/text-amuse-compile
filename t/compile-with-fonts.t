@@ -8,7 +8,7 @@ use File::Temp;
 use File::Spec;
 use JSON::MaybeXS;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
-use Test::More tests => 139;
+use Test::More tests => 161;
 use Data::Dumper;
 
 my $wd = File::Temp->newdir;
@@ -47,10 +47,12 @@ my $pdf = $muse_file;
 $pdf =~ s/\.muse/.pdf/;
 my $epub = $muse_file;
 $epub =~ s/\.muse/.epub/;
+my $html = $muse_file;
+$html =~ s/\.muse/.html/;
 
 my $xelatex = $ENV{TEST_WITH_LATEX};
 foreach my $fs ($file, \@fonts) {
-    my $c = Text::Amuse::Compile->new(epub => 1,
+    my $c = Text::Amuse::Compile->new(epub => 1, html => 1,
                                       tex => 1,
                                       fontspec => $fs,
                                       extra => {
@@ -80,9 +82,12 @@ foreach my $fs ($file, \@fonts) {
         $zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
           or die "Couldn't extract $epub OPS into " . $tmpdir->dirname ;
         my $css = read_file(File::Spec->catfile($tmpdir->dirname, "stylesheet.css"));
-        like $css, qr/font-family: "DejaVuSerif"/, "Found font-family";
-        like $css, qr/font-size: 10pt/;
-        unlike $css, qr/font-size:\s*pt/;
+        my $html_body = read_file($html);
+        foreach my $tcss ($css, $html_body) {
+            like $tcss, qr/font-family: "DejaVuSerif"/, "Found font-family";
+            like $tcss, qr/font-size: 10pt/;
+            unlike $tcss, qr/font-size:\s*pt/;
+        }
         my $manifest = read_file(File::Spec->catfile($tmpdir, "content.opf"));
         foreach my $file (qw/regular.otf bold.otf italic.otf bolditalic.otf/) {
             my $epubfile = File::Spec->catfile($tmpdir, $file);
@@ -96,7 +101,7 @@ foreach my $fs ($file, \@fonts) {
 
 # disable EPUB font embedding
 foreach my $fs ($file, \@fonts) {
-    my $c = Text::Amuse::Compile->new(epub => 1,
+    my $c = Text::Amuse::Compile->new(epub => 1, html => 1,
                                       tex => 1,
                                       fontspec => $fs,
                                       extra => {
@@ -127,7 +132,12 @@ foreach my $fs ($file, \@fonts) {
         $zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
           or die "Couldn't extract $epub OPS into " . $tmpdir->dirname ;
         my $css = read_file(File::Spec->catfile($tmpdir->dirname, "stylesheet.css"));
-        unlike $css, qr/font-family: "DejaVuSerif"/, "font-family not found";
+        my $html_body = read_file($html);
+        foreach my $tcss ($css, $html_body) {
+            like $tcss, qr/font-family: "DejaVuSerif"/, "Found font-family even if not embedded";
+            like $tcss, qr/font-size: 10pt/;
+            unlike $tcss, qr/font-size:\s*pt/;
+        }
         my $manifest = read_file(File::Spec->catfile($tmpdir, "content.opf"));
         foreach my $file (qw/regular.otf bold.otf italic.otf bolditalic.otf/) {
             my $epubfile = File::Spec->catfile($tmpdir, $file);
@@ -142,7 +152,7 @@ foreach my $fs ($file, \@fonts) {
 
 # missing sans font in the spec
 eval {
-    my $c = Text::Amuse::Compile->new(epub => 1,
+    my $c = Text::Amuse::Compile->new(epub => 1, html => 1,
                                       tex => 1,
                                       fontspec => [ $fonts[0] ],
                                       extra => { mainfont => 'DejaVuSerif' },
@@ -155,7 +165,7 @@ eval {
 
 # using the default, dummy font passed
 eval {
-    my $c = Text::Amuse::Compile->new(epub => 1,
+    my $c = Text::Amuse::Compile->new(epub => 1, html => 1,
                                       tex => 1,
                                       fontspec => [ @fonts ],
                                       extra => { mainfont => 'DejaVuasdfSerif' },
@@ -169,7 +179,7 @@ eval {
 
 # dangerous names in the specification
 eval {
-    my $c = Text::Amuse::Compile->new(epub => 1,
+    my $c = Text::Amuse::Compile->new(epub => 1, html => 1,
                                       tex => 1,
                                       fontspec => [ @fonts, { name => 'asdlf/baf', type => 'serif' }],
                                       pdf => $xelatex);
@@ -180,7 +190,7 @@ ok ($@, "bad specification: $@");
 
 # dangerous names in the specification
 eval {
-    my $c = Text::Amuse::Compile->new(epub => 1,
+    my $c = Text::Amuse::Compile->new(epub => 1, html => 1,
                                       tex => 1,
                                       fontspec => [ @fonts, { name => 'asdlfbaf', type => 'serif',
                                                               regular => '/this-can-t-really-exist-i-hope' }],
@@ -194,7 +204,7 @@ ok ($@, "bad specification: $@");
 # fonts in the .tex, but not in the EPUB
 
 {
-    my $c = Text::Amuse::Compile->new(epub => 1,
+    my $c = Text::Amuse::Compile->new(epub => 1, html => 1,
                                       tex => 1,
                                       fontspec => [
                                                    map {
@@ -232,9 +242,12 @@ ok ($@, "bad specification: $@");
         $zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
           or die "Couldn't extract $epub OPS into " . $tmpdir->dirname ;
         my $css = read_file(File::Spec->catfile($tmpdir->dirname, "stylesheet.css"));
-        unlike $css, qr/font-family: "DejaVuSerif"/, "font-family not found";
-        like $css, qr/font-size: 10pt/;
-        unlike $css, qr/font-size:\s*pt/;
+        my $html_body = read_file($html);
+        foreach my $tcss ($css, $html_body) {
+            like $tcss, qr/font-family: "DejaVuSerif"/, "Found font-family even if not embedded";
+            like $tcss, qr/font-size: 10pt/;
+            unlike $tcss, qr/font-size:\s*pt/;
+        }
         my $manifest = read_file(File::Spec->catfile($tmpdir, "content.opf"));
         foreach my $file (qw/regular.otf bold.otf italic.otf bolditalic.otf/) {
             my $epubfile = File::Spec->catfile($tmpdir, $file);
@@ -250,7 +263,7 @@ ok ($@, "bad specification: $@");
 # sans or even mono font as the main font.
 
 {
-    my $c = Text::Amuse::Compile->new(epub => 1,
+    my $c = Text::Amuse::Compile->new(epub => 1, html => 1,
                                       tex => 1,
                                       fontspec => [ @fonts ],
                                       pdf => $xelatex,
@@ -281,9 +294,12 @@ ok ($@, "bad specification: $@");
         $zip->extractTree('OPS', $tmpdir->dirname) == AZ_OK
           or die "Couldn't extract $epub OPS into " . $tmpdir->dirname ;
         my $css = read_file(File::Spec->catfile($tmpdir->dirname, "stylesheet.css"));
-        like $css, qr/font-family: "DejaVuSansMono"/, "font-family found";
-        like $css, qr/font-size: 10pt/;
-        unlike $css, qr/font-size:\s*pt/;
+        my $html_body = read_file($html);
+        foreach my $tcss ($css, $html_body) {
+            like $tcss, qr/font-family: "DejaVuSansMono"/, "Found font-family even if not embedded";
+            like $tcss, qr/font-size: 10pt/;
+            unlike $tcss, qr/font-size:\s*pt/;
+        }
         my $manifest = read_file(File::Spec->catfile($tmpdir, "content.opf"));
         foreach my $file (qw/regular.otf bold.otf italic.otf bolditalic.otf/) {
             my $epubfile = File::Spec->catfile($tmpdir, $file);

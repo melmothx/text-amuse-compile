@@ -145,7 +145,7 @@ has file_header => (is => 'lazy', isa => Object);
 has cover => (is => 'lazy', isa => Str);
 has coverwidth => (is => 'lazy', isa => Str);
 has nocoverpage => (is => 'lazy', isa => Bool);
-has fonts => (is => 'ro', isa => Maybe[InstanceOf['Text::Amuse::Compile::Fonts::Selected']]);
+has fonts => (is => 'ro', isa => InstanceOf['Text::Amuse::Compile::Fonts::Selected']);
 has epub_embed_fonts => (is => 'ro', isa => Bool, default => sub { 1 });
 
 sub _build_file_header {
@@ -435,7 +435,7 @@ switches.
 sub _render_css {
     my ($self, %tokens) = @_;
     my $out = '';
-    $self->tt->process($self->templates->css, \%tokens, \$out);
+    $self->tt->process($self->templates->css, { fonts => $self->fonts, %tokens }, \$out);
     return $out;
 }
 
@@ -726,14 +726,8 @@ sub epub {
                              italic => $main->italic->basename,
                              bolditalic => $main->bolditalic->basename,
                              format => $main->regular->format,
+                             size => $fonts->size,
                             };
-                my %options = %{$self->full_options};
-                if ($options{fontsize}) {
-                    if ($options{fontsize} =~ m/\A([1-9][0-9]?)\z/) {
-                        $webfonts->{size} = $1;
-                    }
-                }
-                $webfonts->{size} ||= 10;
                 foreach my $shape (qw/bold italic bolditalic regular/) {
                     my $fontfile = $main->$shape;
                     $epub->copy_file($fontfile->file,
@@ -1121,6 +1115,7 @@ sub _prepare_tex_tokens {
         $parsed{mainfont} = $fonts->main->name;
         $parsed{sansfont} = $fonts->sans->name;
         $parsed{monofont} = $fonts->mono->name;
+        $parsed{fontsize} = $fonts->size;
     }
 
     # no cover page

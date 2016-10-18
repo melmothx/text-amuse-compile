@@ -288,8 +288,8 @@ html,body {
 	padding:0;
 	border: none;
  	background: transparent;
-	font-family: [% IF webfonts %]"[% webfonts.family %]",[% END %] serif;
-	font-size: [% IF webfonts %][% webfonts.size %][% ELSE %]10[% END %]pt;
+	font-family: [% IF fonts %]"[% fonts.main.name %]",[% END %] serif;
+	font-size: [% IF fonts %][% fonts.size %][% ELSE %]10[% END %]pt;
 }
 
 [% IF epub %]
@@ -319,7 +319,7 @@ div#page {
 [% END %]
 
 pre, code {
-    font-family: Consolas, courier, monospace;
+    font-family: [% IF fonts %]"[% fonts.mono.name %]",[% END %]Consolas, courier, monospace;
 }
 /* invisibles */
 span.hiddenindex, span.commentmarker, .comment, span.tocprefix, #hitme {

@@ -3,7 +3,7 @@ package Text::Amuse::Compile::TemplateOptions;
 use utf8;
 use strict;
 use warnings FATAL => 'all';
-use Types::Standard qw/Str Bool Enum/;
+use Types::Standard qw/Str Bool Enum StrMatch/;
 use Pod::Usage qw//;
 use File::Spec;
 use Moo;
@@ -203,15 +203,15 @@ sub default_monofont {
 }
 
 has mainfont   => (is => 'rw',
-                   isa => Enum[ map { $_->{name} } __PACKAGE__->all_fonts ],
+                   isa => StrMatch[ qr{\A[a-zA-Z0-9 ]+\z} ],
                    default => sub { __PACKAGE__->default_mainfont },
                   );
 has sansfont   => (is => 'rw',
-                   isa => Enum[ map { $_->{name} } __PACKAGE__->all_fonts ],
+                   isa => StrMatch[ qr{\A[a-zA-Z0-9 ]+\z} ],
                    default => sub { __PACKAGE__->default_sansfont },
                   );
 has monofont   => (is => 'rw',
-                   isa => Enum[ map { $_->{name} } __PACKAGE__->all_fonts ],
+                   isa => StrMatch[ qr{\A[a-zA-Z0-9 ]+\z} ],
                    default => sub { __PACKAGE__->default_monofont },
                   );
 

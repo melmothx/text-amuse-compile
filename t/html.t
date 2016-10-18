@@ -17,7 +17,7 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
-plan tests => 63;
+plan tests => 72;
 
 my $file_no_toc = File::Spec->catfile(qw/t tex testing-no-toc.muse/);
 my $file_with_toc = File::Spec->catfile(qw/t tex testing.muse/);
@@ -45,6 +45,11 @@ test_file($file_with_headers, 0,
 sub test_file {
     my ($file, $has_toc, @regexps) = @_;
     my $c = Text::Amuse::Compile->new(html => 1,
+                                      extra => {
+                                                mainfont => 'TeX Gyre Pagella',
+                                                monofont => 'TeX Gyre Cursor',
+                                                fontsize => 12
+                                               },
                                       bare_html => 1);
     $c->compile($file);
     my ($full, $bare);
@@ -71,11 +76,17 @@ sub test_file {
             foreach my $regexp (@regexps) {
                 like($body, $regexp, "$regexp matches the body") or $error++;
             }
+            foreach my $string ('TeX Gyre Pagella',
+                                'TeX Gyre Cursor',
+                                '12pt') {
+                like $body, qr{\Q$string\E};
+            }
+
             like($body, qr/div#page\s*\{\s*margin:20px;\s*padding:20px;\s*\}/s,
                  "Found the margins in the CSS");
             unlike($body, qr/\@font-face/, "\@font-face not found");
             like($body, qr/font-size: 10pt;/, "Found the correct font size");
-            like($body, qr/font-family:\s*serif;/, "Found the serif font family");
+            like($body, qr/font-family:.*serif;/, "Found the serif font family");
             unlike($body, qr/\@page/, "\@page not found");
             unlike($body, qr/text-align: justify/, "No justify found in the body");
         }

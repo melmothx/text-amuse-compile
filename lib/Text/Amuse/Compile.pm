@@ -25,7 +25,7 @@ use Text::Amuse::Compile::Fonts::Selected;
 use Cwd;
 use Fcntl qw/:flock/;
 use Moo;
-use Types::Standard qw/Maybe Bool Str HashRef CodeRef Object ArrayRef InstanceOf/;
+use Types::Standard qw/Int Maybe Bool Str HashRef CodeRef Object ArrayRef InstanceOf/;
 
 =head1 NAME
 
@@ -150,15 +150,19 @@ Alias for sl_pdf.
 
 =item selected_font_main
 
-The selected main font if fontspec was specified.
+The selected main font (from the C<extra> hashref)
 
 =item selected_font_sans
 
-The selected sans font if fontspec was specified.
+The selected sans font (from the C<extra> hashref)
 
 =item selected_font_mono
 
-The selected mono font if fontspec was specified.
+The selected mono font (from the C<extra> hashref)
+
+=item selected_font_size
+
+The selected font size (from the C<extra> hashref)
 
 =item extra_opts
 
@@ -220,40 +224,39 @@ has webfontsdir => (is => 'ro', isa => Maybe[Str]);
 has webfonts  => (is => 'lazy', isa => Maybe[Object]);
 
 has fontspec => (is => 'ro');
-has fonts => (is => 'lazy', isa => Maybe[InstanceOf['Text::Amuse::Compile::Fonts::Selected']]);
+has fonts => (is => 'lazy', isa => InstanceOf['Text::Amuse::Compile::Fonts::Selected']);
 has epub_embed_fonts => (is => 'ro', isa => Bool, default => sub { 1 });
 
 sub _build_fonts {
     my $self = shift;
-    if (my $specs = $self->fontspec) {
-        my $fonts = Text::Amuse::Compile::Fonts->new($specs);
-        my %args;
-        my @all_fonts = $fonts->all_fonts;
-        foreach my $type (qw/sans mono serif/) {
-            my $method = $type . '_fonts';
-            my @all = $fonts->$method;
-            die "Missing $type font in the specification" unless @all;
-            my $store = $type eq 'serif' ? 'main' : $type;
-            my $smethod = "selected_font_${store}";
-            if (my $selected = $self->$smethod) {
-                my ($got) = grep { $_->name eq $selected } @all_fonts;
-                $args{$store} = $got;
-            }
-            unless ($args{$store}) {
-                $self->logger->("$store font not found, using the default\n");
-                $args{$store} = $all[0]; # if everything fails
-            }
+    my $specs = $self->fontspec;
+    my $fonts = Text::Amuse::Compile::Fonts->new($specs);
+    my %args = (
+                size => $self->selected_font_size || 10,
+               );
+    my @all_fonts = $fonts->all_fonts;
+    foreach my $type (qw/sans mono serif/) {
+        my $method = $type . '_fonts';
+        my @all = $fonts->$method;
+        die "Missing $type font in the specification" unless @all;
+        my $store = $type eq 'serif' ? 'main' : $type;
+        my $smethod = "selected_font_${store}";
+        if (my $selected = $self->$smethod) {
+            my ($got) = grep { $_->name eq $selected } @all_fonts;
+            $args{$store} = $got;
         }
-        return Text::Amuse::Compile::Fonts::Selected->new(%args);
+        unless ($args{$store}) {
+            $self->logger->("$store font not found, using the default\n");
+            $args{$store} = $all[0]; # if everything fails
+        }
     }
-    else {
-        return undef;
-    }
+    return Text::Amuse::Compile::Fonts::Selected->new(%args);
 }
 
 has selected_font_main => (is => 'ro', isa => Maybe[Str]);
 has selected_font_sans => (is => 'ro', isa => Maybe[Str]);
 has selected_font_mono => (is => 'ro', isa => Maybe[Str]);
+has selected_font_size => (is => 'ro', isa => Maybe[Int]);
 
 has standalone => (is => 'lazy', isa => Bool);
 has extra_opts => (is => 'ro', isa => HashRef, default => sub { +{} });
@@ -287,12 +290,11 @@ sub BUILDARGS {
             $params{$dir} = $abs;
         }
     }
-    # if fontspec is passed, take out the fonts from the extra.
-    if ($params{fontspec}) {
-        foreach my $type (qw/main sans mono/) {
-            $params{"selected_font_$type"} = delete $params{extra_opts}{"${type}font"};
-        }
+    # take out the fonts from the extra, for backcomp.
+    foreach my $type (qw/main sans mono/) {
+        $params{"selected_font_$type"} = delete $params{extra_opts}{"${type}font"};
     }
+    $params{selected_font_size} = delete $params{extra_opts}{fontsize};
     return \%params;
 }
 

@@ -2,13 +2,15 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 215;
+use Test::More tests => 217;
 use Text::Amuse::Compile;
 use File::Spec;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::Utils qw/read_file/;
 use Text::Amuse::Compile::TemplateOptions;
+use Text::Amuse::Compile::Fonts::Family;
+use Text::Amuse::Compile::Fonts::Selected;
 use Cwd;
 
 my $templates = Text::Amuse::Compile::Templates->new;
@@ -17,13 +19,13 @@ my $basepath = getcwd();
 
 my $extra = {
              site => "Test site",
-             mainfont => "CMU Serif",
+             mainfont => "TeX Gyre Pagella",
              siteslogan => "Hello there!",
              site => "http:mysite.org",
              sitename => "Another crappy test site",
              papersize => "a4paperwithears",
              division => 9,
-             fontsize => 48,
+             fontsize => 14,
              twoside => 1,
              bcor => "23",
              logo => "pallinopinco",
@@ -39,6 +41,8 @@ my $compile = Text::Amuse::Compile->new(
                                        );
 
 my $extracopy = { %$extra };
+is $compile->selected_font_main, delete $extracopy->{mainfont};
+is $compile->selected_font_size, delete $extracopy->{fontsize};
 is_deeply({ $compile->extra }, $extracopy, "extra options stored" );
 ok ($compile->cleanup);
 
@@ -55,6 +59,7 @@ $returned = {
              fontsize => 10,
              bcor => '0mm',
              coverwidth => '1',
+             selected_font_main => $compile->selected_font_main,
             };
 
 my @targets;
@@ -94,7 +99,7 @@ for (1..2) {
             like $c, qr/\Q$string\E/, "Found $string";
         }
         like $c, qr/DIV=9/, "Found the div factor";
-        like $c, qr/fontsize=10pt/, "Found the fontsize";
+        like $c, qr/fontsize=14pt/, "Found the fontsize";
         unlike $c, qr/twoside/, "oneside enforced";
         like $c, qr/oneside/, "oneside enforced on single pdf";
         like $c, qr/BCOR=0mm/, "BCOR validated and enforced";
@@ -120,6 +125,27 @@ my $tt = Text::Amuse::Compile::Templates->new;
 my $file = Text::Amuse::Compile::File->new(name => 'test',
                                            suffix => '.muse',
                                            cleanup => 1,
+                                           fonts => Text::Amuse::Compile::Fonts::Selected
+                                           ->new(mono => Text::Amuse::Compile::Fonts::Family
+                                                 ->new(
+                                                       name => $returned->{selected_font_main},
+                                                       desc => $returned->{selected_font_main},
+                                                       type => 'mono',
+                                                      ),
+                                                 sans => Text::Amuse::Compile::Fonts::Family
+                                                 ->new(
+                                                       name => $returned->{selected_font_main},
+                                                       desc => $returned->{selected_font_main},
+                                                       type => 'sans',
+                                                      ),
+                                                 main => Text::Amuse::Compile::Fonts::Family
+                                                 ->new(
+                                                       name => $returned->{selected_font_main},
+                                                       desc => $returned->{selected_font_main},
+                                                       type => 'serif',
+                                                      ),
+                                                 size => 14,
+                                                ),
                                            templates => $tt);
 
 foreach my $ext (qw/.html .tex .pdf .bare.html .epub/) {
@@ -142,7 +168,7 @@ for (1..2) {
         like $c, qr/\Q$string\E/, "Found $string";
     }
     like $c, qr/DIV=9/, "Found the div factor";
-    like $c, qr/fontsize=10pt/, "Found the fontsize";
+    like $c, qr/fontsize=14pt/, "Found the fontsize";
     like $c, qr/twoside/, "oneside not enforced";
     unlike $c, qr/oneside/, "oneside not enforced";
     like $c, qr/BCOR=0mm/, "BCOR enforced";
@@ -267,7 +293,7 @@ foreach my $method (qw/mainfont sansfont monofont/) {
         $last = $good_font;
     }
     eval {
-        $opts->$method("Random font name");
+        $opts->$method("Random font / name");
     };
 
     ok $@, "random font name doesn't pass the validation";
@@ -336,7 +362,7 @@ foreach my $test ({ name => 'fontsize',
     eval {
         $opts->$method($test->{bad});
     };
-    ok $@, "Setting $method to $test->{bad} raises an exception $@";
+    ok ($@, "Setting $method to $test->{bad} raises an exception") and diag $@;
     is $opts->$method, $test->{good}, "Option still the $test->{good}";
 }
   

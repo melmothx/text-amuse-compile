@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.83 2016-10-18
+
+ - Fixed font validation (it was too strict, preventing sans or mono
+   fonts to be used as main font).
+
 0.82 2016-10-16
 
  - New options: epub_embed_fonts (defaults to true)

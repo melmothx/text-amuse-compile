@@ -29,6 +29,7 @@ t/compile.t
 t/concurrency.t
 t/coverpage.t
 t/covers.t
+t/crash-on-loops.t
 t/epub-meta.t
 t/epub-toc.t
 t/epub.t

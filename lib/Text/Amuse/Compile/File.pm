@@ -618,8 +618,7 @@ sub _compile_pdf {
         $pipe->reader($latex, '-interaction=nonstopmode', $source);
         $pipe->autoflush(1);
         my $shitout;
-        while (<$pipe>) {
-            my $line = $_;
+        while (my $line = <$pipe>) {
             if ($line =~ m/^[!#]/) {
                 $shitout++;
             }

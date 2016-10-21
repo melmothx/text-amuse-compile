@@ -98,6 +98,7 @@ sub all_fonts {
 sub import_with_fclist {
     my $self = shift;
     return unless $self->use_fclist;
+    local $_;
     my %specs;
     my %all = $self->all_fonts;
     my $pipe = IO::Pipe->new;
@@ -135,6 +136,7 @@ sub import_with_imagemagick {
     return unless $self->use_imagemagick;
     my %specs;
     my %all = $self->all_fonts;
+    local $_;
     my $pipe = IO::Pipe->new;
     $pipe->reader('identify', -list => 'font');
     $pipe->autoflush;

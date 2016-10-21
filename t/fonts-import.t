@@ -24,6 +24,11 @@ else {
     plan skip_all => 'Cannot test the font importer';
 }
 
+for (1..2) {
+    $importer->import_with_fclist;
+    $importer->import_with_imagemagick;
+}
+
 my $fclist = $importer->import_with_fclist;
 my $im = $importer->import_with_imagemagick;
 

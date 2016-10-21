@@ -64,9 +64,12 @@ my $c = Text::Amuse::Compile->new(epub => 1,
                                   webfontsdir => $dir);
 
 my $target_base = File::Spec->catfile(qw/t testfile for-epub/);
-$c->compile($target_base . '.muse');
 my $epub = $target_base . '.epub';
-ok (-f $epub);
+unlink $epub if -f $epub;
+for (1,2) {
+    $c->compile($target_base . '.muse');
+}
+ok (-f $epub) or die "EPUB generation failed";
 my $tmpdir = File::Temp->newdir(CLEANUP => 1);
 my $zip = Archive::Zip->new;
 die "Couldn't read $epub" if $zip->read($epub) != AZ_OK;

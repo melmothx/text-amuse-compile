@@ -147,8 +147,8 @@ sub _parse_dir_and_spec {
     my $specfile = File::Spec->catfile($dir, 'spec.txt');
     if (-f $specfile) {
         open (my $fh, '<', $specfile) or die "Cannot open specfile $!";
-        while (<$fh>) {
-            if (m/^\s*
+        while (my $line = <$fh>) {
+            if ($line =~ m/^\s*
                   (family|regular|italic|bold|bolditalic|size)
                   \s+
                   (\w[\w\.\ -]*?)
@@ -156,14 +156,14 @@ sub _parse_dir_and_spec {
                   $/x) {
                 $data{$1} = $2;
             }
-            elsif (m/^#/) {
+            elsif ($line =~ m/^#/) {
                 # ok, comment
             }
-            elsif (m/^\s*$/) {
+            elsif ($line =~ m/^\s*$/) {
                 # ok, blank line
             }
             else {
-                warn "Invalid line in $specfile found: $_";
+                warn "Invalid line in $specfile found: $line";
             }
         }
         close $fh;

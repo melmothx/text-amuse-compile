@@ -10,7 +10,7 @@ use Test::More;
 use IO::Pipe;
 
 if ($ENV{TEST_WITH_LATEX}) {
-    plan tests => 3;
+    plan tests => 4;
 }
 else {
     plan skip_all => 'PDF compilation needed';
@@ -27,11 +27,12 @@ for (1,2) {
 
 
 my $pipe = IO::Pipe->new;
-$pipe->reader('echo', '-n', '0');
+$pipe->reader('perl', '-e', 'print 0');
 $pipe->autoflush(1);
 my $found;
 while (my $line = <$pipe>) {
     diag "Found $line";
+    ok !$line, "Line is false, but read";
     $found++;
 }
 wait;

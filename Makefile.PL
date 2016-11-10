@@ -15,6 +15,7 @@ WriteMakefile(
     BUILD_REQUIRES => {
         'Test::More' => 0,
         'File::Temp' => 0,
+        'PDF::API2' => 0,
     },
     PREREQ_PM => {
         # ours

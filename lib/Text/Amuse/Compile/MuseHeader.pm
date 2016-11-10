@@ -29,6 +29,22 @@ or "no" or "false".
 The cleaned and lowercased header. Directives with underscores are
 ignored.
 
+=head2 title
+
+Verbatim header field
+
+=head2 subtitle
+
+Verbatim header field
+
+=head2 listtitle
+
+Verbatim header field
+
+=head2 author
+
+Verbatim header field
+
 =head2 language
 
 Defaults to en if not present.
@@ -85,9 +101,22 @@ sub BUILDARGS {
         }
         $lowered{$lck} = $directives->{$k};
     }
-
-    return { header => { %lowered } };
+    my %args = (header => { %lowered });
+    foreach my $f (qw/title listtitle subtitle author/) {
+        if (exists $lowered{$f} and defined $lowered{$f}) {
+            $args{$f} = $lowered{$f};
+        }
+        else {
+            $args{$f} = '';
+        }
+    }
+    return \%args;
 }
+
+has title => (is => 'ro', isa => Str, required => 1);
+has subtitle => (is => 'ro', isa => Str, required => 1);
+has listtitle => (is => 'ro', isa => Str, required => 1);
+has author => (is => 'ro', isa => Str, required => 1);
 
 has header => (is => 'ro', isa => HashRef[Str]);
 
@@ -222,6 +251,20 @@ sub _html_strings {
         push @out, muse_format_line(html => $el);
     }
     return @out;
+}
+
+sub tex_metadata {
+    my $self = shift;
+    my %out = (
+               title => $self->listtitle || $self->title,
+               author => (scalar(@{$self->authors}) ? join('; ', @{$self->authors}) : $self->author),
+               subject => $self->subtitle,
+               keywords => (scalar(@{$self->topics}) ? join('; ', @{$self->topics}) : ''),
+              );
+    foreach my $k (keys %out) {
+        $out{$k} = muse_format_line(ltx => $out{$k});
+    }
+    return \%out;
 }
 
 sub _parse_topic_or_author {

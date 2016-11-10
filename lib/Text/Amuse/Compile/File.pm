@@ -152,7 +152,7 @@ sub _build_file_header {
     my $self = shift;
     my $header;
     if ($self->virtual) {
-        $header = {};
+        $header = { $self->document->headers };
     }
     else {
         $header = muse_fast_scan_header($self->muse_file);
@@ -172,6 +172,7 @@ sub _build_wants_slides {
 sub _build_document {
     my $self = shift;
     my %args;
+    die "virtual files need an already built document" if $self->virtual;
     if (my $fileobj = $self->fileobj) {
         %args = $fileobj->text_amuse_constructor;
     }
@@ -194,7 +195,7 @@ sub _build_html_options {
 sub _build_full_options {
     my $self = shift;
     # merge the options with the ones found in the header.
-    # print "Building full options\n";
+    # print "Building full options\n" if DEBUG;
     my %options = %{ $self->options };
     # these values are picked from the file, if not provided by the compiler
     foreach my $override (qw/cover coverwidth nocoverpage/) {
@@ -1188,6 +1189,7 @@ sub _prepare_tex_tokens {
             options => \%tokens,
             safe_options => \%parsed,
             doc => $doc,
+            tex_metadata => $self->file_header->tex_metadata,
            };
 }
 

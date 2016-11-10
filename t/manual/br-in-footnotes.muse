@@ -1,4 +1,7 @@
-#title Test br in fn
+#title Test br in fn !@#$%^&*() _Đć_;'"{}[]
+#subtitle My subject /again/ !@#$%^&*() _Đć_
+#author !@#$%^&*() _Đć_;'"{}[]
+#topics !@#$%^&*() _Đć_;'"{}[]; !@#$%^&__*() _Đć_;'"{}[]
 
 This is a line [1] with [2] some [3] footnotes [4]
 

@@ -75,6 +75,12 @@ Same as C<topics>, but returns a plain list of HTML formatted topics.
 
 Same as C<authors>, but returns a plain list of HTML formatted authors.
 
+=head2 tex_metadata
+
+Return an hashref with the following keys: C<title> C<author>
+C<subject> C<keywords> with the values LaTeX escaped, mapping to the
+relevant headers values for setting PDF metadata.
+
 =head1 INTERNALS
 
 =head2 BUILDARGS

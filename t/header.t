@@ -7,7 +7,7 @@ use Text::Amuse::Compile;
 use Text::Amuse::Compile::Utils qw/write_file read_file/;
 use File::Temp;
 use File::Spec::Functions qw/catdir catfile/;
-use Test::More tests => 54;
+use Test::More tests => 55;
 use Data::Dumper;
 use Cwd;
 
@@ -247,6 +247,7 @@ MUSE
     my $muse = <<'MUSE';
 #title \blah/
 #author pippo
+#subtitle -
 
 x
 MUSE
@@ -259,6 +260,7 @@ MUSE
                keywords => '',
                subject => '',
               });
+    is $header->listing_title, '\blah/';
 }
 
 chdir $cwd;

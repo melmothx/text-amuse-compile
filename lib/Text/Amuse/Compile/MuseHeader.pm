@@ -41,6 +41,10 @@ Verbatim header field
 
 Verbatim header field
 
+=head2 listing_title
+
+Return listtitle if set, title otherwise.
+
 =head2 author
 
 Verbatim header field
@@ -103,7 +107,9 @@ sub BUILDARGS {
     }
     my %args = (header => { %lowered });
     foreach my $f (qw/title listtitle subtitle author/) {
-        if (exists $lowered{$f} and defined $lowered{$f}) {
+        if (exists $lowered{$f} and
+            defined $lowered{$f} and
+            $lowered{$f} =~ m/\w/) {
             $args{$f} = $lowered{$f};
         }
         else {
@@ -253,10 +259,20 @@ sub _html_strings {
     return @out;
 }
 
+sub listing_title {
+    my $self = shift;
+    if (length($self->listtitle)) {
+        return $self->listtitle;
+    }
+    else {
+        return $self->title;
+    }
+}
+
 sub tex_metadata {
     my $self = shift;
     my %out = (
-               title => $self->listtitle || $self->title,
+               title => $self->listing_title,
                author => (scalar(@{$self->authors}) ? join('; ', @{$self->authors}) : $self->author),
                subject => $self->subtitle,
                keywords => (scalar(@{$self->topics}) ? join('; ', @{$self->topics}) : ''),

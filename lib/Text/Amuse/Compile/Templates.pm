@@ -771,11 +771,13 @@ sub latex {
 \subtitle{[% doc.header_as_latex.subtitle %]}
 
 [% IF tex_metadata %]
+% https://groups.google.com/d/topic/comp.text.tex/6fYmcVMbSbQ/discussion
 \hypersetup{%
+pdfencoding=auto,
 pdftitle={[% tex_metadata.title %]},%
 pdfauthor={[% tex_metadata.author %]},%
 pdfsubject={[% tex_metadata.subject %]},%
-pdfkeywords={[% tex_metadata.keywords %]},%
+pdfkeywords={[% tex_metadata.keywords %]}%
 }
 [% END %]
 

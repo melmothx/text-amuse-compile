@@ -1,5 +1,6 @@
 #!perl
 
+use utf8;
 use strict;
 use warnings;
 use Test::More;
@@ -51,21 +52,32 @@ like first_line($log), qr{This is LuaTeX};
 }
 
 foreach my $luatex (0..1) {
-    my $expected = File::Spec->catfile(qw/t manual merged.pdf/);
+    my $expected = File::Spec->catfile(qw/t manual merged/);
     unlink $expected if -f $expected;
-    ok (! -f $expected);
-    my $c = Text::Amuse::Compile->new(tex => 1, pdf => 1, luatex => $luatex);
+    my @exp = map { $expected . $_ } qw/.pdf .a4.pdf .lt.pdf/;
+    foreach my $file (@exp) {
+        unlink $file if -f $file;
+        ok (! -f $file);
+    }
+    my $c = Text::Amuse::Compile->new(tex => 1, pdf => 1, a4_pdf => 1, lt_pdf => 1, luatex => $luatex);
     $c->compile({
                  files => [qw/manual br-in-footnotes/],
                  path => File::Spec->catdir(qw/t manual/),
                  name => 'merged',
                  title => "Title is Bla *bla* bla",
                  subtitle => "My [subtitle]",
-                 author => 'My {author}',
+                 author => 'My á Д {author}',
                  topics => '\-=my= \ **cat**, [another] {cat}',
                 });
-    ok (-f $expected, "Found expected");
-    check_metadata($expected);
+    foreach my $file (@exp) {
+        ok (-f $file, "$file created");
+        check_metadata($file, {
+                               Title => "Title is Bla bla bla",
+                               Subject => "My [subtitle]",
+                               Author => 'My á Д {author}',
+                               Keywords => '\-my \ cat; [another] {cat}',
+                              });
+    }
 }
 
 
@@ -78,12 +90,16 @@ sub first_line {
 }
 
 sub check_metadata {
-    my $file = shift;
+    my ($file, $checks) = @_;
     my $pdf = PDF::API2->open($file);
     my %info = $pdf->info;
-    foreach my $field (qw/Author Title Subject Keywords/) {
+    foreach my $field (qw/Author Title Subject Keywords Creator Producer/) {
         ok $info{$field}, "Found $field metadata" and diag $info{$field};
+    }
+    if ($checks) {
+        foreach my $k (keys %$checks) {
+            is $info{$k}, $checks->{$k};
+        }
     }
     $pdf->end;
 }
-

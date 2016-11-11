@@ -7,7 +7,8 @@ use Text::Amuse::Compile;
 use Text::Amuse::Compile::Utils qw/write_file read_file/;
 use File::Temp;
 use File::Spec::Functions qw/catdir catfile/;
-use Test::More tests => 46;
+use Test::More tests => 55;
+use Data::Dumper;
 use Cwd;
 
 my $cwd = getcwd();
@@ -19,6 +20,8 @@ my $c = Text::Amuse::Compile->new;
 {
     my $muse = <<MUSE;
 #title blah
+#author author
+#subtitle subtitle
 #deleted 1
 #cover 11 Name.jpg
 #coverwidth blablabla
@@ -34,11 +37,17 @@ MUSE
     ok !$header->cover, "No cover";
     ok !$header->coverwidth, "No coverwidth";
     ok !$header->nocoverpage, "Nocoverpage is false";
+    is $header->title, 'blah';
+    is $header->author, 'author';
+    is $header->subtitle, 'subtitle';
+    is $header->listtitle, '';
+    diag Dumper($header->tex_metadata);
 }
 
 {
     my $muse = <<MUSE;
 #title blah
+#LISTtitle 001 blah
 #deleted
 #lang it
 #slides NO
@@ -50,10 +59,12 @@ MUSE
     write_file($testfile, $muse);
     my $header = $c->parse_muse_header($testfile);
     ok !$header->is_deleted, "File is not deleted";
+    is $header->listtitle, '001 blah';
     is $header->language, "it", "Language is it";
     ok !$header->wants_slides, "File doesn't want slides";
     ok !$header->cover, "No cover";
     ok !$header->coverwidth, "No coverwidth";
+    is $header->tex_metadata->{title}, '001 blah';
 }
 
 {
@@ -205,11 +216,12 @@ MUSE
 }
 
 {
-    my $muse = <<MUSE;
-#title blah
+    my $muse = <<'MUSE';
+#title \blah\
 #SORTtopics >first, =&'last=<;
 #SORTauthors my **fist, <em>"author"</em>;
 #cat bla foo, try
+#subtitle /hullo\
 
 x
 MUSE
@@ -221,7 +233,34 @@ MUSE
     is_deeply ($header->authors, ['my **fist, <em>"author"</em>']);
     is_deeply ([$header->authors_as_html_list],
                ['my **fist, <em>&quot;author&quot;</em>']);
+    diag Dumper($header->tex_metadata);
+    is_deeply($header->tex_metadata,
+              {
+               'author' => 'my **fist, \\emph{"author"}',
+               'title' => '\\textbackslash{}blah\\textbackslash{}',
+               'keywords' => 'bla; foo; try; >first, \\texttt{\\&\'last}<',
+               'subject' => '\\Slash{}hullo\\textbackslash{}'
+              });
 }
 
+{
+    my $muse = <<'MUSE';
+#title \blah/
+#author pippo
+#subtitle -
+
+x
+MUSE
+    write_file($testfile, $muse);
+    my $header = $c->parse_muse_header($testfile);
+    is_deeply($header->tex_metadata,
+              {
+               title => '\\textbackslash{}blah\\Slash{}',
+               author => 'pippo',
+               keywords => '',
+               subject => '',
+              });
+    is $header->listing_title, '\blah/';
+}
 
 chdir $cwd;

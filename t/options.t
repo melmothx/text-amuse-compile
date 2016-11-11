@@ -4,8 +4,10 @@ use warnings;
 use utf8;
 use Test::More tests => 217;
 use Text::Amuse::Compile;
+use Text::Amuse::Functions qw/muse_to_object/;
 use File::Spec;
 use Text::Amuse::Compile::File;
+use Text::Amuse::Compile::Merged;
 use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::Utils qw/read_file/;
 use Text::Amuse::Compile::TemplateOptions;
@@ -178,11 +180,13 @@ for (1..2) {
     unlink $texfile or die $!;
 }
 
+my $merged = Text::Amuse::Compile::Merged->new(files => [qw/test.muse/]);
 
 my $dummy = Text::Amuse::Compile::File->new(
                                             name => 'dummy',
                                             suffix => '.muse',
                                             templates => $templates,
+                                            document => $merged,
                                             options => {
                                                         pippo => '[[http://test.org][test]]',
                                                         prova => 'hello *there* & \stuff',
@@ -227,6 +231,7 @@ $dummy = Text::Amuse::Compile::File->new(
                                          name => 'dummy',
                                          suffix => '.muse',
                                          templates => $templates,
+                                         document => $merged,
                                          options => {
                                                      cover => 'prova.pdf',
                                                      logo => 'c-i-a',
@@ -250,6 +255,7 @@ SKIP: {
                                              name => 'dummy',
                                              suffix => '.muse',
                                              templates => $templates,
+                                             document => $merged,
                                              options => {
                                                          cover => $testfile,
                                                          logo => $wintestfile,
@@ -271,6 +277,7 @@ SKIP: {
                                                          cover => 'a bc.pdf',
                                                          logo => 'c alsdkfl',
                                                         },
+                                             document => $merged,
                                              virtual => 1,
                                             );
     is $dummy->tex_options->{cover}, undef, "cover with spaces doesn't validate";

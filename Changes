@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.87 2016-11-11
+
+ - Store metadata in the PDF (both plain and imposed)
+
 0.86 2016-10-22
 
  - Do not use $_ when reading files and pipes.

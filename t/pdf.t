@@ -15,7 +15,7 @@ binmode $builder->todo_output,    ":utf8";
 
 
 if ($ENV{TEST_WITH_LATEX}) {
-    plan tests => 40;
+    plan tests => 108;
 }
 else {
     plan skip_all => "No TEST_WITH_LATEX set, skipping";

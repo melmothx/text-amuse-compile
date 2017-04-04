@@ -861,7 +861,7 @@ HTML
         my $piecenumber = 0;
         foreach my $piece (@pieces) {
             # we insert these in Text::Amuse, so it's not a wild regexp.
-            while ($piece =~ m/<a id="(text-amuse-label-.+?)"><\/a>/g) {
+            while ($piece =~ m/<a id="(text-amuse-label-.+?)"( class="text-amuse-internal-anchor")?><\/a>/g) {
                 my $label = $1;
                 $internal_links{$label} =
                   $self->_format_epub_fragment($toc[$piecenumber]{index});

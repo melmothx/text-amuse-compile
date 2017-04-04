@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.88 2017-04-04
+
+ - Fix handling of internal linking in epub and bump Text::Amuse
+   version
+
 0.87 2016-11-11
 
  - Store metadata in the PDF (both plain and imposed)

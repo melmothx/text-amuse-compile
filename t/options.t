@@ -207,6 +207,7 @@ is_deeply($html_options, {
                           ciao => 1,
                           test => "Another great thing!",
                           nocoverpage => 0,
+                          notoc => 0,
                           coverwidth => 1,
                          }, "html escaped and interpreted ok");
 is_deeply($latex_options, {
@@ -214,6 +215,7 @@ is_deeply($latex_options, {
                            pippo => '\href{http://test.org}{test}',
                            ciao => 1,
                            test => "Another great thing!",
+                           notoc => 0,
                            nocoverpage => 0,
                            coverwidth => 1,
                           }, "latex escaped and interpreted ok");

@@ -32,15 +32,15 @@ foreach my $header (0..1) {
                                           ($option ? (extra => { notoc => 1 }) : ()));
         
         my $musebody = $header ? "#notoc 1\n" . $muse : $muse;
-        write_file($target, $muse);
+        write_file($target, $musebody);
         $c->compile($target);
         ok(-f $tex, "$tex file is present");
         my $texbody = read_file($tex);
         if ($header || $option) {
-            unlike($texbody, qr/\\tableofcontents/, "ToC is not present");
+            unlike($texbody, qr/\\tableofcontents/, "ToC is not present header: $header option: $option");
         }
         else {
-            like($texbody, qr/\\tableofcontents/, "ToC is present");
+            like($texbody, qr/\\tableofcontents/, "ToC is present header: $header option: $option");
         }
       SKIP:
         {

@@ -222,6 +222,13 @@ sub _build_nocoverpage {
     return !!$self->header->{nocoverpage};
 }
 
+has notoc => (is => 'lazy', isa => Bool);
+
+sub _build_notoc {
+    my $self = shift;
+    return !!$self->header->{notoc};
+}
+
 
 
 has topics => (is => 'lazy', isa => ArrayRef);

@@ -631,12 +631,12 @@ sub latex {
     \lehead{\pagemark}
     \rohead{\pagemark}
     \rehead{[% doc.header_as_latex.title %]}
-    \lohead{[% doc.header_as_latex.subtitle %]}
+    \lohead{[% IF doc.header_defined.subtitle %][% doc.header_as_latex.subtitle %][% ELSE %][% doc.header_as_latex.title %][% END %]}
     [% END %]
     [% IF safe_options.headings.author_title %]
     \lehead{\pagemark}
     \rohead{\pagemark}
-    \rehead{[% doc.header_as_latex.author %]}
+    \rehead{[% IF doc.header_defined.author %][% doc.header_as_latex.author %][% ELSE %][% doc.header_as_latex.title %][% END %]}
     \lohead{[% doc.header_as_latex.title %]}
     [% END %]
     [% IF safe_options.headings.section_subsection %]

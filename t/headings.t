@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Test::More tests => 90;
+use Test::More tests => 222;
 use Text::Amuse::Compile;
 use Text::Amuse::Compile::TemplateOptions;
 use Text::Amuse::Compile::Utils qw/read_file write_file/;
@@ -59,7 +59,8 @@ $random
 MUSE
 
 foreach my $spec (Text::Amuse::Compile::TemplateOptions->all_headings) {
-    foreach my $twoside (0, 1) {
+    foreach my $titleonly (0..1) {
+        foreach my $twoside (0..1) {
         my $c = Text::Amuse::Compile->new(tex => 1,
                                           pdf => !!$ENV{TEST_WITH_LATEX},
                                           extra => {
@@ -74,10 +75,17 @@ foreach my $spec (Text::Amuse::Compile::TemplateOptions->all_headings) {
         if ($twoside) {
             $basename .= '-2side';
         }
+        if ($titleonly) {
+            $basename .= '-titleonly';
+        }
         my $target = File::Spec->catfile($tmpdir, $basename . '.muse');
         my $tex = File::Spec->catfile($tmpdir, $basename . '.tex');
         my $pdf = File::Spec->catfile($tmpdir, $basename . '.pdf');
-        write_file($target, $muse);
+        my $musebody = $muse;
+        if ($titleonly) {
+            $musebody =~ s/^#(subtitle|author).*$//mg;
+        }
+        write_file($target, $musebody);
         $c->compile($target);
         ok (-f $tex, "$tex found");
 
@@ -90,11 +98,25 @@ foreach my $spec (Text::Amuse::Compile::TemplateOptions->all_headings) {
             like($texbody, qr{headinclude\=true\,\%}, "headinclude is true");
             unlike($texbody, qr!\\pagestyle\{plain\}!, "not a plain pagestyle");
             like($texbody, qr!\\pagestyle\{scrheadings\}!, "custom pagestyle");
+            if ($twoside) {
+                like($texbody, qr/(\\rehead\{[^\\].+\}|\\automark)/, "heading definition found");
+                like($texbody, qr/(\\lohead\{[^\\].+\}|\\automark)/, "heading definition found");
+                while ($texbody =~ m/\\((re|lo)head)\{(.*)\}/g) {
+                    diag "$1 = $3";
+                }
+            }
+            else {
+                like($texbody, qr/(\\chead\{[^\\].*\}|\\automark)/, "heading definition found");
+                while ($texbody =~ m/\\((c)head)\{(.*)\}/g) {
+                    diag "$1 = $3";
+                }
+            }
         }
 
       SKIP: {
             skip "pdf $pdf not required", 1 unless $ENV{TEST_WITH_LATEX};
             ok(-f $pdf, "$pdf created");
         }
+    }
     }
 }

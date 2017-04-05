@@ -317,9 +317,8 @@ width.
 
 =item * nocoverpage
 
-Use the LaTeX article class if ToC is not present. If the text doesn't
-require a toc, this options set the class to komascript's article.
-Ignored if there is a toc.
+Force the use of the LaTeX article class. If there are chapters
+present, consider them aliases for a section.
 
 =item * notoc
 

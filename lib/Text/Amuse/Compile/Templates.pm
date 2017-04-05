@@ -621,6 +621,9 @@ sub latex {
 \renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}
 [% END %]
 
+[% IF safe_options.nocoverpage %]
+\let\chapter\section
+[% END %]
 % global style
 [% IF safe_options.headings %]
 \setlength{\headsep}{\baselineskip}
@@ -835,7 +838,11 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 [% IF safe_options.wants_toc %]
 \tableofcontents
 % start a new right-handed page
+[% IF safe_options.nocoverpage %]
+  \vskip 3em
+[% ELSE %]
 \cleardoublepage
+[% END %]
 [% END %]
 
 [% doc.as_latex %]

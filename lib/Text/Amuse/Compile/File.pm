@@ -1119,13 +1119,16 @@ sub _prepare_tex_tokens {
     }
 
     # no cover page
-    unless ($doc->wants_toc) {
+    # here we used to have a conditional ->wants_toc, removed.
+    # Instead, the template should say \let\chapter\section or
+    # \let\chapter\part
+
         if ($self->nocoverpage) {
             $parsed{nocoverpage} = 1;
             $parsed{class} = 'scrartcl';
             delete $parsed{opening}; # not needed for article.
         }
-    }
+
 
     unless ($parsed{notoc}) {
         if ($doc->wants_toc) {

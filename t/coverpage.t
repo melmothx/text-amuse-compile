@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 14;
 use File::Temp;
 use File::Copy qw/copy/;
 use File::Spec::Functions qw/catfile catdir/;
@@ -32,6 +32,7 @@ ok(-f $tex);
 my $texbody = read_file($tex);
 
 like($texbody, qr/\{scrbook\}/);
+unlike($texbody, qr/\\let\\chapter\\section/);
 unlike($texbody, qr/prova\.png/);
 
 copy(catfile(qw/t manual logo.png/), catfile($tmpdir, "prova.png"));
@@ -91,10 +92,9 @@ write_file($target, $muse);
 $c = Text::Amuse::Compile->new(tex => 1);
 $c->compile($target);
 $texbody = read_file($tex);
-like($texbody, qr/\{scrbook\}/,
-     "Passing nocoverpage in header, but with toc, doesn't change the class");
-
-
+like($texbody, qr/\{scrartcl\}/,
+     "Passing nocoverpage in header, but with toc, changes the class nevertheless");
+like($texbody, qr/\\let\\chapter\\section/);
 
 $muse =<<'MUSE';
 #title Test

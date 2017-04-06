@@ -1,5 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
+0.89 2017-06-06
+
+ - Obey #notoc if set in the header
+ - Always obey #nocoverpage (both in header or in option)
+
 0.88 2017-04-04
 
  - Fix handling of internal linking in epub and bump Text::Amuse

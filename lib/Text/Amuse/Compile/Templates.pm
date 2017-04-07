@@ -214,7 +214,7 @@ sub html {
   [% END  %]
   [% END %]
   [% IF doc.toc_as_html %]
-  <div class="table-of-contents">
+  <div class="table-of-contents"[% IF options.notoc %] style="display:none"[% END %]>
   [% doc.toc_as_html %]
   </div>
   [% END %]
@@ -511,7 +511,7 @@ sub bare_html {
     }
     my $html = <<'EOF';
 [% IF doc.toc_as_html %]
-<div class="table-of-contents">
+<div class="table-of-contents"[% IF options.notoc %] style="display:none"[% END %]>
 [% doc.toc_as_html %]
 </div>
 [% END %]

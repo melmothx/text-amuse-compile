@@ -1,6 +1,10 @@
 Revision history for perl module Text::Amuse::Compile
 
-0.89 2017-06-06
+0.90 2017-04-07
+
+ - Obey #notoc for HTML as well
+
+0.89 2017-04-06
 
  - Obey #notoc if set in the header
  - Always obey #nocoverpage (both in header or in option)

@@ -713,7 +713,7 @@ sub latex {
 \PassOptionsToPackage{hyphens}{url}\usepackage[hyperfootnotes=false,hidelinks,breaklinks=true]{hyperref}
 \usepackage{bookmark}
 \usepackage[stable]{footmisc}
-\usepackage{enumerate}
+\usepackage[shortlabels]{enumitem}
 \usepackage{tabularx}
 \usepackage[normalem]{ulem}
 \def\hsout{\bgroup \ULdepth=-.55ex \ULset}
@@ -946,7 +946,7 @@ sub slides {
 \usepackage{alltt}
 \usepackage{verbatim}
 \usepackage[stable]{footmisc}
-\usepackage{enumerate}
+\usepackage[shortlabels]{enumitem}
 \usepackage{tabularx}
 \usepackage[normalem]{ulem}
 \def\hsout{\bgroup \ULdepth=-.55ex \ULset}

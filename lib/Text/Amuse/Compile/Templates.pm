@@ -851,6 +851,9 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 
 [% doc.as_latex %]
 
+[% UNLESS safe_options.nofinalpage %]
+% begin final page
+
 \clearpage
 
 [% IF safe_options.twoside %]
@@ -916,6 +919,9 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 [% END %]
 
 \end{center}
+
+% end final page with colophon
+[% END %]
 
 \end{document}
 

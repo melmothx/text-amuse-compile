@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 22;
+use Test::More tests => 21;
 use File::Temp;
 use File::Copy qw/copy/;
 use File::Spec::Functions qw/catfile catdir/;

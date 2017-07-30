@@ -300,7 +300,7 @@ div#page > p {
 }
 
 blockquote > p, li > p {
-   margin-top: 5pt;
+   margin-top: 0.5em;
    text-indent: 0em;
    text-align: justify;
 }
@@ -352,7 +352,7 @@ h6 {
 }
 
 sup, sub {
-    font-size: 8pt;
+    font-size: 80%;
     line-height: 0;
 }
 
@@ -444,24 +444,24 @@ div.right {
 
 .toclevel1 {
 	font-weight: bold;
-	font-size:11pt;
+	font-size:110%;
 }	
 
 .toclevel2 {
 	font-weight: bold;
-	font-size: 10pt;
+	font-size: 100%;
     padding-left: 1em;
 }
 
 .toclevel3 {
 	font-weight: normal;
-	font-size: 9pt;
+	font-size: 90%;
     padding-left: 2em;
 }
 
 .toclevel4 {
 	font-weight: normal;
-	font-size: 8pt;
+	font-size: 80%;
     padding-left: 3em;
 }
 
@@ -478,7 +478,7 @@ dd {
 /* footnotes */
 
 a.footnote, a.footnotebody {
-    font-size: 8pt;
+    font-size: 80%;
     line-height: 0;
     vertical-align: super;
 }
@@ -496,7 +496,7 @@ p.fnline + p.fnline {
 }
 
 p.fnline {
-    font-size: 8pt;
+    font-size: 80%;
 }
 /* end footnotes */
 

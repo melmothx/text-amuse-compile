@@ -14,6 +14,9 @@ use Data::Dumper;
 my $wd = File::Temp->newdir;
 my %fontfiles = map { $_ => File::Spec->catfile($wd, $_ . '.otf') } (qw/regular italic
                                                                         bold bolditalic/);
+my $font_size_no_embed = qr{/\* font-size: 1em; no font embedding \*/};
+my $font_size_embedded = qr{font-size: 10pt; /\* fonts embedded \*/};
+
 foreach my $file (values %fontfiles) {
     diag "Creating file $file";
     write_file($file, 'x');
@@ -85,9 +88,10 @@ foreach my $fs ($file, \@fonts) {
         my $html_body = read_file($html);
         foreach my $tcss ($css, $html_body) {
             like $tcss, qr/font-family: "DejaVuSerif"/, "Found font-family";
-            like $tcss, qr/font-size: 10pt/;
             unlike $tcss, qr/font-size:\s*pt/;
         }
+        like $css, $font_size_embedded, "Font size embedded in CSS";
+        like $html_body, $font_size_no_embed, "In HTML we don't embed the fonts";
         my $manifest = read_file(File::Spec->catfile($tmpdir, "content.opf"));
         foreach my $file (qw/regular.otf bold.otf italic.otf bolditalic.otf/) {
             my $epubfile = File::Spec->catfile($tmpdir, $file);
@@ -135,7 +139,7 @@ foreach my $fs ($file, \@fonts) {
         my $html_body = read_file($html);
         foreach my $tcss ($css, $html_body) {
             like $tcss, qr/font-family: "DejaVuSerif"/, "Found font-family even if not embedded";
-            like $tcss, qr/font-size: 10pt/;
+            like $tcss, $font_size_no_embed, "No font embedding";
             unlike $tcss, qr/font-size:\s*pt/;
         }
         my $manifest = read_file(File::Spec->catfile($tmpdir, "content.opf"));
@@ -148,7 +152,6 @@ foreach my $fs ($file, \@fonts) {
         unlike $manifest, qr{(application/x-font.*){4}}s;
     }
 }
-
 
 # missing sans font in the spec
 eval {
@@ -245,7 +248,7 @@ ok ($@, "bad specification: $@");
         my $html_body = read_file($html);
         foreach my $tcss ($css, $html_body) {
             like $tcss, qr/font-family: "DejaVuSerif"/, "Found font-family even if not embedded";
-            like $tcss, qr/font-size: 10pt/;
+            like $tcss, $font_size_no_embed, "No font embedding";
             unlike $tcss, qr/font-size:\s*pt/;
         }
         my $manifest = read_file(File::Spec->catfile($tmpdir, "content.opf"));
@@ -258,6 +261,7 @@ ok ($@, "bad specification: $@");
         unlike $manifest, qr{(application/x-font.*){4}}s;
     }
 }
+
 
 # here is all valid, but we mix main, sans, mono. So people can use a
 # sans or even mono font as the main font.
@@ -273,6 +277,7 @@ ok ($@, "bad specification: $@");
                                                 monofont => 'DejaVuSans',
                                                },
                                      );
+    diag Dumper(\@fonts);
 
     $c->compile($muse_file);
     {
@@ -296,10 +301,11 @@ ok ($@, "bad specification: $@");
         my $css = read_file(File::Spec->catfile($tmpdir->dirname, "stylesheet.css"));
         my $html_body = read_file($html);
         foreach my $tcss ($css, $html_body) {
-            like $tcss, qr/font-family: "DejaVuSansMono"/, "Found font-family even if not embedded";
-            like $tcss, qr/font-size: 10pt/;
+            like $tcss, qr/font-family: "DejaVuSansMono"/, "Found font-family embedded";
             unlike $tcss, qr/font-size:\s*pt/;
         }
+        like $css, $font_size_embedded, "Font size embedded in CSS";
+        like $html_body, $font_size_no_embed, "In HTML we don't embed the fonts";
         my $manifest = read_file(File::Spec->catfile($tmpdir, "content.opf"));
         foreach my $file (qw/regular.otf bold.otf italic.otf bolditalic.otf/) {
             my $epubfile = File::Spec->catfile($tmpdir, $file);

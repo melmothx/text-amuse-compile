@@ -289,11 +289,6 @@ html,body {
 	border: none;
  	background: transparent;
 	font-family: [% IF fonts %]"[% fonts.main.name %]",[% END %] serif;
-    [% IF webfonts %]
-    font-size: [% webfonts.size %]pt; /* fonts embedded */
-    [% ELSE %]
-    /* font-size: 1em; no font embedding */
-    [% END %]
 }
 
 [% IF epub %]

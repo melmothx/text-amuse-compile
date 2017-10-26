@@ -269,6 +269,12 @@ sub default_font_list {
              desc => 'TeX Gyre Bonum (Bookman)',
              type => 'serif',
             },
+            { name => 'Alegreya',       desc => 'Alegreya',       type => 'serif' },
+            { name => 'Arvo',           desc => 'Arvo',           type => 'serif' },
+            { name => 'Crimson Text',   desc => 'Crimson Text',   type => 'serif' },
+            { name => 'Lora',           desc => 'Lora',           type => 'serif' },
+            { name => 'Merriweather',   desc => 'Merriweather',   type => 'serif' },
+            { name => 'Vollkorn',       desc => 'Vollkorn',       type => 'serif' },
             {
              name => 'Antykwa Poltawskiego',
              desc => 'Antykwa Półtawskiego',
@@ -339,6 +345,14 @@ sub default_font_list {
              desc => 'Noto Sans',
              type => 'sans',
             },
+            { name => 'AlegreyaSans',   desc => 'AlegreyaSans',   type => 'sans' },
+            { name => 'ArchivoNarrow',  desc => 'ArchivoNarrow',  type => 'sans' },
+            { name => 'Fira Sans',      desc => 'Fira Sans',      type => 'sans' },
+            { name => 'Karla',          desc => 'Karla',          type => 'sans' },
+            { name => 'Libre Franklin', desc => 'Libre Franklin', type => 'sans' },
+            { name => 'Poppins',        desc => 'Poppins',        type => 'sans' },
+            { name => 'Rubik',          desc => 'Rubik',          type => 'sans' },
+            { name => 'SourceSansPro',  desc => 'SourceSansPro',  type => 'sans' },
             {
              name => 'CMU Typewriter Text',
              desc => 'Computer Modern Typewriter Text',
@@ -354,6 +368,8 @@ sub default_font_list {
              desc => 'TeX Gyre Cursor (Courier)',
              type => 'mono',
             },
+            { name => 'AnonymousPro', desc => 'AnonymousPro', type => 'mono' },
+            { name => 'SpaceMono',    desc => 'SpaceMono',    type => 'mono' },
            ];
 }
 

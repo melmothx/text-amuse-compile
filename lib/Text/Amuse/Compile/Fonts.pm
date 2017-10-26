@@ -269,6 +269,7 @@ sub default_font_list {
              desc => 'TeX Gyre Bonum (Bookman)',
              type => 'serif',
             },
+            { name => 'Coelacanth',     desc => 'Coelacanth (no bolditalic)', type => 'serif' },
             { name => 'Alegreya',       desc => 'Alegreya',       type => 'serif' },
             { name => 'Arvo',           desc => 'Arvo',           type => 'serif' },
             { name => 'Crimson Text',   desc => 'Crimson Text',   type => 'serif' },

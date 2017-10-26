@@ -139,6 +139,10 @@ As above, but only the mono fonts
 
 As above, but only the sans fonts
 
+=head2 default_font_list
+
+Return an arrayref with the default font definitions
+
 =head1 INTERNALS
 
 =head2 BUILDARGS
@@ -213,7 +217,7 @@ sub BUILDARGS {
             $list = undef if $@;
         }
     }
-    $list ||= $class->_default_font_list;
+    $list ||= $class->default_font_list;
     my @out;
     foreach my $fontref (@$list) {
         my $font = { %$fontref }; # do a copy do avoid mangling the argument.
@@ -233,7 +237,7 @@ sub BUILDARGS {
     return { list => \@out };
 }
 
-sub _default_font_list {
+sub default_font_list {
     return [
             {
              name => 'CMU Serif',

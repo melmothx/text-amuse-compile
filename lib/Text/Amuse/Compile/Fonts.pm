@@ -345,14 +345,14 @@ sub default_font_list {
              desc => 'Noto Sans',
              type => 'sans',
             },
-            { name => 'AlegreyaSans',   desc => 'AlegreyaSans',   type => 'sans' },
-            { name => 'ArchivoNarrow',  desc => 'ArchivoNarrow',  type => 'sans' },
+            { name => 'Alegreya Sans',   desc => 'Alegreya Sans',   type => 'sans' },
+            { name => 'Archivo Narrow',  desc => 'Archivo Narrow',  type => 'sans' },
             { name => 'Fira Sans',      desc => 'Fira Sans',      type => 'sans' },
             { name => 'Karla',          desc => 'Karla',          type => 'sans' },
             { name => 'Libre Franklin', desc => 'Libre Franklin', type => 'sans' },
             { name => 'Poppins',        desc => 'Poppins',        type => 'sans' },
             { name => 'Rubik',          desc => 'Rubik',          type => 'sans' },
-            { name => 'SourceSansPro',  desc => 'SourceSansPro',  type => 'sans' },
+            { name => 'Source Sans Pro',  desc => 'Source Sans Pro',  type => 'sans' },
             {
              name => 'CMU Typewriter Text',
              desc => 'Computer Modern Typewriter Text',
@@ -368,8 +368,8 @@ sub default_font_list {
              desc => 'TeX Gyre Cursor (Courier)',
              type => 'mono',
             },
-            { name => 'AnonymousPro', desc => 'AnonymousPro', type => 'mono' },
-            { name => 'SpaceMono',    desc => 'SpaceMono',    type => 'mono' },
+            { name => 'Anonymous Pro', desc => 'Anonymous Pro', type => 'mono' },
+            { name => 'Space Mono',    desc => 'Space Mono',    type => 'mono' },
            ];
 }
 

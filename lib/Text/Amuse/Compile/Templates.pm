@@ -717,7 +717,15 @@ sub latex {
 % http://tex.stackexchange.com/questions/3033/forcing-linebreaks-in-url
 \PassOptionsToPackage{hyphens}{url}\usepackage[hyperfootnotes=false,hidelinks,breaklinks=true]{hyperref}
 \usepackage{bookmark}
-\usepackage[stable]{footmisc}
+\usepackage{bigfoot}
+\usepackage{perpage}
+\DeclareNewFootnote{default}
+\DeclareNewFootnote{B}[alph]
+\MakeSortedPerPage[1]{footnoteB}
+% continuous numbering across the document. Defaults to resetting at chapter. Unclear
+% \usepackage{chngcntr}
+% \counterwithout{footnote}{chapter}
+
 \usepackage[shortlabels]{enumitem}
 \usepackage{tabularx}
 \usepackage[normalem]{ulem}

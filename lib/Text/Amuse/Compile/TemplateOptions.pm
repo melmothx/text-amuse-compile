@@ -340,6 +340,11 @@ centered, on the second page, raggedright, in smaller size.
 Use the default komascript style where chapters and parts have sans
 font.
 
+=item * secondary_footnotes_alpha
+
+By default, secondary footnotes use arabic numbering between parens.
+You can switch to alpha per-page setting this option to 1 (boolean).
+
 =item * headings
 
 Generate the running headings in the document. Beware that this will

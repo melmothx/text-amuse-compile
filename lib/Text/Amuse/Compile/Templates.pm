@@ -721,11 +721,20 @@ sub latex {
 % http://tex.stackexchange.com/questions/3033/forcing-linebreaks-in-url
 \PassOptionsToPackage{hyphens}{url}\usepackage[hyperfootnotes=false,hidelinks,breaklinks=true]{hyperref}
 \usepackage{bookmark}
+
+% footnote handling
 \usepackage{bigfoot}
 \usepackage{perpage}
 \DeclareNewFootnote{default}
+[% IF safe_options.secondary_footnotes_alpha %]
 \DeclareNewFootnote{B}[alph]
 \MakeSortedPerPage[1]{footnoteB}
+[% ELSE %]
+\DeclareNewFootnote{B}
+\MakeSorted{footnoteB}
+\renewcommand*\thefootnoteB{(\arabic{footnoteB})}
+[% END %]
+
 % continuous numbering across the document. Defaults to resetting at chapter. Unclear
 % \usepackage{chngcntr}
 % \counterwithout{footnote}{chapter}

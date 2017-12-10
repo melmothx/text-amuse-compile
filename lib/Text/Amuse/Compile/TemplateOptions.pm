@@ -408,6 +408,7 @@ has notoc       => (is => 'rw', isa => Bool, default => sub { 0 });
 has nofinalpage => (is => 'rw', isa => Bool, default => sub { 0 });
 has impressum => (is => 'rw', isa => Bool, default => sub { 0 });
 has sansfontsections => (is => 'rw', isa => Bool, default => sub { 0 });
+has secondary_footnotes_alpha => (is => 'rw', isa => Bool, default => sub { 0 });
 
 sub all_headings {
     my @headings = (
@@ -590,6 +591,7 @@ sub config_setters {
                cover coverwidth nocoverpage notoc
                nofinalpage
                impressum sansfontsections
+               secondary_footnotes_alpha
                opening beamertheme beamercolortheme/);
 }
 

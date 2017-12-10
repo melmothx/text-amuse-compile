@@ -2,11 +2,12 @@
 
 use strict;
 use warnings;
-use Test::More tests => 10;
+use Test::More tests => 17;
 use File::Spec::Functions qw/catdir catfile/;
 use File::Temp;
 use Text::Amuse::Compile::Utils qw/write_file read_file/;
 use Text::Amuse::Compile;
+# use Data::Dumper;
 
 my $workingdir = File::Temp->newdir(CLEANUP => !$ENV{NOCLEANUP});
 diag "Using " . $workingdir->dirname;
@@ -84,34 +85,51 @@ Here we have [2] a footnote and a secondary {2}
 
 MUSE
 
-my $source = catfile($workingdir, 'secondary-footnotes');
-write_file($source . '.muse', $muse);
+foreach my $alpha (0,1) {
+    my $source = catfile($workingdir, 'secondary-footnotes-' . $alpha);
+    write_file($source . '.muse', $muse);
 
-my %args = (
-            tex => 1,
-            epub => 1,
-            html => 1,
-            sl_tex => 1,
-            pdf => $ENV{TEST_WITH_LATEX},
-            sl_pdf => $ENV{TEST_WITH_LATEX},
-           );
+    my %args = (
+                tex => 1,
+                epub => 1,
+                html => 1,
+                sl_tex => 1,
+                pdf => $ENV{TEST_WITH_LATEX},
+                sl_pdf => $ENV{TEST_WITH_LATEX},
+              );
 
-{
-    my $c = Text::Amuse::Compile->new(%args);
-    $c->compile($source . '.muse');
-    foreach my $ext (keys %args) {
-        my $real = $ext;
-        $real =~ s/_/./;
-        if ($args{$ext}) {
-            ok (-f $source . '.' . $real, "$ext found in $source.$real")
-        }
-        else {
-          SKIP:
-            {
-                skip "pdf $ext not required", 1 unless $ENV{TEST_WITH_LATEX};
-                ok(-f $source . '.' . $real, "$ext found in $source.$real")
+    {
+        my $c = Text::Amuse::Compile->new(%args,
+                                          extra => { secondary_footnotes_alpha => $alpha },
+                                         );
+        # diag Dumper($c->extra_opts);
+        $c->compile($source . '.muse');
+        foreach my $ext (keys %args) {
+            my $real = $ext;
+            $real =~ s/_/./;
+            my $output = $source . '.' . $real;
+            if ($ext eq 'tex') {
+                my $texbody = read_file($output);
+                if ($alpha) {
+                    like $texbody, qr{\\MakeSortedPerPage\[1\]\{footnoteB\}}, "alpha option picked up";
+                    unlike $texbody, qr{\\MakeSorted\{footnoteB\}};
+                }
+                else {
+                    unlike $texbody, qr{\\MakeSortedPerPage\[1\]\{footnoteB\}};
+                    like $texbody, qr{\\MakeSorted\{footnoteB\}};
+                    like $texbody, qr{\\renewcommand\*\\thefootnoteB\{\(\\arabic\{footnoteB\}\)}, "Found the (1)";
+                }
             }
-        }
+            if ($args{$ext}) {
+                ok (-f $output, "$ext found in $output")
+            } else {
+              SKIP:
+                {
+                    skip "pdf $ext not required", 1 unless $ENV{TEST_WITH_LATEX};
+                    ok(-f $output, "$ext found in $output")
+                }
+            }
         
+        }
     }
 }

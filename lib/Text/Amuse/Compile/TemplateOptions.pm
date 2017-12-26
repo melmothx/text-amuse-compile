@@ -340,6 +340,10 @@ centered, on the second page, raggedright, in smaller size.
 Use the default komascript style where chapters and parts have sans
 font.
 
+=item * nobold
+
+Prevent the use of bold fonts and replace them with italics.
+
 =item * secondary_footnotes_alpha
 
 By default, secondary footnotes use arabic numbering between parens.

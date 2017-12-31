@@ -1,3 +1,9 @@
+libtext-amuse-compile-perl (1.00-2+amw1) unstable; urgency=medium
+
+  * Adjust dependencies for stretch
+
+ -- Marco Pessotto <melmothx@gmail.com>  Sun, 31 Dec 2017 08:41:52 +0100
+
 libtext-amuse-compile-perl (1.00-1+amw1) unstable; urgency=medium
 
   * New release

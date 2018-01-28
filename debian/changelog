@@ -1,3 +1,9 @@
+libtext-amuse-compile-perl (1.01-1+amw1) unstable; urgency=medium
+
+  * New minor release
+
+ -- Marco Pessotto <melmothx@gmail.com>  Sun, 28 Jan 2018 10:54:28 +0100
+
 libtext-amuse-compile-perl (1.00-2+amw1) unstable; urgency=medium
 
   * Adjust dependencies for stretch

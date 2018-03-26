@@ -1,11 +1,15 @@
 #!/usr/bin/env perl
 
+BEGIN {
+    $ENV{AMW_DEBUG} = 1;
+}
+
 use utf8;
 use strict;
 use warnings;
 use Text::Amuse::Compile;
 use File::Spec;
-use Text::Amuse::Compile::Utils qw/append_file read_file/;
+use Text::Amuse::Compile::Utils qw/append_file read_file write_file/;
 use Test::More;
 use File::Temp;
 use Cwd;
@@ -30,8 +34,15 @@ for my $luatex (0..1) {
     my $c = Text::Amuse::Compile->new(
                                       pdf => 1,
                                       luatex => $luatex,
+                                      cleanup => 0,
                                       logger => sub { append_file($logfile, @_) },
+                                      report_failure_sub => sub { diag @_ },
                                      );
+    $c->compile(File::Spec->catfile('t', 'testfile', 'for-multipar-footnotes.muse'));
+    my $body = read_file(File::Spec->catfile('t', 'testfile', 'for-multipar-footnotes.tex'));
+    $body =~ s/endgraf/par/g;
+    write_file(File::Spec->catfile('t', 'testfile', 'for-multipar-footnotes.tex'), $body);
+
     $c->compile(File::Spec->catfile('t', 'testfile', 'for-multipar-footnotes.muse'));
     my $logs = read_file($logfile);
     like $logs, qr{аргументацией};

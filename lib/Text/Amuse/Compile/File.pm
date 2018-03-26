@@ -1004,6 +1004,7 @@ sub _clean_html {
     $string =~ s/&gt;/>/g;
     $string =~ s/&quot;/"/g;
     $string =~ s/&#x27;/'/g;
+    $string =~ s/&nbsp;/ /g;
     $string =~ s/&amp;/&/g;
     return $string;
 }

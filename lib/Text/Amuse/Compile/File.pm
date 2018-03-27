@@ -665,8 +665,8 @@ sub _compile_pdf {
                 if ($line =~ m/^! LaTeX Error: Unknown option.*fragile.*for package.*bigfoot/) {
                     my $help =<<HELP;
 It appears that your TeX installation has an obsolete version of the
-bigfoot package. You can upgrade just this package following this
-procedure:
+bigfoot package. You can upgrade this package following this
+procedure (per user, not global).
 
 cd /tmp/
 mkdir -p `kpsewhich -var-value TEXMFHOME`/tex/latex/bigfoot
@@ -677,7 +677,7 @@ make
 mv *.sty `kpsewhich -var-value TEXMFHOME`/tex/latex/bigfoot
 texhash `kpsewhich -var-value TEXMFHOME`
 
-If you are not the site administrator, please report it.
+Please contact the sys-admin if the commands above mean nothing to you.
 HELP
                     $self->log_info("***** WARNING *****\n" . $help);
                 }

@@ -662,6 +662,24 @@ sub _compile_pdf {
                                     . "Unfortunately this is not supported in the PDF output.\n"
                                     . "Please correct it.\n");
                 }
+                if ($line =~ m/^! LaTeX Error: Unknown option.*fragile.*for package.*bigfoot/) {
+                    my $help =<<HELP;
+It appears that your TeX installation has an obsolete version of the
+bigfoot package. You can upgrade just this package following this
+procedure:
+
+cd /tmp/
+mkdir -p `kpsewhich -var-value TEXMFHOME`/tex/latex/bigfoot
+wget http://mirrors.ctan.org/macros/latex/contrib/bigfoot.zip
+unzip bigfoot.zip
+cd bigfoot
+make
+mv *.sty `kpsewhich -var-value TEXMFHOME`/tex/latex/bigfoot
+texhash `kpsewhich -var-value TEXMFHOME`
+
+If you are not the site administrator, please report it.
+HELP
+                }
                 $shitout++;
             }
             if ($shitout) {

@@ -679,6 +679,7 @@ texhash `kpsewhich -var-value TEXMFHOME`
 
 If you are not the site administrator, please report it.
 HELP
+                    $self->log_info("***** WARNING *****\n" . $help);
                 }
                 $shitout++;
             }

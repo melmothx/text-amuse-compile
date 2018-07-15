@@ -424,6 +424,8 @@ div.float_image_l {
 }
 
 div.float_image_f {
+    margin-top: 3em;
+    margin-bottom: 3em;
     clear: both;
     margin-left: auto;
     margin-right: auto;
@@ -440,7 +442,7 @@ div.biblio, div.play {
 }
 
 div.caption {
-    padding-bottom: 1em;
+    padding: 1em 0 1em 0;
 }
 
 div.center {

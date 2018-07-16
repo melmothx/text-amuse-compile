@@ -417,10 +417,14 @@ div.image, div.float_image_f {
 
 div.float_image_r {
     float: right;
+    text-align: center;
+    margin: 1em;
 }
 
 div.float_image_l {
     float: left;
+    text-align: center;
+    margin: 1em;
 }
 
 div.float_image_f {
@@ -442,7 +446,7 @@ div.biblio, div.play {
 }
 
 div.caption {
-    padding: 1em 0 1em 0;
+    padding: 1em;
 }
 
 div.center {

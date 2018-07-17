@@ -746,10 +746,6 @@ sub latex {
 [% END %]
 \deffootnote[3em]{0em}{4em}{\textsuperscript{\thefootnotemark}~}
 
-% continuous numbering across the document. Defaults to resetting at chapter. Unclear
-% \usepackage{chngcntr}
-% \counterwithout{footnote}{chapter}
-
 \usepackage[shortlabels]{enumitem}
 \usepackage{tabularx}
 \usepackage[normalem]{ulem}
@@ -768,6 +764,18 @@ sub latex {
 \renewcommand*{\tableformat}{}
 \KOMAoption{captions}{belowfigure,nooneline}
 \addtokomafont{caption}{\centering}
+
+[% IF safe_options.continuefootnotes %]
+% continuous numbering across the document. Defaults to resetting at chapter.
+\usepackage{chngcntr}
+\counterwithout{footnote}{chapter}
+[% END %]
+[% IF safe_options.centerchapter %]
+\let\raggedchapter\centering
+[% END %]
+[% IF safe_options.centersection %]
+\let\raggedsection\centering
+[% END %]
 
 % avoid breakage on multiple <br><br> and avoid the next [] to be eaten
 \newcommand*{\forcelinebreak}{\strut\\*{}}

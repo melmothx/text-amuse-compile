@@ -192,7 +192,7 @@ sub html {
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="[% doc.language_code %]" lang="[% doc.language_code %]">
 <head>
   <meta http-equiv="Content-type" content="application/xhtml+xml; charset=UTF-8" />
-  <title>[% doc.header_as_html.title %]</title>
+  <title>[% title %]</title>
   <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
 [% css %]

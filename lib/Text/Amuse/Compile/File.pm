@@ -492,9 +492,12 @@ sub html {
     my $self = shift;
     $self->purge('.html');
     my $outfile = $self->name . '.html';
+    my $doc = $self->document;
+    my $title = $doc->header_as_html->{title} || 'Untitled';
     $self->_process_template($self->templates->html,
                              {
-                              doc => $self->document,
+                              doc => $doc,
+                              title => $self->_remove_tags($title),
                               css => $self->_render_css(html => 1),
                               options => { %{$self->html_options} },
                              },

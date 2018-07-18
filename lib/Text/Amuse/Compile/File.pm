@@ -483,7 +483,12 @@ switches.
 sub _render_css {
     my ($self, %tokens) = @_;
     my $out = '';
-    $self->tt->process($self->templates->css, { fonts => $self->fonts, %tokens }, \$out);
+    $self->tt->process($self->templates->css, {
+                                               fonts => $self->fonts,
+                                               centersection => $self->centersection,
+                                               centerchapter => $self->centerchapter,
+                                               %tokens
+                                              }, \$out);
     return $out;
 }
 

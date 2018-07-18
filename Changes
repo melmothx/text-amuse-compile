@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+1.06 2018-07-18
+
+ - HTML: respect centerchapter and centersection
+
 1.05 2018-07-17
 
  - New options: continuefootnotes, centerchapter, centersection

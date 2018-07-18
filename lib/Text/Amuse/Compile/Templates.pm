@@ -360,6 +360,14 @@ h6 {
     margin: 0;
 }
 
+[% IF centerchapter %]
+h1, h2, h3 { text-align: center; }
+[% END %]
+
+[% IF centersection %]
+h1, h2, h3, h4, h5, h6 { text-align: center; }
+[% END %]
+
 sup, sub {
     font-size: 80%;
     line-height: 0;

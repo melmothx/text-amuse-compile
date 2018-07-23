@@ -189,7 +189,7 @@ sub html {
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="[% doc.language_code %]" lang="[% doc.language_code %]">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="[% doc.language_code %]" lang="[% doc.language_code %]"[% IF doc.is_rtl %] dir="rtl"[% END %]>
 <head>
   <meta http-equiv="Content-type" content="application/xhtml+xml; charset=UTF-8" />
   <title>[% title %]</title>
@@ -630,24 +630,10 @@ sub latex {
                paper=[% safe_options.papersize %]]%
                {[% safe_options.class %]}
 \usepackage{fontspec}
-\usepackage{polyglossia}
-\setmainfont{[% safe_options.mainfont %]}
-% these are not used but prevents XeTeX to barf
-\setsansfont[Scale=MatchLowercase]{[% safe_options.sansfont %]}
-\setmonofont[Scale=MatchLowercase]{[% safe_options.monofont %]}
-\setmainlanguage{[% safe_options.lang %]}
+\setmainfont[Script=[% doc.font_script %]]{[% safe_options.mainfont %]}
+\setsansfont[Script=[% doc.font_script %],Scale=MatchLowercase]{[% safe_options.sansfont %]}
+\setmonofont[Script=[% doc.font_script %],Scale=MatchLowercase]{[% safe_options.monofont %]}
 [% safe_options.mainlanguage_script %]
-
-[% IF safe_options.other_languages %]
-\setotherlanguages{[% safe_options.other_languages %]}
-[% END %]
-[% IF safe_options.other_languages_additional %]
-[% safe_options.other_languages_additional %]
-[% END %]
-
-[% IF safe_options.mainlanguage_toc_name %]
-\renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}
-[% END %]
 
 [% IF safe_options.nocoverpage %]
 \let\chapter\section
@@ -741,6 +727,9 @@ sub latex {
 \PassOptionsToPackage{hyphens}{url}\usepackage[hyperfootnotes=false,hidelinks,breaklinks=true]{hyperref}
 \usepackage{bookmark}
 
+[% IF disable_bigfoot %]
+\newcommand{\footnoteB}[1]{\{\{#1\}\}}
+[% ELSE %]
 % footnote handling
 \usepackage[fragile]{bigfoot}
 \usepackage{perpage}
@@ -752,6 +741,7 @@ sub latex {
 \DeclareNewFootnote{B}
 \MakeSorted{footnoteB}
 \renewcommand*\thefootnoteB{(\arabic{footnoteB})}
+[% END %]
 [% END %]
 \deffootnote[3em]{0em}{4em}{\textsuperscript{\thefootnotemark}~}
 
@@ -785,6 +775,22 @@ sub latex {
 [% IF safe_options.centersection %]
 \let\raggedsection\centering
 [% END %]
+
+\usepackage{polyglossia}
+\setmainlanguage{[% safe_options.lang %]}
+[% safe_options.mainlanguage_script %]
+
+[% IF safe_options.other_languages %]
+\setotherlanguages{[% safe_options.other_languages %]}
+[% END %]
+[% IF safe_options.other_languages_additional %]
+[% safe_options.other_languages_additional %]
+[% END %]
+
+[% IF safe_options.mainlanguage_toc_name %]
+\renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}
+[% END %]
+
 
 % avoid breakage on multiple <br><br> and avoid the next [] to be eaten
 \newcommand*{\forcelinebreak}{\strut\\*{}}

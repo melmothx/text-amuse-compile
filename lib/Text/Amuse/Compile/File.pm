@@ -1243,7 +1243,10 @@ sub _prepare_tex_tokens {
 
     # I don't like doing this here, but here we go...
     my %scripts = (
-                   russian    => 'Cyrillic',
+                   russian  => 'Cyrillic',
+                   farsi    => 'Arabic',
+                   arabic   => 'Arabic',
+                   hebrew   => 'Hebrew',
                   );
 
     if (my $script = $scripts{$lang}) {
@@ -1279,11 +1282,11 @@ sub _prepare_tex_tokens {
             $parsed{other_languages_additional} = join("\n", sort keys %additional_strings);
         }
     }
-
     return {
             options => \%tokens,
             safe_options => \%parsed,
             doc => $doc,
+            disable_bigfoot => $doc->is_rtl || $doc->is_bidi,
             tex_metadata => $self->file_header->tex_metadata,
            };
 }

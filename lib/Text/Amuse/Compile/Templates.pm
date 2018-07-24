@@ -552,8 +552,9 @@ sub title_page_html {
         return $ref;
     }
     my $html = <<'EOF';
+<div dir="[% doc.html_direction %]">
 [% IF doc.wants_preamble %]
-<div id="first-page-title-page" dir="[% doc.html_direction %]">
+<div id="first-page-title-page">
   [% IF doc.header_defined.author %]
   <h2 class="amw-text-author">[% doc.header_as_html.author %]</h2>
   [% END %]
@@ -570,7 +571,7 @@ sub title_page_html {
  <strong>* * * * *</strong>
 </div>
 [% IF doc.wants_postamble %]
-<div id="impressum-title-page" dir="[% doc.html_direction %]">
+<div id="impressum-title-page">
   [% IF doc.header_defined.source %]
   <div class="amw-text-source" id="source">
   [% doc.header_as_html.source %]
@@ -583,6 +584,7 @@ sub title_page_html {
   [% END %]
 </div>
 [% END %]
+</div>
 EOF
     return \$html;
 }

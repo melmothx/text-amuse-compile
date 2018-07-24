@@ -15,17 +15,18 @@ binmode $builder->todo_output,    ":utf8";
 binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
+my $c = Text::Amuse::Compile->new(
+                                  pdf => $ENV{TEST_WITH_LATEX},
+                                  tex => 1,
+                                  epub => 1,
+                                  extra => {
+                                            mainfont => 'FreeSerif',
+                                            monofont => 'DejaVu Sans Mono',
+                                            sansfont => 'DejaVu Sans',
+                                           },
+                                 );
+
 {
-    my $c = Text::Amuse::Compile->new(
-                                      pdf => $ENV{TEST_WITH_LATEX},
-                                      tex => 1,
-                                      epub => 1,
-                                      extra => {
-                                                mainfont => 'FreeSerif',
-                                                monofont => 'DejaVu Sans Mono',
-                                                sansfont => 'DejaVu Sans',
-                                               },
-                                     );
     $c->compile({
                  path => catdir(qw/t merged-dir-2/),
                  files => [qw/farsi english russian farsi english russian farsi/],
@@ -40,6 +41,28 @@ binmode STDERR, ':encoding(utf-8)';
     ok -f $tex, "$tex exists";
     my $html = explode_epub($epub);
     like $html, qr{dir="rtl".*dir="ltr".*dir="rtl".*dir="ltr".*dir="rtl"}si, "html switches directions";
+    # diag $html;
+  SKIP: {
+        skip "No pdf required", 1 unless $ENV{TEST_WITH_LATEX};
+        ok (-f $pdf, "$pdf exists");
+    }
+}
+
+{
+    $c->compile({
+                 path => catdir(qw/t merged-dir-2/),
+                 files => [qw/english farsi russian farsi english russian farsi/],
+                 name => 'my-test-2',
+                 title => 'Test multilingual (English first)',
+                });
+    my $base = catfile(qw/t merged-dir-2 my-test-2/);
+    my $epub = $base . '.epub';
+    my $pdf = $base. '.pdf';
+    my $tex = $base .'.tex';
+    ok -f $epub, "$epub exists";
+    ok -f $tex, "$tex exists";
+    my $html = explode_epub($epub);
+    like $html, qr{dir="ltr".*dir="rtl".*dir="ltr".*dir="rtl"}si, "html switches directions";
     # diag $html;
   SKIP: {
         skip "No pdf required", 1 unless $ENV{TEST_WITH_LATEX};

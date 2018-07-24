@@ -791,6 +791,10 @@ sub latex {
 \renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}
 [% END %]
 
+[% IF doc.is_bidi %]
+\usepackage{bidi}
+[% END %]
+
 
 % avoid breakage on multiple <br><br> and avoid the next [] to be eaten
 \newcommand*{\forcelinebreak}{\strut\\*{}}

@@ -201,10 +201,14 @@ sub is_rtl {
 
 Return a list of HTML fragments.
 
+=head2 as_splat_html_with_attrs
+
+Return a list of tokens for the minimal html template
+
 =cut
 
-sub as_splat_html {
-    my $self = shift;
+sub _as_splat_html {
+    my ($self, %opts) = @_;
     my @out;
     my $counter = 0;
     foreach my $doc ($self->docs) {
@@ -224,10 +228,28 @@ sub as_splat_html {
                             |id=")
                             text-amuse-label)/$1-$prefix/gx;
         }
-        my $dir = $doc->html_direction;
-        push @out, map { qq{<div dir="$dir">\n} . $_ . qq{</div>\n} } ($title_page, @pieces);
+        if ($opts{attrs}) {
+            push @out, map {
+                +{
+                  text => $_,
+                  language_code => $doc->language_code,
+                  html_direction => $doc->html_direction,
+                 }
+            } ($title_page, @pieces);
+        }
+        else {
+            push @out, $title_page, @pieces;
+        }
     }
     return @out;
+}
+
+sub as_splat_html_with_attrs {
+    return shift->_as_splat_html(attrs => 1);
+}
+
+sub as_splat_html {
+    return shift->_as_splat_html;
 }
 
 =head2 raw_html_toc

@@ -552,7 +552,6 @@ sub title_page_html {
         return $ref;
     }
     my $html = <<'EOF';
-<div dir="[% doc.html_direction %]">
 [% IF doc.wants_preamble %]
 <div id="first-page-title-page">
   [% IF doc.header_defined.author %]
@@ -584,12 +583,12 @@ sub title_page_html {
   [% END %]
 </div>
 [% END %]
-</div>
 EOF
     return \$html;
 }
 
 sub minimal_html {
+    # has no options.
     my $self = shift;
     if (my $ref = $self->ttref('minimal_html')) {
         return $ref;
@@ -597,7 +596,7 @@ sub minimal_html {
     my $html = <<'EOF';
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="[% language_code %]" lang="[% language_code %]" dir="[% html_direction %]">
   <head>
     <title>[% title %]</title>
     <link href="stylesheet.css" type="text/css" rel="stylesheet" />

@@ -1286,7 +1286,7 @@ sub _prepare_tex_tokens {
             options => \%tokens,
             safe_options => \%parsed,
             doc => $doc,
-            disable_bigfoot => $doc->is_rtl || $doc->is_bidi,
+            disable_bigfoot => 0, # $doc->is_rtl || $doc->is_bidi,
             tex_metadata => $self->file_header->tex_metadata,
            };
 }

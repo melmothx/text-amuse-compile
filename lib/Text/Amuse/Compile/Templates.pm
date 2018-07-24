@@ -727,23 +727,6 @@ sub latex {
 \PassOptionsToPackage{hyphens}{url}\usepackage[hyperfootnotes=false,hidelinks,breaklinks=true]{hyperref}
 \usepackage{bookmark}
 
-[% IF disable_bigfoot %]
-\newcommand{\footnoteB}[1]{\{\{#1\}\}}
-[% ELSE %]
-% footnote handling
-\usepackage[fragile]{bigfoot}
-\usepackage{perpage}
-\DeclareNewFootnote{default}
-[% IF safe_options.secondary_footnotes_alpha %]
-\DeclareNewFootnote{B}[alph]
-\MakeSortedPerPage[1]{footnoteB}
-[% ELSE %]
-\DeclareNewFootnote{B}
-\MakeSorted{footnoteB}
-\renewcommand*\thefootnoteB{(\arabic{footnoteB})}
-[% END %]
-[% END %]
-\deffootnote[3em]{0em}{4em}{\textsuperscript{\thefootnotemark}~}
 
 \usepackage[shortlabels]{enumitem}
 \usepackage{tabularx}
@@ -794,6 +777,24 @@ sub latex {
 [% IF doc.is_bidi %]
 \usepackage{bidi}
 [% END %]
+
+[% IF disable_bigfoot %]
+\newcommand{\footnoteB}[1]{\{\{#1\}\}}
+[% ELSE %]
+% footnote handling
+\usepackage[fragile]{bigfoot}
+\usepackage{perpage}
+\DeclareNewFootnote{default}
+[% IF safe_options.secondary_footnotes_alpha %]
+\DeclareNewFootnote{B}[alph]
+\MakeSortedPerPage[1]{footnoteB}
+[% ELSE %]
+\DeclareNewFootnote{B}
+\MakeSorted{footnoteB}
+\renewcommand*\thefootnoteB{(\arabic{footnoteB})}
+[% END %]
+[% END %]
+\deffootnote[3em]{0em}{4em}{\textsuperscript{\thefootnotemark}~}
 
 
 % avoid breakage on multiple <br><br> and avoid the next [] to be eaten

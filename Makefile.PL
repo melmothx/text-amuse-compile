@@ -28,6 +28,7 @@ WriteMakefile(
         'Template::Tiny' => 1.12, # version in wheezy
         'IO::Pipe' => 0,
         'Archive::Zip' => 0, # alread a requirement of EBook::EPUB
+        'Path::Tiny' => 0,
         'JSON::MaybeXS' => 0,
     },
     EXE_FILES => [

@@ -21,6 +21,7 @@ t/testfile/*
 !t/testfile/*.muse
 !t/testfile/*.png
 t/merged-dir/*status
+t/merged-dir-2/my-test*
 t/manual/*
 !t/manual/*.muse
 !t/manual/logo.png

@@ -31,5 +31,6 @@
 t/testfile/.*\.(aux|html|log|ok|pdf|tex|snm|vrb|toc|epub|lock|test|zip|status)$
 t/manual/.*\.(aux|html|log|ok|pdf|tex|toc|epub|lock|test|zip|status)$
 t/merged-dir/.*ok$
+t/merged-dir-2/my-test.*
 fulltest.sh
 

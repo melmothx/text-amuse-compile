@@ -189,7 +189,7 @@ sub html {
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="[% doc.language_code %]" lang="[% doc.language_code %]"[% IF doc.is_rtl %] dir="rtl"[% END %]>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="[% doc.language_code %]" lang="[% doc.language_code %]" dir="[% doc.html_direction %]">
 <head>
   <meta http-equiv="Content-type" content="application/xhtml+xml; charset=UTF-8" />
   <title>[% title %]</title>
@@ -535,11 +535,11 @@ sub bare_html {
     }
     my $html = <<'EOF';
 [% IF doc.toc_as_html %]
-<div class="table-of-contents"[% IF options.notoc %] style="display:none"[% END %]>
+<div class="table-of-contents"[% IF options.notoc %] style="display:none"[% END %] dir="[% doc.html_direction %]">
 [% doc.toc_as_html %]
 </div>
 [% END %]
-<div id="thework">
+<div id="thework" dir="[% doc.html_direction %]">
 [% doc.as_html %]
 </div>
 EOF
@@ -553,7 +553,7 @@ sub title_page_html {
     }
     my $html = <<'EOF';
 [% IF doc.wants_preamble %]
-<div id="first-page-title-page">
+<div id="first-page-title-page" dir="[% doc.html_direction %]">
   [% IF doc.header_defined.author %]
   <h2 class="amw-text-author">[% doc.header_as_html.author %]</h2>
   [% END %]
@@ -570,7 +570,7 @@ sub title_page_html {
  <strong>* * * * *</strong>
 </div>
 [% IF doc.wants_postamble %]
-<div id="impressum-title-page">
+<div id="impressum-title-page" dir="[% doc.html_direction %]">
   [% IF doc.header_defined.source %]
   <div class="amw-text-source" id="source">
   [% doc.header_as_html.source %]

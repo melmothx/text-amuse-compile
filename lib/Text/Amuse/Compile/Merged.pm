@@ -100,6 +100,10 @@ sub new {
                 other_language_codes => \%language_codes,
                 tt      => Template::Tiny->new,
                 templates => Text::Amuse::Compile::Templates->new,
+                font_script => $docs[0]->font_script,
+                html_direction => $docs[0]->html_direction,
+                is_rtl => $docs[0]->is_rtl,
+                is_bidi => scalar(grep { $_->is_rtl || $_->is_bidi } @docs),
                };
     bless $self, $class;
 }
@@ -125,6 +129,22 @@ language codes, undef otherwise.
 =head2 hyphenation
 
 Return the hyphenation of the first text.
+
+=head2 font_script
+
+The font script of the first text.
+
+=head2 html_direction
+
+The direction (rtl or ltr) of the first text
+
+=head2 is_rtl
+
+Return true if the first text is RTL.
+
+=head2 is_bidi
+
+Return true if any of the text is RTL or bidirectional.
 
 =cut
 
@@ -162,6 +182,20 @@ sub other_languages {
     }
 }
 
+sub font_script {
+    return shift->{font_script};
+}
+
+sub is_bidi {
+    return shift->{is_bidi};
+}
+
+sub html_direction {
+    return shift->{html_direction};
+}
+sub is_rtl {
+    return shift->{is_rtl};
+}
 
 =head2 as_splat_html
 
@@ -190,7 +224,8 @@ sub as_splat_html {
                             |id=")
                             text-amuse-label)/$1-$prefix/gx;
         }
-        push @out, $title_page, @pieces;
+        my $dir = $doc->html_direction;
+        push @out, map { qq{<div dir="$dir">\n} . $_ . qq{</div>\n} } ($title_page, @pieces);
     }
     return @out;
 }

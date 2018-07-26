@@ -337,27 +337,33 @@ span.hiddenindex, span.commentmarker, .comment, span.tocprefix, #hitme {
 
 h1 {
     font-size: 200%;
-    margin: .67em 0
+    margin: .67em 0;
+    clear: both;
 }
 h2 {
     font-size: 180%;
-    margin: .75em 0
+    margin: .75em 0;
+    clear: both;
 }
 h3 {
     font-size: 150%;
-    margin: .83em 0
+    margin: .83em 0;
+    clear: both;
 }
 h4 {
     font-size: 130%;
-    margin: 1.12em 0
+    margin: 1.12em 0;
+    clear: both;
 }
 h5 {
     font-size: 115%;
-    margin: 1.5em 0
+    margin: 1.5em 0;
+    clear: both;
 }
 h6 {
     font-size: 100%;
     margin: 0;
+    clear: both;
 }
 
 [% IF centerchapter %]

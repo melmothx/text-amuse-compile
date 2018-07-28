@@ -68,6 +68,7 @@ t/merged-dir/third.muse
 t/merged-rtl.t
 t/merged.t
 t/methods.t
+t/missing-bidi.t
 t/missing-fonts.t
 t/nobold-option.t
 t/nofinalpage.t

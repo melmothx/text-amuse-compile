@@ -1036,17 +1036,11 @@ sub slides {
     my $slides =<<'LATEX';
 \documentclass[ignorenonframetext]{beamer}
 \usepackage{fontspec}
-\usepackage{polyglossia}
-\setmainfont{[% safe_options.mainfont %]}
-\setsansfont{[% safe_options.sansfont %]}
-\setmonofont[Scale=MatchLowercase]{[% safe_options.monofont %]}
+\setmainfont[Script=[% doc.font_script %]]{[% safe_options.mainfont %]}
+\setsansfont[Script=[% doc.font_script %],Scale=MatchLowercase]{[% safe_options.sansfont %]}
+\setmonofont[Script=[% doc.font_script %],Scale=MatchLowercase]{[% safe_options.monofont %]}
 \usetheme{[% safe_options.beamertheme %]}
 \usecolortheme{[% safe_options.beamercolortheme %]}
-\setmainlanguage{[% safe_options.lang %]}
-[% safe_options.mainlanguage_script %]
-[% IF safe_options.mainlanguage_toc_name %]
-\renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}
-[% END %]
 \usepackage{graphicx}
 \usepackage{alltt}
 \usepackage{verbatim}
@@ -1059,6 +1053,23 @@ sub slides {
 % Unclear if \protect  \hsout is needed. Doesn't looks so
 \DeclareRobustCommand{\sout}[1]{\texorpdfstring{\hsout{#1}}{#1}}
 \usepackage{wrapfig}
+
+\usepackage{polyglossia}
+\setmainlanguage{[% safe_options.lang %]}
+[% safe_options.mainlanguage_script %]
+[% IF safe_options.mainlanguage_toc_name %]
+\renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}
+[% END %]
+
+[% IF doc.is_bidi %]
+\usepackage{bidi}
+[% END %]
+[% IF doc.is_rtl %]
+\setbeamertemplate{frametitle}[default][right]
+[% END %]
+
+
+
 % remove the numbering
 \setcounter{secnumdepth}{-2}
 

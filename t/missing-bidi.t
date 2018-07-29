@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Text::Amuse::Compile;
 use Path::Tiny;
-use Test::More;
+use Test::More tests => 3;
 
 my $c = Text::Amuse::Compile->new(extra => {
                                             notoc => 1,

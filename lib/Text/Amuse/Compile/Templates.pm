@@ -975,28 +975,29 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 
                [% IF doc.header_defined.seriesname %]
                [% IF doc.header_defined.seriesnumber %]
-                 [% doc.header_as_latex.seriesname %] [% doc.header_as_latex.seriesnumber %]
-               \vfill
+                  [% doc.header_as_latex.seriesname %] [% doc.header_as_latex.seriesnumber %]
+                  \vfill
                [% END %]
                [% END %]
 
                [% IF doc.header_defined.notes %]
-               \noindent [% doc.header_as_latex.notes %]
+                  [% doc.header_as_latex.notes %]
+                  \bigskip
                [% END %]
 
                [% IF doc.header_defined.rights %]
-               \noindent [% doc.header_as_latex.rights %]
-               \bigskip
+                 [% doc.header_as_latex.rights %]
+                 \bigskip
                [% END %]
 
                [% IF doc.header_defined.isbn %]
-               \noindent ISBN [% doc.header_as_latex.isbn %]
-               \bigskip
+                 ISBN [% doc.header_as_latex.isbn %]
+                 \bigskip
                [% END %]
 
                [% IF doc.header_defined.publisher %]
-               \noindent [% doc.header_as_latex.publisher %]
-               \bigskip
+                 [% doc.header_as_latex.publisher %]
+                 \bigskip
                [% END %]
 
           \strut
@@ -1075,7 +1076,31 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 [% IF doc.wants_postamble %]
 [% doc.header_as_latex.source     %]
    [% UNLESS safe_options.impressum  %]
-[% doc.header_as_latex.notes      %]
+
+       [% IF doc.header_defined.seriesname %]
+       [% IF doc.header_defined.seriesnumber %]
+         \noindent [% doc.header_as_latex.seriesname %] [% doc.header_as_latex.seriesnumber %]
+       [% END %]
+       [% END %]
+
+       [% IF doc.header_defined.notes %]
+         [% doc.header_as_latex.notes %]
+       [% END %]
+
+       [% IF doc.header_defined.rights %]
+         [% doc.header_as_latex.rights %]
+         \bigskip
+       [% END %]
+
+       [% IF doc.header_defined.isbn %]
+         ISBN [% doc.header_as_latex.isbn %]
+         \bigskip
+       [% END %]
+
+       [% IF doc.header_defined.publisher %]
+         [% doc.header_as_latex.publisher %]
+         \bigskip
+       [% END %]
    [% END %]
 [% ELSE %]
 \strut

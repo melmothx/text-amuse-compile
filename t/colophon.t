@@ -6,7 +6,7 @@ use warnings;
 use Text::Amuse::Compile;
 use Text::Amuse::Compile::Devel qw/explode_epub/;
 use Path::Tiny;
-use Test::More;
+use Test::More tests => 32;
 
 my $muse = <<"MUSE";
 #title My title
@@ -29,34 +29,40 @@ foreach my $k (keys %values) {
 }
 
 
-my $wd = Path::Tiny->tempdir(CLEANUP => !$ENV{NOCLEANUP});
-my $file = $wd->child("text.muse");
-$file->spew_utf8($muse);
-
-{
-    my $c = Text::Amuse::Compile->new(html => 1, epub => 1, tex => 1, extra => { impressum => 1 });
+for my $trigger_impressum (0..1) {
+    my $wd = Path::Tiny->tempdir(CLEANUP => !$ENV{NOCLEANUP});
+    my $file = $wd->child("text.muse");
+    $file->spew_utf8($muse);
+    my $c = Text::Amuse::Compile->new(html => 1, epub => 1, tex => 1,
+                                      pdf => $ENV{TEST_WITH_LATEX},
+                                      extra => { impressum => $trigger_impressum });
     $c->compile("$file");
-    my %tex = %values;
 
     my $html = $wd->child("text.html")->slurp_utf8;
-    foreach my $str (values %values) {
+    foreach my $val (values %values) {
+        my $str = $val;
         $str =~ s/<br>/<br \/>/g;
         like $html, qr{\Q$str\E};
     }
 
     my $tex = $wd->child("text.tex")->slurp_utf8;
-    foreach my $str (values %tex) {
-        diag $str;
+    foreach my $val (values %values) {
+        my $str = $val;
         $str =~ s/ *<br>/\\forcelinebreak /g;
         like $tex, qr{\Q$str\E};
     }
     my $epub = explode_epub($wd->child("text.epub")->stringify);
-    foreach my $str (values %values) {
+    foreach my $val (values %values) {
+        my $str = $val;
         $str =~ s/<br>/<br \/>/g;
         like $epub, qr{\Q$str\E};
     }
+    my $pdf = $wd->child("text.pdf");
+  SKIP: {
+        skip "pdf $pdf not required", 1 unless $ENV{TEST_WITH_LATEX};
+        ok $pdf->exists;
+    }
+    diag $wd;
 }
 
-diag $wd;
 
-done_testing;

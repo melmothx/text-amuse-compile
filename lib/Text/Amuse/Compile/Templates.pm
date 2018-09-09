@@ -997,8 +997,8 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 \strut
 \end{small}
 \end{center}
-\cleardoublepage
 [% END %]
+\cleardoublepage
 [% END %]
 
 [% IF safe_options.wants_toc %]

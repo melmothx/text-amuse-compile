@@ -224,16 +224,45 @@ sub html {
   <hr />
   [% IF doc.wants_postamble %]
   <div id="impressum">
+
+    [% IF doc.header_defined.seriesname %]
+    [% IF doc.header_defined.seriesnumber %]
+    <div class="amw-impressum amw-text-series" id="amw-impressum-series">
+    [% doc.header_as_html.seriesname %] [% doc.header_as_html.seriesnumber %]
+    </div>
+    [% END %]
+    [% END %]
+
     [% IF doc.header_defined.source %]
-    <div class="amw-text-source" id="source">
+    <div class="amw-impressum amw-text-source" id="source">
     [% doc.header_as_html.source %]
     </div>
     [% END %]
     [% IF doc.header_defined.notes %]
-    <div class="amw-text-notes" id="notes">
+    <div class="amw-impressum amw-text-notes" id="notes">
     [% doc.header_as_html.notes %]
     </div>
     [% END %]
+
+    [% IF doc.header_defined.rights %]
+    <div class="amw-impressum amw-text-rights" id="amw-impressum-rights">
+    [% doc.header_as_html.rights %]
+    </div>
+    [% END %]
+
+    [% IF doc.header_defined.isbn %]
+    <div class="amw-impressum amw-text-isbn" id="amw-impressum-isbn">
+    ISBN [% doc.header_as_html.isbn %]
+    </div>
+    [% END %]
+
+    [% IF doc.header_defined.publisher %]
+    <div class="amw-impressum amw-text-publisher" id="amw-impressum-publisher">
+    [% doc.header_as_html.publisher %]
+    </div>
+    [% END %]
+
+
   </div>
   [% END %]
 </div>
@@ -529,6 +558,14 @@ p.fnline, p.secondary-fnline {
 }
 
 /* end footnotes */
+
+div.amw-impressum {
+    margin-top: 1em;
+}
+
+div.amw-impressum-container {
+    margin-top: 10em;
+}
 
 EOF
     return \$css;
@@ -924,17 +961,44 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 [% ELSE %]
   \end{titlepage}
 [% IF safe_options.impressum %]
-[% IF doc.header_defined.notes %]
 % impressum
 \thispagestyle{empty}
+\begin{center}
+\begin{small}
 \strut
 \vfill
-\begin{footnotesize}
+
+[% IF doc.header_defined.seriesname %]
+[% IF doc.header_defined.seriesnumber %]
+  [% doc.header_as_latex.seriesname %] [% doc.header_as_latex.seriesnumber %]
+\vfill
+[% END %]
+[% END %]
+
+[% IF doc.header_defined.notes %]
 \noindent [% doc.header_as_latex.notes %]
-\end{footnotesize}
 [% END %]
+
+[% IF doc.header_defined.rights %]
+\noindent [% doc.header_as_latex.rights %]
+\bigskip
 [% END %]
+
+[% IF doc.header_defined.isbn %]
+\noindent ISBN [% doc.header_as_latex.isbn %]
+\bigskip
+[% END %]
+
+[% IF doc.header_defined.publisher %]
+\noindent [% doc.header_as_latex.publisher %]
+\bigskip
+[% END %]
+
+\strut
+\end{small}
+\end{center}
 \cleardoublepage
+[% END %]
 [% END %]
 
 [% IF safe_options.wants_toc %]

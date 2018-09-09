@@ -922,6 +922,7 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 [% ELSE %]
   \begin{titlepage}
 [% END %]
+
   \strut\vskip 2em
   \begin{center}
 [% IF doc.wants_preamble %]
@@ -938,6 +939,7 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 [% ELSE %]
 \strut
 [% END %]
+
 [% UNLESS safe_options.nocoverpage %]
    [% IF safe_options.cover %]
       \vskip 3em
@@ -945,6 +947,7 @@ pdfkeywords={[% tex_metadata.keywords %]}%
    [% END %]
    \vfill
 [% END %]
+
 [% IF doc.wants_preamble %]
   [% IF doc.header_defined.date %]
   {\usekomafont{date}{[% doc.header_as_latex.date %]\par}}%
@@ -952,53 +955,55 @@ pdfkeywords={[% tex_metadata.keywords %]}%
     \strut\par
   [% END %]
 [% ELSE %]
-\strut
+  \strut
 [% END %]
+
   \end{center}
+
 [% IF safe_options.nocoverpage %]
   \vskip 3em
   \par
 [% ELSE %]
-  \end{titlepage}
-[% IF safe_options.impressum %]
-% impressum
-\thispagestyle{empty}
-\begin{center}
-\begin{small}
-\strut
-\vfill
+     \end{titlepage}
+     [% IF safe_options.impressum %]
+          % impressum
+          \thispagestyle{empty}
+          \begin{center}
+          \begin{small}
+          \strut
+          \vfill
 
-[% IF doc.header_defined.seriesname %]
-[% IF doc.header_defined.seriesnumber %]
-  [% doc.header_as_latex.seriesname %] [% doc.header_as_latex.seriesnumber %]
-\vfill
-[% END %]
-[% END %]
+               [% IF doc.header_defined.seriesname %]
+               [% IF doc.header_defined.seriesnumber %]
+                 [% doc.header_as_latex.seriesname %] [% doc.header_as_latex.seriesnumber %]
+               \vfill
+               [% END %]
+               [% END %]
 
-[% IF doc.header_defined.notes %]
-\noindent [% doc.header_as_latex.notes %]
-[% END %]
+               [% IF doc.header_defined.notes %]
+               \noindent [% doc.header_as_latex.notes %]
+               [% END %]
 
-[% IF doc.header_defined.rights %]
-\noindent [% doc.header_as_latex.rights %]
-\bigskip
-[% END %]
+               [% IF doc.header_defined.rights %]
+               \noindent [% doc.header_as_latex.rights %]
+               \bigskip
+               [% END %]
 
-[% IF doc.header_defined.isbn %]
-\noindent ISBN [% doc.header_as_latex.isbn %]
-\bigskip
-[% END %]
+               [% IF doc.header_defined.isbn %]
+               \noindent ISBN [% doc.header_as_latex.isbn %]
+               \bigskip
+               [% END %]
 
-[% IF doc.header_defined.publisher %]
-\noindent [% doc.header_as_latex.publisher %]
-\bigskip
-[% END %]
+               [% IF doc.header_defined.publisher %]
+               \noindent [% doc.header_as_latex.publisher %]
+               \bigskip
+               [% END %]
 
-\strut
-\end{small}
-\end{center}
-[% END %]
-\cleardoublepage
+          \strut
+          \end{small}
+          \end{center}
+     [% END %]
+     \cleardoublepage
 [% END %]
 
 [% IF safe_options.wants_toc %]

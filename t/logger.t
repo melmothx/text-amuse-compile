@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use utf8;
-use Test::More tests => 8;
+use Test::More tests => 12;
 use Data::Dumper;
 use File::Spec;
 use Text::Amuse::Compile::File;

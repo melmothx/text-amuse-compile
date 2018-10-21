@@ -667,6 +667,7 @@ sub latex {
     my $latex = <<'EOF';
 \documentclass[DIV=[% safe_options.division %],%
                BCOR=[% safe_options.bcor %],%
+               headings=small,%
                headinclude=[% IF safe_options.headings %]true[% ELSE %]false[% END %],%
                footinclude=false,[% IF safe_options.opening %]open=[% safe_options.opening %],[% END %]%
                fontsize=[% safe_options.fontsize %]pt,%
@@ -776,6 +777,7 @@ sub latex {
 \pagestyle{plain}
 [% END %]
 
+\renewcommand*{\partpagestyle}{empty}
 
 
 \usepackage{microtype} % you need an *updated* texlive 2012, but harmless

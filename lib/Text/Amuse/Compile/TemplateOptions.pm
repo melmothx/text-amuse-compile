@@ -55,6 +55,14 @@ The DIV of the C<typearea> package. Defaults to 12. Go and read the
 doc. Sensible values are from 9 to 15. 15 has narrow margins, while in
 9 they are pretty generous.
 
+=item * areaset_width 3in
+
+=item * areaset_height 50mm
+
+Usually you want to use the DIV factor, but you can also set the type
+area manually specifying the dimensions. The dimensions can be in mm,
+cm, in and pt, separated by a colon.
+
 =item * oneside (boolean)
 
 This is the default. Actually, this option doesn't have any use.
@@ -121,12 +129,23 @@ sub tex_papersize {
     return _get_papersize($self->papersize);
 }
 
+sub is_tex_measure {
+    die "$_[0] is not a TeX measure"
+      unless $_[0] =~ TEX_MEASURE;
+}
+
+sub is_tex_measure_or_false {
+    is_tex_measure($_[0]) if $_[0];
+}
+
+has areaset_width => (is => 'rw',
+                      isa => \&is_tex_measure_or_false);
+
+has areaset_height => (is => 'rw',
+                       isa => \&is_tex_measure_or_false);
 
 has bcor => (is => 'rw',
-             isa => sub {
-                 die "Bcor $_[0] must be a measure like 11mm"
-                   unless $_[0] =~ TEX_MEASURE;                 
-             },
+             isa => \&is_tex_measure,
              default => sub { '0mm' });
 
 has division   => (is => 'rw',
@@ -619,6 +638,8 @@ sub paging {
 
 sub config_setters {
     return (qw/papersize bcor division oneside twoside
+               areaset_width
+               areaset_height
                mainfont sansfont monofont fontsize
                sitename siteslogan site logo
                headings

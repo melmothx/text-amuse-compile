@@ -673,6 +673,11 @@ sub latex {
                [% safe_options.paging %],%
                paper=[% safe_options.papersize %]]%
                {[% safe_options.class %]}
+[% IF safe_options.areaset_width %]
+[% IF safe_options.areaset_height %]
+\areaset[current]{[% safe_options.areaset_width %]}{[% safe_options.areaset_height %]}
+[% END %]
+[% END %]
 \usepackage{fontspec}
 \setmainfont[Script=[% doc.font_script %]]{[% safe_options.mainfont %]}
 \setsansfont[Script=[% doc.font_script %],Scale=MatchLowercase]{[% safe_options.sansfont %]}

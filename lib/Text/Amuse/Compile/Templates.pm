@@ -693,6 +693,12 @@ sub latex {
 \usepackage{scrlayer-scrpage}
 \pagestyle{scrheadings}
   [% IF safe_options.twoside %]
+    [% IF safe_options.headings.part_chapter %]
+    \automark[part]{part}
+    \automark*[chapter]{}
+    \ohead{\pagemark}
+    \ihead{\headmark}
+    [% END %]
     [% IF safe_options.headings.title_subtitle %]
     \lehead{\pagemark}
     \rohead{\pagemark}
@@ -734,6 +740,10 @@ sub latex {
     \cfoot[]{}
     \ofoot[]{}
   [% ELSE %]
+    [% IF safe_options.headings.part_chapter %]
+    \automark[part]{part}
+    \chead[]{\headmark}
+    [% END %]
     [% IF safe_options.headings.title_subtitle %]
     \chead{[% doc.header_as_latex.title %]}
     [% END %]

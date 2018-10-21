@@ -470,6 +470,10 @@ sub all_headings {
                      desc => 'None',
                     },
                     {
+                     name => 'part_chapter',
+                     desc => 'Part and chapter. If one side document: part.',
+                    },
+                    {
                      name => 'title_subtitle',
                      desc => 'Title and subtitle. If one side document: title.',
                     },

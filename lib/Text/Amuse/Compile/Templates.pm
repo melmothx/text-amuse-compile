@@ -890,6 +890,8 @@ sub latex {
 [% END %]
 
 \frenchspacing
+% avoid vertical glue
+\raggedbottom
 
 [% IF safe_options.fussy %]
 % this will generate overfull boxes, so we need to set a tolerance
@@ -898,6 +900,8 @@ sub latex {
 % hyphenation, so it makes sense to be strict here and let the user
 % accept tweak the tolerance instead.
 \tolerance=[% safe_options.tex_tolerance %]
+% Additional tolerance for bad paragraphs only
+\setlength{\emergencystretch}{2pt}
 [% ELSE %]
 \sloppy
 [% END %]

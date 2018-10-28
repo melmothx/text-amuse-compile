@@ -1218,13 +1218,13 @@ sub _prepare_tex_tokens {
     # now validate the options against the new shiny module
     my %options = (%{ $self->full_options }, %args);
     # print Dumper($self->full_options);
-    my $parsed = eval { Text::Amuse::Compile::TemplateOptions->new(%options) };
-    unless ($parsed) {
-        $parsed = Text::Amuse::Compile::TemplateOptions->new;
+    my $template_options = eval { Text::Amuse::Compile::TemplateOptions->new(%options) };
+    unless ($template_options) {
+        $template_options = Text::Amuse::Compile::TemplateOptions->new;
         $self->log_info("# Validation failed: $@, setting one by one\n");
-        foreach my $method ($parsed->config_setters) {
+        foreach my $method ($template_options->config_setters) {
             if (exists $options{$method}) {
-                eval { $parsed->$method($options{$method}) };
+                eval { $template_options->$method($options{$method}) };
                 if ($@) {
                     print "Error on $method: $@\n";
                 }
@@ -1232,7 +1232,7 @@ sub _prepare_tex_tokens {
         }
     }
     my $safe_options =
-      $self->_escape_options_hashref(ltx => $parsed->config_output);
+      $self->_escape_options_hashref(ltx => $template_options->config_output);
 
     # defaults
     my %parsed = (%$safe_options,

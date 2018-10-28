@@ -6,7 +6,7 @@ use warnings;
 use Text::Amuse::Compile;
 use Path::Tiny;
 use Data::Dumper;
-use Test::More tests => 6;
+use Test::More tests => 50;
 
 my $muse = <<"MUSE";
 #title My title
@@ -116,7 +116,22 @@ foreach my $options ({
                      {
                       areaset_width => '8cm',
                       areaset_height => '50mm',
-                     }) {
+                     },
+                     {
+                      fussy => 1,
+                      tex_tolerance => 66666,
+                     },
+                     {
+                      fussy => 1,
+                     },
+                     {
+                      fussy => 0,
+                      tex_tolerance => 66666,
+                     },
+                     {
+                      fussy_last_word => 1,
+                     }
+                    ) {
     my $wd = Path::Tiny->tempdir(CLEANUP => !$ENV{NOCLEANUP});
     diag "Working on $wd for " . Dumper($options);
 
@@ -126,6 +141,12 @@ foreach my $options ({
     my $file = $wd->child("text.muse");
     $file->spew_utf8($muse);
     $c->compile("$file");
+    my $pdf = $wd->child("text.pdf");
+  SKIP:
+    {
+        skip "pdf $pdf not required", 1 unless $ENV{TEST_WITH_LATEX};
+        ok $pdf->exists;
+    }
     my $tex = $wd->child("text.tex")->slurp_utf8;
     if ($options->{areaset_width} && $options->{areaset_height}) {
         like($tex, qr/\\areaset\[current\]\{\Q$options->{areaset_width}\E\}\{\Q$options->{areaset_height}\E\}/,
@@ -133,5 +154,25 @@ foreach my $options ({
     }
     else {
         unlike $tex, qr{\\areaset};
+    }
+    if ($options->{fussy}) {
+        like $tex, qr{\\tolerance=}m;
+        if (!$options->{tex_tolerance} or $options->{tex_tolerance} > 10000) {
+            like $tex, qr{\\tolerance=1000$}m, "Tolerance is 1_000 (default)" or die;
+        }
+        else {
+            like $tex, qr{\\tolerance=\Q$options->{tex_tolerance}\E$}m,
+              "Tolerance is $options->{tex_tolerance}";
+        }
+    }
+    else {
+        unlike $tex, qr{\\tolerance=}, "No tolerance set";
+        like $tex, qr{\\sloppy}, "Sloppy doc";
+    }
+    if ($options->{fussy_last_word}) {
+        like $tex, qr{\\finalhyphendemerits=10000};
+    }
+    else {
+        unlike $tex, qr{\\finalhyphendemerits=10000};
     }
 }

@@ -888,13 +888,29 @@ sub latex {
 \addtokomafont{disposition}{\rmfamily}
 \addtokomafont{descriptionlabel}{\rmfamily}
 [% END %]
-% forbid widows/orphans
+
 \frenchspacing
+
+[% IF safe_options.fussy %]
+% this will generate overfull boxes, so we need to set a tolerance
+% \pretolerance=1000
+% pretolerance is what is accepted for a paragraph without
+% hyphenation, so it makes sense to be strict here and let the user
+% accept tweak the tolerance instead.
+\tolerance=[% safe_options.tex_tolerance %]
+[% ELSE %]
 \sloppy
+[% END %]
+% (try to) forbid widows/orphans
 \clubpenalty=10000
 \widowpenalty=10000
+
+
+[% IF safe_options.fussy_last_word %]
 % http://tex.stackexchange.com/questions/304802/how-not-to-hyphenate-the-last-word-of-a-paragraph
 \finalhyphendemerits=10000
+[% END %]
+
 
 % given that we said footinclude=false, this should be safe
 \setlength{\footskip}{2\baselineskip}

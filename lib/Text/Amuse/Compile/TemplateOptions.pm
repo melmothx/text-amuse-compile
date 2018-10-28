@@ -3,7 +3,7 @@ package Text::Amuse::Compile::TemplateOptions;
 use utf8;
 use strict;
 use warnings FATAL => 'all';
-use Types::Standard qw/Str Bool Enum StrMatch/;
+use Types::Standard qw/Str Bool Enum StrMatch Int is_Int/;
 use Pod::Usage qw//;
 use File::Spec;
 use Moo;
@@ -136,6 +136,11 @@ sub is_tex_measure {
 
 sub is_tex_measure_or_false {
     is_tex_measure($_[0]) if $_[0];
+}
+
+sub is_tex_tolerance {
+    die "tolerance needs to be between 0 and 1000"
+      unless is_Int($_[0]) && $_[0] > -1 && $_[0] < 10_001;
 }
 
 has areaset_width => (is => 'rw',
@@ -603,6 +608,48 @@ has beamercolortheme => (is => 'rw',
                          isa => Enum[ __PACKAGE__->beamer_colorthemes ],
                          default => sub { __PACKAGE__->default_beamercolortheme });
 
+=head2 Advanced
+
+=over 4
+
+=item * fussy
+
+Do not use a sloppy TeX run, but instead be strict on paragraph
+building. This is going to generate overfull boxes, though. You can
+adjust the tex_tolerance below to reduce their number. Overfull boxes
+are reported.
+
+=item * tex_tolerance
+
+An integer between 0 and 10000
+
+Quoting: a parameter that tells TeX how much badness is allowable
+without error. Default to 1000. This is used only on a fussy run.
+
+=item * fussy_last_word
+
+Avoid breking the last word of a paragraph. This sounds great, but if
+you have short paragraphs (say, on line, or the text is full of
+dialogs), this is going to be a big problem, generating really bad
+lines.
+
+=back
+
+=cut
+
+has fussy => (is => 'rw',
+              isa => Bool,
+              default => sub { 0 });
+
+has tex_tolerance => (is => 'rw',
+                  isa => \&is_tex_tolerance,
+                  default => sub { 1000 });
+
+has fussy_last_word => (is => 'rw',
+                        isa => Bool,
+                        default => sub { 0 });
+
+
 =head1 METHODS
 
 =head2 paging
@@ -646,6 +693,9 @@ sub config_setters {
                areaset_height
                mainfont sansfont monofont fontsize
                sitename siteslogan site logo
+               fussy
+               tex_tolerance
+               fussy_last_word
                headings
                cover coverwidth nocoverpage notoc
                nofinalpage
@@ -690,6 +740,7 @@ sub show_options {
                                              ACCESSORS/Fonts
                                              ACCESSORS/Colophon
                                              ACCESSORS/Cover
+                                             ACCESSORS/Advanced
                                              ACCESSORS/Slides
                                            )],
                             -input => __FILE__,

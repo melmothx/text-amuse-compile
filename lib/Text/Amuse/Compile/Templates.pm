@@ -686,7 +686,10 @@ sub latex {
 
 [% IF safe_options.nocoverpage %]
 \let\chapter\section
+[% ELSE %]
+\renewcommand*{\partpagestyle}{empty}
 [% END %]
+
 % global style
 [% IF safe_options.headings %]
 \setlength{\headsep}{\baselineskip}
@@ -775,9 +778,6 @@ sub latex {
 [% ELSE %]
 \pagestyle{plain}
 [% END %]
-
-\renewcommand*{\partpagestyle}{empty}
-
 
 \usepackage{microtype} % you need an *updated* texlive 2012, but harmless
 \usepackage{graphicx}

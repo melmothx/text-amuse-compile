@@ -639,6 +639,25 @@ you have short paragraphs (say, on line, or the text is full of
 dialogs), this is going to be a big problem, generating really bad
 lines.
 
+=item * format_id
+
+This does nothing per se but makes C<safe_options.format_id.$name>
+accessible in the template.
+
+This is useful if you have a local latex.tt template which needs to do
+different things with different formats, so you can call:
+
+  [% IF safe_options.format_id.c999 %]
+  Output 1
+  [% ELSE %]
+  Output 2
+  [% END %]
+
+If not specified, C<DEFAULT> is set.
+
+The value must begin with a letter and have only letters, digits and
+underscores.
+
 =back
 
 =cut
@@ -655,6 +674,9 @@ has fussy_last_word => (is => 'rw',
                         isa => Bool,
                         default => sub { 0 });
 
+has format_id => (is => 'rw',
+                  isa => StrMatch[ qr{\A[a-zA-Z][a-zA-Z0-9_]+\z} ],
+                  default => sub { 'DEFAULT' });
 
 =head1 METHODS
 
@@ -713,6 +735,7 @@ sub config_setters {
                continuefootnotes
                centerchapter
                centersection
+               format_id
                opening beamertheme beamercolortheme/);
 }
 
@@ -734,6 +757,9 @@ sub config_output {
                 }
                 $out{headings} = { $value => 1 };
             }
+        }
+        elsif ($method eq 'format_id') {
+            $out{format_id} = { $self->format_id => 1 };
         }
         else {
             $out{$method} = $self->$method;

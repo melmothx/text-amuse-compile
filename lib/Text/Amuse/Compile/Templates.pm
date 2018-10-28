@@ -1152,6 +1152,10 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 
 \end{document}
 
+[% IF safe_options.format_id.DEFAULT %]
+% No format ID passed.
+[% END %]
+
 EOF
     return \$latex;
 }

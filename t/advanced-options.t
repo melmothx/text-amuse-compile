@@ -6,7 +6,7 @@ use warnings;
 use Text::Amuse::Compile;
 use Path::Tiny;
 use Data::Dumper;
-use Test::More tests => 66;
+use Test::More tests => 77;
 
 my $muse = <<"MUSE";
 #title My title
@@ -186,5 +186,11 @@ foreach my $options ({
     }
     else {
         like $tex, qr{\\includegraphics};
+    }
+    if (!$options->{format_id}) {
+        like $tex, qr{^\% No format ID passed\.$}m;
+    }
+    else {
+        unlike $tex, qr{^\% No format ID passed\.$}m;
     }
 }

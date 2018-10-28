@@ -344,6 +344,10 @@ width.
 Force the use of the LaTeX article class. If there are chapters
 present, consider them aliases for a section.
 
+=item * ignore_cover
+
+Ignore the cover unconditionally
+
 =item * notoc
 
 Do not generate a table of contents, even if the document requires
@@ -455,6 +459,8 @@ has coverwidth => (is => 'rw',
                    default => sub { 1 });
 
 has nocoverpage => (is => 'rw', isa => Bool, default => sub { 0 });
+has ignore_cover => (is => 'rw', isa => Bool, default => sub { 0 });
+
 has notoc       => (is => 'rw', isa => Bool, default => sub { 0 });
 has nofinalpage => (is => 'rw', isa => Bool, default => sub { 0 });
 has impressum => (is => 'rw', isa => Bool, default => sub { 0 });
@@ -697,6 +703,7 @@ sub config_setters {
                tex_tolerance
                fussy_last_word
                headings
+               ignore_cover
                cover coverwidth nocoverpage notoc
                nofinalpage
                impressum sansfontsections

@@ -6,7 +6,7 @@ use warnings;
 use Text::Amuse::Compile;
 use Path::Tiny;
 use Data::Dumper;
-use Test::More tests => 50;
+use Test::More tests => 66;
 
 my $muse = <<"MUSE";
 #title My title
@@ -14,6 +14,7 @@ my $muse = <<"MUSE";
 #lang it
 #pubdate 2018-09-05T13:30:34
 #notes Seconda edizione riveduta e corretta: novembre 2018
+#cover test.png
 
 *** The standard Lorem Ipsum passage, used since the 1500s
 
@@ -130,14 +131,19 @@ foreach my $options ({
                      },
                      {
                       fussy_last_word => 1,
-                     }
-                    ) {
+                     },
+                     {
+                      ignore_cover => 1,
+                     }) {
     my $wd = Path::Tiny->tempdir(CLEANUP => !$ENV{NOCLEANUP});
+    path(qw/t resources test.png/)->copy($wd->child('test.png')) or die;
     diag "Working on $wd for " . Dumper($options);
 
     my $c = Text::Amuse::Compile->new(tex => 1,
                                       pdf => $ENV{TEST_WITH_LATEX},
-                                      extra => $options);
+                                      extra => { papersize => 'a6',
+                                                 %$options,
+                                               });
     my $file = $wd->child("text.muse");
     $file->spew_utf8($muse);
     $c->compile("$file");
@@ -174,5 +180,11 @@ foreach my $options ({
     }
     else {
         unlike $tex, qr{\\finalhyphendemerits=10000};
+    }
+    if ($options->{ignore_cover}) {
+        unlike $tex, qr{\\includegraphics};
+    }
+    else {
+        like $tex, qr{\\includegraphics};
     }
 }

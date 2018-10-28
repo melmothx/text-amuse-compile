@@ -974,8 +974,10 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 
 [% UNLESS safe_options.nocoverpage %]
    [% IF safe_options.cover %]
+      [% UNLESS safe_options.ignore_cover %]
       \vskip 3em
       \includegraphics[keepaspectratio=true,height=0.5\textheight,width=[% safe_options.coverwidth %]\textwidth]{[% safe_options.cover %]}
+      [% END %]
    [% END %]
    \vfill
 [% END %]

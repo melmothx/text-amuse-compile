@@ -1325,9 +1325,27 @@ sub _prepare_tex_tokens {
             options => \%tokens,
             safe_options => \%parsed,
             doc => $doc,
+            latex_body => $self->_interpolate_magic_comments($template_options->format_id, $doc),
             disable_bigfoot => 0, # $doc->is_rtl || $doc->is_bidi,
             tex_metadata => $self->file_header->tex_metadata,
            };
+}
+
+sub _interpolate_magic_comments {
+    my ($self, $format, $doc) = @_;
+    my $latex = $doc->as_latex;
+    # format is validated.
+    my $re = qr{^
+                \%
+                \x{20}+
+                \:\Q$format\E\:
+                \x{20}+
+                \\textbackslash\{\}
+                (sloppy|fussy)
+                \x{20}*
+                $}xms;
+    $latex =~ s/$re/\\$1/g;
+    return $latex;
 }
 
 sub _looks_like_a_sane_name {

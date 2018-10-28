@@ -1051,7 +1051,7 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 [% END %]
 [% END %]
 
-[% doc.as_latex %]
+[% latex_body %]
 
 [% UNLESS safe_options.nofinalpage %]
 % begin final page

@@ -673,6 +673,11 @@ sub latex {
                [% safe_options.paging %],%
                paper=[% safe_options.papersize %]]%
                {[% safe_options.class %]}
+[% IF safe_options.areaset_width %]
+[% IF safe_options.areaset_height %]
+\areaset[current]{[% safe_options.areaset_width %]}{[% safe_options.areaset_height %]}
+[% END %]
+[% END %]
 \usepackage{fontspec}
 \setmainfont[Script=[% doc.font_script %]]{[% safe_options.mainfont %]}
 \setsansfont[Script=[% doc.font_script %],Scale=MatchLowercase]{[% safe_options.sansfont %]}
@@ -688,6 +693,12 @@ sub latex {
 \usepackage{scrlayer-scrpage}
 \pagestyle{scrheadings}
   [% IF safe_options.twoside %]
+    [% IF safe_options.headings.part_chapter %]
+    \automark[part]{part}
+    \automark*[chapter]{}
+    \ohead{\pagemark}
+    \ihead{\headmark}
+    [% END %]
     [% IF safe_options.headings.title_subtitle %]
     \lehead{\pagemark}
     \rohead{\pagemark}
@@ -729,6 +740,10 @@ sub latex {
     \cfoot[]{}
     \ofoot[]{}
   [% ELSE %]
+    [% IF safe_options.headings.part_chapter %]
+    \automark[part]{part}
+    \chead[]{\headmark}
+    [% END %]
     [% IF safe_options.headings.title_subtitle %]
     \chead{[% doc.header_as_latex.title %]}
     [% END %]
@@ -761,6 +776,7 @@ sub latex {
 \pagestyle{plain}
 [% END %]
 
+\renewcommand*{\partpagestyle}{empty}
 
 
 \usepackage{microtype} % you need an *updated* texlive 2012, but harmless
@@ -872,13 +888,33 @@ sub latex {
 \addtokomafont{disposition}{\rmfamily}
 \addtokomafont{descriptionlabel}{\rmfamily}
 [% END %]
-% forbid widows/orphans
+
 \frenchspacing
+% avoid vertical glue
+\raggedbottom
+
+[% IF safe_options.fussy %]
+% this will generate overfull boxes, so we need to set a tolerance
+% \pretolerance=1000
+% pretolerance is what is accepted for a paragraph without
+% hyphenation, so it makes sense to be strict here and let the user
+% accept tweak the tolerance instead.
+\tolerance=[% safe_options.tex_tolerance %]
+% Additional tolerance for bad paragraphs only
+\setlength{\emergencystretch}{2pt}
+[% ELSE %]
 \sloppy
+[% END %]
+% (try to) forbid widows/orphans
 \clubpenalty=10000
 \widowpenalty=10000
+
+
+[% IF safe_options.fussy_last_word %]
 % http://tex.stackexchange.com/questions/304802/how-not-to-hyphenate-the-last-word-of-a-paragraph
 \finalhyphendemerits=10000
+[% END %]
+
 
 % given that we said footinclude=false, this should be safe
 \setlength{\footskip}{2\baselineskip}
@@ -942,8 +978,10 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 
 [% UNLESS safe_options.nocoverpage %]
    [% IF safe_options.cover %]
+      [% UNLESS safe_options.ignore_cover %]
       \vskip 3em
       \includegraphics[keepaspectratio=true,height=0.5\textheight,width=[% safe_options.coverwidth %]\textwidth]{[% safe_options.cover %]}
+      [% END %]
    [% END %]
    \vfill
 [% END %]
@@ -1017,7 +1055,7 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 [% END %]
 [% END %]
 
-[% doc.as_latex %]
+[% latex_body %]
 
 [% UNLESS safe_options.nofinalpage %]
 % begin final page
@@ -1117,6 +1155,10 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 [% END %]
 
 \end{document}
+
+[% IF safe_options.format_id.DEFAULT %]
+% No format ID passed.
+[% END %]
 
 EOF
     return \$latex;

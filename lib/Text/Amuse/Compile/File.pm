@@ -1218,13 +1218,13 @@ sub _prepare_tex_tokens {
     # now validate the options against the new shiny module
     my %options = (%{ $self->full_options }, %args);
     # print Dumper($self->full_options);
-    my $parsed = eval { Text::Amuse::Compile::TemplateOptions->new(%options) };
-    unless ($parsed) {
-        $parsed = Text::Amuse::Compile::TemplateOptions->new;
+    my $template_options = eval { Text::Amuse::Compile::TemplateOptions->new(%options) };
+    unless ($template_options) {
+        $template_options = Text::Amuse::Compile::TemplateOptions->new;
         $self->log_info("# Validation failed: $@, setting one by one\n");
-        foreach my $method ($parsed->config_setters) {
+        foreach my $method ($template_options->config_setters) {
             if (exists $options{$method}) {
-                eval { $parsed->$method($options{$method}) };
+                eval { $template_options->$method($options{$method}) };
                 if ($@) {
                     print "Error on $method: $@\n";
                 }
@@ -1232,7 +1232,7 @@ sub _prepare_tex_tokens {
         }
     }
     my $safe_options =
-      $self->_escape_options_hashref(ltx => $parsed->config_output);
+      $self->_escape_options_hashref(ltx => $template_options->config_output);
 
     # defaults
     my %parsed = (%$safe_options,
@@ -1325,9 +1325,27 @@ sub _prepare_tex_tokens {
             options => \%tokens,
             safe_options => \%parsed,
             doc => $doc,
+            latex_body => $self->_interpolate_magic_comments($template_options->format_id, $doc),
             disable_bigfoot => 0, # $doc->is_rtl || $doc->is_bidi,
             tex_metadata => $self->file_header->tex_metadata,
            };
+}
+
+sub _interpolate_magic_comments {
+    my ($self, $format, $doc) = @_;
+    my $latex = $doc->as_latex;
+    # format is validated.
+    my $re = qr{^
+                \%
+                \x{20}+
+                \:\Q$format\E\:
+                \x{20}+
+                \\textbackslash\{\}
+                (sloppy|fussy)
+                \x{20}*
+                $}xms;
+    $latex =~ s/$re/\\$1/g;
+    return $latex;
 }
 
 sub _looks_like_a_sane_name {

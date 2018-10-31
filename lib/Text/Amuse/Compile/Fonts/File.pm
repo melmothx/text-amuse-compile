@@ -91,15 +91,15 @@ sub _build_format {
     my $self = shift;
     if (my $ext = $self->extension) {
         my %map = (
-                   woff => 'woff',
-                   ttf => 'truetype',
-                   otf => 'opentype',
+                   '.woff' => 'woff',
+                   '.ttf' => 'truetype',
+                   '.otf' => 'opentype',
                   );
-        return $map{lc($ext)};
+        if (my $type = $map{lc($ext)}) {
+            return $type;
+        }
     }
-    else {
-        return;
-    }
+    die "Bad file format without extension " . $self->file;
 }
 
 sub _build_mimetype {

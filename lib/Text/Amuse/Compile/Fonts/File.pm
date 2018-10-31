@@ -5,7 +5,8 @@ use utf8;
 
 use Moo;
 use File::Basename qw//;
-use Types::Standard qw/Maybe Str Enum/;
+use File::Spec;
+use Types::Standard qw/Maybe Str Enum ArrayRef/;
 
 =head1 NAME
 
@@ -54,21 +55,51 @@ has format => (is => 'lazy',
 has mimetype => (is => 'lazy',
                  isa => Str);
 
+has parsed_path => (is => 'lazy',
+                    isa => ArrayRef);
+
+sub _build_parsed_path {
+    my $self = shift;
+    if (my $file = $self->file) {
+        return [ File::Basename::fileparse(File::Spec->rel2abs($file), qr/\.(woff|ttf|otf)\z/i) ];
+    }
+    else {
+        return [ '', '', '' ];
+    }
+}
+
+# my ($filename, $dirs, $suffix) = fileparse($path, @suffixes);
+
+sub basename {
+    shift->parsed_path->[0];
+}
+
+sub dirname {
+    shift->parsed_path->[1];
+}
+
+sub basename_and_ext {
+    my $parts = shift->parsed_path;
+    return $parts->[0] . $parts->[2];
+}
+
+sub extension {
+    shift->parsed_path->[2];
+}
 
 sub _build_format {
     my $self = shift;
-    if (my $file = $self->file) {
-        if ($file =~ m/\.(woff|ttf|otf)\z/i) {
-            my $ext = lc($1);
-            my %map = (
-                       woff => 'woff',
-                       ttf => 'truetype',
-                       otf => 'opentype',
-                      );
-            return $map{$ext};
-        }
+    if (my $ext = $self->extension) {
+        my %map = (
+                   woff => 'woff',
+                   ttf => 'truetype',
+                   otf => 'opentype',
+                  );
+        return $map{lc($ext)};
     }
-    return;
+    else {
+        return;
+    }
 }
 
 sub _build_mimetype {
@@ -84,9 +115,5 @@ sub _build_mimetype {
     return;
 }
 
-sub basename {
-    my $self = shift;
-    return File::Basename::basename($self->file);
-}
 
 1;

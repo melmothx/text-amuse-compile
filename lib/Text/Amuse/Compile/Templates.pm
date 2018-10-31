@@ -678,11 +678,8 @@ sub latex {
 \areaset[current]{[% safe_options.areaset_width %]}{[% safe_options.areaset_height %]}
 [% END %]
 [% END %]
-\usepackage{fontspec}
-\setmainfont[Script=[% doc.font_script %]]{[% safe_options.mainfont %]}
-\setsansfont[Script=[% doc.font_script %],Scale=MatchLowercase]{[% safe_options.sansfont %]}
-\setmonofont[Script=[% doc.font_script %],Scale=MatchLowercase]{[% safe_options.monofont %]}
-[% safe_options.mainlanguage_script %]
+
+[% tex_setup_langs %]
 
 [% IF safe_options.nocoverpage %]
 \let\chapter\section
@@ -819,24 +816,6 @@ sub latex {
 \let\raggedsection\centering
 [% END %]
 
-\usepackage{polyglossia}
-\setmainlanguage{[% safe_options.lang %]}
-[% safe_options.mainlanguage_script %]
-
-[% IF safe_options.other_languages %]
-\setotherlanguages{[% safe_options.other_languages %]}
-[% END %]
-[% IF safe_options.other_languages_additional %]
-[% safe_options.other_languages_additional %]
-[% END %]
-
-[% IF safe_options.mainlanguage_toc_name %]
-\renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}
-[% END %]
-
-[% IF doc.is_bidi %]
-\usepackage{bidi}
-[% END %]
 
 [% IF disable_bigfoot %]
 \newcommand{\footnoteB}[1]{\{\{#1\}\}}
@@ -1171,10 +1150,7 @@ sub slides {
     }
     my $slides =<<'LATEX';
 \documentclass[ignorenonframetext]{beamer}
-\usepackage{fontspec}
-\setmainfont[Script=[% doc.font_script %]]{[% safe_options.mainfont %]}
-\setsansfont[Script=[% doc.font_script %],Scale=MatchLowercase]{[% safe_options.sansfont %]}
-\setmonofont[Script=[% doc.font_script %],Scale=MatchLowercase]{[% safe_options.monofont %]}
+[% tex_setup_langs %]
 \usetheme{[% safe_options.beamertheme %]}
 \usecolortheme{[% safe_options.beamercolortheme %]}
 \usepackage{graphicx}
@@ -1189,22 +1165,9 @@ sub slides {
 % Unclear if \protect  \hsout is needed. Doesn't looks so
 \DeclareRobustCommand{\sout}[1]{\texorpdfstring{\hsout{#1}}{#1}}
 \usepackage{wrapfig}
-
-\usepackage{polyglossia}
-\setmainlanguage{[% safe_options.lang %]}
-[% safe_options.mainlanguage_script %]
-[% IF safe_options.mainlanguage_toc_name %]
-\renewcaptionname{[% safe_options.lang %]}{\contentsname}{[% safe_options.mainlanguage_toc_name %]}
-[% END %]
-
-[% IF doc.is_bidi %]
-\usepackage{bidi}
-[% END %]
 [% IF doc.is_rtl %]
 \setbeamertemplate{frametitle}[default][right]
 [% END %]
-
-
 
 % remove the numbering
 \setcounter{secnumdepth}{-2}

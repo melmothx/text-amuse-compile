@@ -21,6 +21,31 @@ All are read-only instances of L<Text::Amuse::Compile::Fonts::Family>.
 
 =head2 size
 
+=head1 METHODS
+
+=head2 compose_polyglossia_fontspec_stanza(lang => 'english', others => [qw/russian farsi/], bidi => 1)
+
+The place to produce this stanza is a bit weird, but fontspec and
+polyglossia are tighly coupled.
+
+Named arguments:
+
+=over 4
+
+=item lang
+
+The main language.
+
+=item others
+
+The other languages as arrayref
+
+=item bidi
+
+Boolean if bidirectional
+
+=back
+
 =cut
 
 has mono => (is => 'ro', required => 1, isa => InstanceOf['Text::Amuse::Compile::Fonts::Family']);
@@ -75,7 +100,7 @@ sub compose_polyglossia_fontspec_stanza {
     return join("\n", @out);
 }
 
-sub shape_mapping {
+sub _shape_mapping {
     return +{
              bold => 'BoldFont',
              italic => 'ItalicFont',
@@ -105,7 +130,7 @@ sub _build_definitions {
                 $definition{attr}{Path} = $1;
             }
 
-            my %map = %{$self->shape_mapping};
+            my %map = %{$self->_shape_mapping};
             foreach my $method (keys %map) {
                 $definition{attr}{$map{$method}} = $font->$method->basename_and_ext;
             }
@@ -128,7 +153,7 @@ sub _fontspec_args {
     my $def = $self->definitions->{$slot} or die "bad usage, can't find $slot";
     my $script = $scripts{$language} || 'Latin';
     my @list = ("Script=$script");
-    my @shapes = sort values %{ $self->shape_mapping };
+    my @shapes = sort values %{ $self->_shape_mapping };
     foreach my $att (qw/Scale Path/, @shapes) {
         if (my $v = $def->{attr}->{$att}) {
             push @list, "$att=$v";

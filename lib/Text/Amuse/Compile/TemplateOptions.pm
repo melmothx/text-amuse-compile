@@ -129,28 +129,28 @@ sub tex_papersize {
     return _get_papersize($self->papersize);
 }
 
-sub is_tex_measure {
+sub _is_tex_measure {
     die "$_[0] is not a TeX measure"
       unless $_[0] =~ TEX_MEASURE;
 }
 
-sub is_tex_measure_or_false {
-    is_tex_measure($_[0]) if $_[0];
+sub _is_tex_measure_or_false {
+    _is_tex_measure($_[0]) if $_[0];
 }
 
-sub is_tex_tolerance {
+sub _is_tex_tolerance {
     die "tolerance needs to be between 0 and 1000"
       unless is_Int($_[0]) && $_[0] > -1 && $_[0] < 10_001;
 }
 
 has areaset_width => (is => 'rw',
-                      isa => \&is_tex_measure_or_false);
+                      isa => \&_is_tex_measure_or_false);
 
 has areaset_height => (is => 'rw',
-                       isa => \&is_tex_measure_or_false);
+                       isa => \&_is_tex_measure_or_false);
 
 has bcor => (is => 'rw',
-             isa => \&is_tex_measure,
+             isa => \&_is_tex_measure,
              default => sub { '0mm' });
 
 has division   => (is => 'rw',
@@ -667,7 +667,7 @@ has fussy => (is => 'rw',
               default => sub { 0 });
 
 has tex_tolerance => (is => 'rw',
-                  isa => \&is_tex_tolerance,
+                  isa => \&_is_tex_tolerance,
                   default => sub { 1000 });
 
 has fussy_last_word => (is => 'rw',

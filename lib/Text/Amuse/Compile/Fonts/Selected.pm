@@ -44,6 +44,10 @@ The other languages as arrayref
 
 Boolean if bidirectional
 
+=item is_slide
+
+Boolean if for beamer
+
 =back
 
 =cut
@@ -56,8 +60,61 @@ has size => (is => 'ro', default => sub { 10 }, isa => Enum[9..14]);
 sub compose_polyglossia_fontspec_stanza {
     my ($self, %args) = @_;
 
-    my @out = ("\\usepackage{fontspec}",
-               "\\usepackage{polyglossia}");
+    my @out;
+
+    push @out, <<'STANDARD';
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{alltt}
+\usepackage{verbatim}
+\usepackage[shortlabels]{enumitem}
+\usepackage{tabularx}
+\usepackage[normalem]{ulem}
+\def\hsout{\bgroup \ULdepth=-.55ex \ULset}
+% https://tex.stackexchange.com/questions/22410/strikethrough-in-section-title
+% Unclear if \protect \hsout is needed. Doesn't looks so
+\DeclareRobustCommand{\sout}[1]{\texorpdfstring{\hsout{#1}}{#1}}
+\usepackage{wrapfig}
+
+% avoid breakage on multiple <br><br> and avoid the next [] to be eaten
+\newcommand*{\forcelinebreak}{\strut\\*{}}
+
+\newcommand*{\hairline}{%
+  \bigskip%
+  \noindent \hrulefill%
+  \bigskip%
+}
+
+% reverse indentation for biblio and play
+
+\newenvironment*{amusebiblio}{
+  \leftskip=\parindent
+  \parindent=-\parindent
+  \smallskip
+  \indent
+}{\smallskip}
+
+\newenvironment*{amuseplay}{
+  \leftskip=\parindent
+  \parindent=-\parindent
+  \smallskip
+  \indent
+}{\smallskip}
+
+\newcommand*{\Slash}{\slash\hspace{0pt}}
+
+STANDARD
+
+    unless($args{is_slide}) {
+        push @out, <<'HYPERREF';
+% http://tex.stackexchange.com/questions/3033/forcing-linebreaks-in-url
+\PassOptionsToPackage{hyphens}{url}\usepackage[hyperfootnotes=false,hidelinks,breaklinks=true]{hyperref}
+\usepackage{bookmark}
+HYPERREF
+    }
+
+    push @out, "\\usepackage{fontspec}";
+    push @out, "\\usepackage{polyglossia}";
 
     # main language
     my $orig_lang = $args{lang} || 'english';
@@ -94,9 +151,24 @@ sub compose_polyglossia_fontspec_stanza {
         push @out, sprintf('\\renewcaptionname{%s}{\\contentsname}{%s}',
                            $lang, $toc_names{$orig_lang});
     }
+
     if ($args{bidi}) {
         push @out, '\\usepackage{bidi}';
     }
+
+    # if disabled, use
+    # \newcommand{\footnoteB}[1]{\{\{#1\}\}}
+
+    # bigfoot after bidi
+    push @out, <<'BIGFOOT';
+% footnote handling
+\usepackage[fragile]{bigfoot}
+\usepackage{perpage}
+\DeclareNewFootnote{default}
+BIGFOOT
+
+    push @out, <<'MUSE';
+MUSE
     return join("\n", @out);
 }
 

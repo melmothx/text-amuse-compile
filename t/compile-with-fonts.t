@@ -6,6 +6,7 @@ use Text::Amuse::Compile;
 use Text::Amuse::Compile::Utils qw/write_file read_file/;
 use File::Temp;
 use File::Spec;
+use Path::Tiny;
 use JSON::MaybeXS;
 use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
 use Test::More tests => 155;
@@ -18,9 +19,8 @@ my $font_re = qr{\{regular\.otf\}\[[^]]*?Path=\Q$wd\E[^]]*?\]}s;
 
 my $font_size_in_pt = qr{font-size:.*pt};
 
-foreach my $file (values %fontfiles) {
-    diag "Creating file $file";
-    write_file($file, 'x');
+foreach my $file (keys %fontfiles) {
+    path(qw/t fonts/, $file  . '.otf')->copy($fontfiles{$file});
 }
 my @fonts = (
              {
@@ -291,7 +291,7 @@ ok ($@, "bad specification: $@");
     }
   SKIP: {
         skip "No pdf required", 1 unless $xelatex;
-        ok (-f $pdf);
+        ok (-f $pdf, "PDF produced with " . Dumper($c->fonts));
     }
     {
         ok (-f $epub);

@@ -776,24 +776,10 @@ sub latex {
 \pagestyle{plain}
 [% END %]
 
-\usepackage{microtype} % you need an *updated* texlive 2012, but harmless
-\usepackage{graphicx}
-\usepackage{alltt}
-\usepackage{verbatim}
-% http://tex.stackexchange.com/questions/3033/forcing-linebreaks-in-url
-\PassOptionsToPackage{hyphens}{url}\usepackage[hyperfootnotes=false,hidelinks,breaklinks=true]{hyperref}
-\usepackage{bookmark}
 
 
-\usepackage[shortlabels]{enumitem}
-\usepackage{tabularx}
-\usepackage[normalem]{ulem}
-\def\hsout{\bgroup \ULdepth=-.55ex \ULset}
-% https://tex.stackexchange.com/questions/22410/strikethrough-in-section-title
-% Unclear if \protect \hsout is needed. Doesn't looks so
-\DeclareRobustCommand{\sout}[1]{\texorpdfstring{\hsout{#1}}{#1}}
-\usepackage{wrapfig}
 \usepackage{indentfirst}
+
 % remove the numbering
 \setcounter{secnumdepth}{-2}
 
@@ -817,13 +803,6 @@ sub latex {
 [% END %]
 
 
-[% IF disable_bigfoot %]
-\newcommand{\footnoteB}[1]{\{\{#1\}\}}
-[% ELSE %]
-% footnote handling
-\usepackage[fragile]{bigfoot}
-\usepackage{perpage}
-\DeclareNewFootnote{default}
 [% IF safe_options.secondary_footnotes_alpha %]
 \DeclareNewFootnote{B}[alph]
 \MakeSortedPerPage[1]{footnoteB}
@@ -832,36 +811,7 @@ sub latex {
 \MakeSorted{footnoteB}
 \renewcommand*\thefootnoteB{(\arabic{footnoteB})}
 [% END %]
-[% END %]
 \deffootnote[3em]{0em}{4em}{\textsuperscript{\thefootnotemark}~}
-
-
-% avoid breakage on multiple <br><br> and avoid the next [] to be eaten
-\newcommand*{\forcelinebreak}{\strut\\*{}}
-
-\newcommand*{\hairline}{%
-  \bigskip%
-  \noindent \hrulefill%
-  \bigskip%
-}
-
-% reverse indentation for biblio and play
-
-\newenvironment*{amusebiblio}{
-  \leftskip=\parindent
-  \parindent=-\parindent
-  \smallskip
-  \indent
-}{\smallskip}
-
-\newenvironment*{amuseplay}{
-  \leftskip=\parindent
-  \parindent=-\parindent
-  \smallskip
-  \indent
-}{\smallskip}
-
-\newcommand*{\Slash}{\slash\hspace{0pt}}
 
 [% UNLESS safe_options.sansfontsections %]
 \addtokomafont{disposition}{\rmfamily}
@@ -1153,51 +1103,13 @@ sub slides {
 [% tex_setup_langs %]
 \usetheme{[% safe_options.beamertheme %]}
 \usecolortheme{[% safe_options.beamercolortheme %]}
-\usepackage{graphicx}
-\usepackage{alltt}
-\usepackage{verbatim}
-\usepackage[stable]{footmisc}
-\usepackage[shortlabels]{enumitem}
-\usepackage{tabularx}
-\usepackage[normalem]{ulem}
-\def\hsout{\bgroup \ULdepth=-.55ex \ULset}
-% https://tex.stackexchange.com/questions/22410/strikethrough-in-section-title
-% Unclear if \protect  \hsout is needed. Doesn't looks so
-\DeclareRobustCommand{\sout}[1]{\texorpdfstring{\hsout{#1}}{#1}}
-\usepackage{wrapfig}
+
 [% IF doc.is_rtl %]
 \setbeamertemplate{frametitle}[default][right]
 [% END %]
 
 % remove the numbering
 \setcounter{secnumdepth}{-2}
-
-% avoid breakage on multiple <br><br> and avoid the next [] to be eaten
-\newcommand*{\forcelinebreak}{\strut\\*{}}
-
-\newcommand*{\hairline}{%
-  \bigskip%
-  \noindent \hrulefill%
-  \bigskip%
-}
-
-% reverse indentation for biblio and play
-
-\newenvironment*{amusebiblio}{
-  \leftskip=\parindent
-  \parindent=-\parindent
-  \smallskip
-  \indent
-}{\smallskip}
-
-\newenvironment*{amuseplay}{
-  \leftskip=\parindent
-  \parindent=-\parindent
-  \smallskip
-  \indent
-}{\smallskip}
-
-\newcommand*{\Slash}{\slash\hspace{0pt}}
 
 \title{[% doc.header_as_latex.title %]}
 \date{[% doc.header_as_latex.date %]}

@@ -613,7 +613,7 @@ sub sl_tex {
     my $texfile = $self->name . '.sl.tex';
     return unless $self->wants_slides;
     return $self->_process_template($self->templates->slides,
-                                    $self->_prepare_tex_tokens,
+                                    $self->_prepare_tex_tokens(is_slide => 1),
                                     $texfile);
 }
 
@@ -1209,6 +1209,7 @@ sub _process_template {
 sub _prepare_tex_tokens {
     my ($self, %args) = @_;
     my $doc = $self->document;
+    my $is_slide = delete $args{is_slide};
     my %tokens = %{ $self->tex_options };
     my $escaped_args = $self->_escape_options_hashref(ltx => \%args);
     foreach my $k (keys %$escaped_args) {
@@ -1245,6 +1246,7 @@ sub _prepare_tex_tokens {
 
     my $fonts = $self->fonts;
 
+    # not used but for legacy templates
         $parsed{mainfont} = $fonts->main->name;
         $parsed{sansfont} = $fonts->sans->name;
         $parsed{monofont} = $fonts->mono->name;
@@ -1254,6 +1256,7 @@ sub _prepare_tex_tokens {
       ->compose_polyglossia_fontspec_stanza(lang => $doc->language,
                                             others => $doc->other_languages || [],
                                             bidi => $doc->is_bidi,
+                                            is_slide => $is_slide,
                                            );
     # no cover page if header or compiler says so, or
     # if coverpage_only_if_toc is set and doc doesn't have a toc.

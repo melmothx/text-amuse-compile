@@ -618,19 +618,38 @@ has beamercolortheme => (is => 'rw',
 
 =over 4
 
-=item * fussy
-
-Do not use a sloppy TeX run, but instead be strict on paragraph
-building. This is going to generate overfull boxes, though. You can
-adjust the tex_tolerance below to reduce their number. Overfull boxes
-are reported.
-
 =item * tex_tolerance
 
 An integer between 0 and 10000
 
 Quoting: a parameter that tells TeX how much badness is allowable
-without error. Default to 1000. This is used only on a fussy run.
+without error. Default to 200.
+
+\tolerance sets the maximum "badness" that tex is allowed to use while
+setting the paragraph, that is it inserts breakpoints allowing white
+space to stretch and penalties to be taken, so long as the badness
+keeps below this threshold. If it can not do that then you get
+overfull boxes. So different values produce different typeset result.
+
+=item * tex_emergencystretch
+
+Default to 30pt. It can be a TeX measure (I guess pt is what makes
+most sense for our use)
+
+\emergencystretch (added at TeX3) is used if TeX can not set the
+paragraph below the \tolerance badness, but rather than make overfull
+boxes it tries an extra pass "pretending" that every line has an
+additional \emergencystretch of stretchable glue, this allows the
+overall badness to be kept below 1000 and stops TeX "giving up" and
+putting all stretch into one line. So \emergencystretch does not
+change the setting of "good" paragraphs, it only changes the setting
+of paragraphs that would have produced over-full boxes. Note that you
+get warnings about the real badness calculation from TeX even though
+it retries with \emergencystretch the extra stretch is used to control
+the typesetting but it is not considered as good for the purposes of
+logging.
+
+See L<https://tex.stackexchange.com/questions/241343/what-is-the-meaning-of-fussy-sloppy-emergencystretch-tolerance-hbadness> for reference.
 
 =item * fussy_last_word
 
@@ -662,13 +681,14 @@ underscores.
 
 =cut
 
-has fussy => (is => 'rw',
-              isa => Bool,
-              default => sub { 0 });
-
 has tex_tolerance => (is => 'rw',
                   isa => \&_is_tex_tolerance,
-                  default => sub { 1000 });
+                  default => sub { 200 });
+
+has tex_emergencystretch => (is => 'rw',
+                             isa => \&_is_tex_measure,
+                             default => sub { '30pt' }, # more or less 3em
+                            );
 
 has fussy_last_word => (is => 'rw',
                         isa => Bool,
@@ -721,7 +741,7 @@ sub config_setters {
                areaset_height
                mainfont sansfont monofont fontsize
                sitename siteslogan site logo
-               fussy
+               tex_emergencystretch
                tex_tolerance
                fussy_last_word
                headings

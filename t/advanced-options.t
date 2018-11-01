@@ -6,7 +6,7 @@ use warnings;
 use Text::Amuse::Compile;
 use Path::Tiny;
 use Data::Dumper;
-use Test::More tests => 77;
+use Test::More tests => 99;
 
 my $muse = <<"MUSE";
 #title My title
@@ -119,14 +119,13 @@ foreach my $options ({
                       areaset_height => '50mm',
                      },
                      {
-                      fussy => 1,
+                      tex_emergencystretch => '10pt',
                       tex_tolerance => 66666,
                      },
                      {
-                      fussy => 1,
+                      tex_emergencystretch => '0pt',
                      },
                      {
-                      fussy => 0,
                       tex_tolerance => 66666,
                      },
                      {
@@ -161,20 +160,24 @@ foreach my $options ({
     else {
         unlike $tex, qr{\\areaset};
     }
-    if ($options->{fussy}) {
-        like $tex, qr{\\tolerance=}m;
-        if (!$options->{tex_tolerance} or $options->{tex_tolerance} > 10000) {
-            like $tex, qr{\\tolerance=1000$}m, "Tolerance is 1_000 (default)" or die;
-        }
-        else {
-            like $tex, qr{\\tolerance=\Q$options->{tex_tolerance}\E$}m,
-              "Tolerance is $options->{tex_tolerance}";
-        }
+    like $tex, qr{\\tolerance=}m;
+    if (!$options->{tex_tolerance} or $options->{tex_tolerance} > 10000) {
+        like $tex, qr{\\tolerance=200$}m, "Tolerance is 200 (default)" or die;
     }
     else {
-        unlike $tex, qr{\\tolerance=}, "No tolerance set";
-        like $tex, qr{\\sloppy}, "Sloppy doc";
+        like $tex, qr{\\tolerance=\Q$options->{tex_tolerance}\E$}m,
+          "Tolerance is $options->{tex_tolerance}";
     }
+    unlike $tex, qr{^\\sloppy}m, "Not sloppy";
+
+    if ($options->{tex_emergencystretch} and $options->{tex_emergencystretch} =~ m/\A[0-9]+pt\z/) {
+        like $tex, qr/^\\setlength\{\\emergencystretch\}\{\Q$options->{tex_emergencystretch}\E\}$/m
+    }
+    else {
+        like $tex, qr/^\\setlength\{\\emergencystretch\}\{30pt\}$/m
+    }
+
+
     if ($options->{fussy_last_word}) {
         like $tex, qr{\\finalhyphendemerits=10000};
     }

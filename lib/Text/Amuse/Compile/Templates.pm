@@ -822,7 +822,6 @@ sub latex {
 % avoid vertical glue
 \raggedbottom
 
-[% IF safe_options.fussy %]
 % this will generate overfull boxes, so we need to set a tolerance
 % \pretolerance=1000
 % pretolerance is what is accepted for a paragraph without
@@ -830,10 +829,8 @@ sub latex {
 % accept tweak the tolerance instead.
 \tolerance=[% safe_options.tex_tolerance %]
 % Additional tolerance for bad paragraphs only
-\setlength{\emergencystretch}{2pt}
-[% ELSE %]
-\sloppy
-[% END %]
+\setlength{\emergencystretch}{[% safe_options.tex_emergencystretch %]}
+
 % (try to) forbid widows/orphans
 \clubpenalty=10000
 \widowpenalty=10000

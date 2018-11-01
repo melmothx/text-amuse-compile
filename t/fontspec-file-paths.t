@@ -5,7 +5,7 @@ use warnings;
 use Text::Amuse::Compile;
 use Path::Tiny;
 use Data::Dumper;
-use Test::More tests => 20;
+use Test::More tests => 21;
 
 my $muse = <<'MUSE';
 #title My title

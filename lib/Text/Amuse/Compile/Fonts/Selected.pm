@@ -30,10 +30,9 @@ has size => (is => 'ro', default => sub { 10 }, isa => Enum[9..14]);
 
 sub compose_polyglossia_fontspec_stanza {
     my ($self, %args) = @_;
-    my @others = @{ $args{others} || [] };
 
-    my @out = ("\\usepackage{fontspec}");
-    push @out, "\\usepackage{polyglossia}";
+    my @out = ("\\usepackage{fontspec}",
+               "\\usepackage{polyglossia}");
 
     # main language
     my $orig_lang = $args{lang} || 'english';
@@ -42,23 +41,24 @@ sub compose_polyglossia_fontspec_stanza {
                    macedonian => 'russian',
                    serbian => 'croatian',
                   );
+
     my $lang = $aliases{$orig_lang} || $orig_lang;
+    my %langs = ($lang => 1, map { $aliases{$_} || $_  => 1 } @{ $args{others} || [] } );
+
     push @out, "\\setmainlanguage{$lang}";
+    if (my @other_langs = sort grep { $_ ne $lang } keys %langs) {
+        push @out, sprintf('\\setotherlanguages{%s}', join(",", @other_langs));
+    }
 
     foreach my $slot (qw/main mono sans/) {
         # original lang
         push @out, "\\set${slot}font" . $self->_fontspec_args($slot => $lang);
     }
 
-    my %langs = ($lang => 1, map { $aliases{$_} || $_  => 1 } @others );
-    foreach my $l (keys %langs) {
+    foreach my $l (sort keys %langs) {
         push @out, "\\newfontfamily\\${l}font" . $self->_fontspec_args(main => $l);
     }
 
-    delete $langs{$lang};
-    if (my @other_langs = sort keys %langs) {
-        push @out, sprintf('\\setotherlanguages{%s}', join(",", @other_langs));
-    }
 
     # special cases.
     my %toc_names = (

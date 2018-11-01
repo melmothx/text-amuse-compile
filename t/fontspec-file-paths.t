@@ -22,7 +22,7 @@ MUSE
                                                }
                                      );
     my $fonts = $c->fonts;
-    is $fonts->main->regular->basename, 'regular';
+    is $fonts->main->regular->basename, 'regular.otf';
     is $fonts->main->regular->extension, '.otf';
     is $fonts->main->regular->basename_and_ext, 'regular.otf';
     diag $fonts->main->regular->dirname;

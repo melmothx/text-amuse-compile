@@ -61,7 +61,9 @@ has parsed_path => (is => 'lazy',
 sub _build_parsed_path {
     my $self = shift;
     if (my $file = $self->file) {
-        return [ File::Basename::fileparse(File::Spec->rel2abs($file), qr/\.(woff|ttf|otf)\z/i) ];
+        my ($filename, $dirs, $suffix) = File::Basename::fileparse(File::Spec->rel2abs($file),
+                                                                   qr/\.(woff|ttf|otf)\z/i);
+        return [ $filename . $suffix , $dirs, $suffix ];
     }
     else {
         return [ '', '', '' ];
@@ -74,13 +76,12 @@ sub basename {
     shift->parsed_path->[0];
 }
 
-sub dirname {
-    shift->parsed_path->[1];
+sub basename_and_ext {
+    shift->parsed_path->[0];
 }
 
-sub basename_and_ext {
-    my $parts = shift->parsed_path;
-    return $parts->[0] . $parts->[2];
+sub dirname {
+    shift->parsed_path->[1];
 }
 
 sub extension {

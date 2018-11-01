@@ -25,16 +25,28 @@ The shape of the font. Must be regular, bold, italic or bolditalic.
 =head2 format
 
 Built lazily from the filename, validating it and crashing if it's not
-otf, ttf or woff.
+otf or ttf.
 
 =head2 mimetype
 
 Built lazily from the filename, validating it and crashing if it's not
-otf, ttf or woff.
+otf or ttf
 
 =head2 basename
 
-The basename of the font.
+The basename of the font, includin the extension.
+
+=head2 basename_and_ext
+
+Alias for C<basename>
+
+=head2 extension
+
+The file extension, including the dot.
+
+=head2 dirname
+
+The directory, including the trailing slash.
 
 =cut
 
@@ -42,7 +54,7 @@ has file => (is => 'ro',
              required => 1,
              isa => sub {
                  die "$_[0] is not a font file"
-                   unless $_[0] && -f $_[0] && $_[0] =~ m/\.(woff|ttf|otf)\z/i
+                   unless $_[0] && -f $_[0] && $_[0] =~ m/\.(ttf|otf)\z/i
                });
 
 has shape => (is => 'ro',
@@ -55,14 +67,14 @@ has format => (is => 'lazy',
 has mimetype => (is => 'lazy',
                  isa => Str);
 
-has parsed_path => (is => 'lazy',
+has _parsed_path => (is => 'lazy',
                     isa => ArrayRef);
 
-sub _build_parsed_path {
+sub _build__parsed_path {
     my $self = shift;
     if (my $file = $self->file) {
         my ($filename, $dirs, $suffix) = File::Basename::fileparse(File::Spec->rel2abs($file),
-                                                                   qr/\.(woff|ttf|otf)\z/i);
+                                                                   qr/\.(ttf|otf)\z/i);
         return [ $filename . $suffix , $dirs, $suffix ];
     }
     else {
@@ -73,19 +85,19 @@ sub _build_parsed_path {
 # my ($filename, $dirs, $suffix) = fileparse($path, @suffixes);
 
 sub basename {
-    shift->parsed_path->[0];
+    shift->_parsed_path->[0];
 }
 
 sub basename_and_ext {
-    shift->parsed_path->[0];
+    shift->_parsed_path->[0];
 }
 
 sub dirname {
-    shift->parsed_path->[1];
+    shift->_parsed_path->[1];
 }
 
 sub extension {
-    shift->parsed_path->[2];
+    shift->_parsed_path->[2];
 }
 
 sub _build_format {

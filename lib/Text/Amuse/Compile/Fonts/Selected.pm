@@ -67,7 +67,7 @@ sub compose_polyglossia_fontspec_stanza {
 
     if (my $toc_name = $toc_names{$orig_lang}) {
         push @out, sprintf('\\renewcaptionname{%s}{\\contentsname}{%s}',
-                           $orig_lang, $toc_names{$orig_lang});
+                           $lang, $toc_names{$orig_lang});
     }
     if ($args{bidi}) {
         push @out, '\\usepackage{bidi}';

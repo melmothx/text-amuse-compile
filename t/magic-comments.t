@@ -8,7 +8,7 @@ use warnings;
 use Text::Amuse::Compile;
 use Path::Tiny;
 use Data::Dumper;
-use Test::More tests => 3;
+use Test::More tests => 16;
 
 my $muse = <<'MUSE';
 #title My title
@@ -18,16 +18,19 @@ Test
 START
 ; :DEFAULT: \sloppy
 ; :c111: \fussy
+; :c9: \newpage
 
 Done
 
+; :c9: \sloppy 10
+; :c9: \vskip 10mm
 ; :DEFAULT: \fussy
 ; :c111: \sloppy
 END
 
 MUSE
 
-foreach my $id (qw/DEFAULT c111 c1/) {
+foreach my $id (qw/DEFAULT c111 c1 c9/) {
     my $wd = Path::Tiny->tempdir(CLEANUP => !$ENV{NOCLEANUP});
     my $file = $wd->child("text.muse");
     $file->spew_utf8($muse);
@@ -47,4 +50,13 @@ foreach my $id (qw/DEFAULT c111 c1/) {
     else {
         unlike $tex, qr{START.*\\(fussy|sloppy).*Done.*\\(sloppy|fussy).*END/}ms;
     }
+    if ($id eq 'c9') {
+        like $tex, qr{^\\newpage$}m;
+        like $tex, qr{^\\vskip 10mm$}m;
+    }
+    else {
+        like $tex, qr{^\%.*?\\textbackslash\{\}newpage$}m;
+        like $tex, qr{^\%.*?\\textbackslash\{\}vskip 10mm$}m;
+    }
+    unlike $tex, qr{\\sloppy 10};
 }

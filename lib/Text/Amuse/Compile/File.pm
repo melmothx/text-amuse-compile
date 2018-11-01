@@ -1295,7 +1295,13 @@ sub _interpolate_magic_comments {
                 \:\Q$format\E\:
                 \x{20}+
                 \\textbackslash\{\}
-                (sloppy|fussy)
+                ( # permitted commands
+                    sloppy |
+                    fussy  |
+                    newpage |
+                    strut |
+                    vskip\x{20}+[1-9][0-9]*(?:mm|cm|pt)
+                )
                 \x{20}*
                 $}xms;
     $latex =~ s/$re/\\$1/g;

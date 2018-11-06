@@ -359,6 +359,11 @@ div#page {
 pre, code {
     font-family: [% IF fonts %]"[% fonts.mono.name %]",[% END %]Consolas, courier, monospace;
 }
+
+pre {
+    overflow: auto;
+}
+
 /* invisibles */
 span.hiddenindex, span.commentmarker, .comment, span.tocprefix, #hitme {
     display: none

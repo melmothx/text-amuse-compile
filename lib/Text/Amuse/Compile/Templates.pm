@@ -796,10 +796,13 @@ sub latex {
 \addtokomafont{caption}{\centering}
 
 [% IF safe_options.continuefootnotes %]
+[% UNLESS safe_options.nocoverpage %]
 % continuous numbering across the document. Defaults to resetting at chapter.
 \usepackage{chngcntr}
 \counterwithout{footnote}{chapter}
 [% END %]
+[% END %]
+
 [% IF safe_options.centerchapter %]
 \let\raggedchapter\centering
 [% END %]

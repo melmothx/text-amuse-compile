@@ -337,7 +337,6 @@ p.tableofcontentline {
 blockquote > p, li > p {
    margin-top: 0.5em;
    text-indent: 0em;
-   text-align: justify;
 }
 
 a {

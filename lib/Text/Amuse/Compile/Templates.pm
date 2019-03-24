@@ -348,6 +348,14 @@ a {
    text-decoration: none;
 }
 
+[% IF epub %]
+/* Workaround for CoolReader, which does not seem to have default style for blockquotes. */
+/* These values are taken from https://www.w3schools.com/cssref/css_default_values.asp */
+blockquote {
+   margin: 1em 40px;
+}
+[% END %]
+
 [% IF html %]
 div#page {
    margin:20px;

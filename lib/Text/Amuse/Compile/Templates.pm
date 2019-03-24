@@ -324,7 +324,7 @@ div#thework {
     margin-top: 3em;
 }
 
-div#thework > p {
+div#thework p {
    margin: 0;
    text-indent: 1em;
    text-align: justify;

@@ -324,7 +324,7 @@ div#thework {
     margin-top: 3em;
 }
 
-div#thework > p {
+div#thework p {
    margin: 0;
    text-indent: 1em;
    text-align: justify;
@@ -332,12 +332,6 @@ div#thework > p {
 
 p.tableofcontentline {
    margin: 0;
-}
-
-blockquote > p, li > p {
-   margin-top: 0.5em;
-   text-indent: 0em;
-   text-align: justify;
 }
 
 a {
@@ -348,6 +342,14 @@ a {
 .table-of-contents a {
    text-decoration: none;
 }
+
+[% IF epub %]
+/* Workaround for CoolReader, which does not seem to have default style for blockquotes. */
+/* These values are taken from https://www.w3schools.com/cssref/css_default_values.asp */
+blockquote {
+   margin: 1em 40px;
+}
+[% END %]
 
 [% IF html %]
 div#page {

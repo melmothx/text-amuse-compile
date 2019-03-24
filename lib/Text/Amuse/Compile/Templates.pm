@@ -334,11 +334,6 @@ p.tableofcontentline {
    margin: 0;
 }
 
-blockquote > p, li > p {
-   margin-top: 0.5em;
-   text-indent: 0em;
-}
-
 a {
    color:#000000;
    text-decoration: underline;

@@ -500,11 +500,11 @@ div.caption {
     text-align: center;
 }
 
-div.center {
+div#thework div.center p {
     text-align: center;
 }
 
-div.right {
+div#thework div.right p {
     text-align: right;
 }
 

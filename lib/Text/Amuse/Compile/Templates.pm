@@ -324,10 +324,20 @@ div#thework {
     margin-top: 3em;
 }
 
-div#thework p {
+div#thework > p {
    margin: 0;
    text-indent: 1em;
    text-align: justify;
+}
+
+/*
+ * Separate paragraphs inside blockquotes and lists
+ * with margins
+ * instead of indentation to emulate LaTeX layout.
+ */
+div#thework blockquote > p, li > p {
+  margin-top: 0.5em;
+  text-indent: 0;
 }
 
 p.tableofcontentline {
@@ -500,11 +510,11 @@ div.caption {
     text-align: center;
 }
 
-div.center {
+div#thework div.center p {
     text-align: center;
 }
 
-div.right {
+div#thework div.right p {
     text-align: right;
 }
 

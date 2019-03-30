@@ -330,18 +330,14 @@ div#thework > p {
    text-align: justify;
 }
 
-/*
- * Separate paragraphs inside blockquotes and lists
- * with margins
- * instead of indentation to emulate LaTeX layout.
- */
-div#thework blockquote > p, li > p {
-  margin-top: 0.5em;
-  text-indent: 0;
-}
-
 p.tableofcontentline {
    margin: 0;
+}
+
+blockquote > p, li > p {
+   margin-top: 0.5em;
+   text-indent: 0em;
+   text-align: justify;
 }
 
 a {
@@ -352,14 +348,6 @@ a {
 .table-of-contents a {
    text-decoration: none;
 }
-
-[% IF epub %]
-/* Workaround for CoolReader, which does not seem to have default style for blockquotes. */
-/* These values are taken from https://www.w3schools.com/cssref/css_default_values.asp */
-blockquote {
-   margin: 1em 40px;
-}
-[% END %]
 
 [% IF html %]
 div#page {
@@ -510,11 +498,11 @@ div.caption {
     text-align: center;
 }
 
-div#thework div.center p {
+div.center {
     text-align: center;
 }
 
-div#thework div.right p {
+div.right {
     text-align: right;
 }
 

@@ -59,5 +59,8 @@ my $wd = Path::Tiny->tempdir(CLEANUP => !$ENV{NOCLEANUP});
                                      );
     $c->compile("$file");
     my $tex = $wd->child("text.tex")->slurp_utf8;
+    # normalize both to quick fix win32 tests
+    $exp =~ s/\r//gs;
+    $tex =~ s/\r//gs;
     like $tex, qr{\Q$exp\E};
 }

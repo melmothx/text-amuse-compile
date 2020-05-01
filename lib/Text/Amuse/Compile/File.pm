@@ -29,6 +29,7 @@ use Text::Amuse::Functions qw/muse_fast_scan_header
 use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::TemplateOptions;
 use Text::Amuse::Compile::MuseHeader;
+use Text::Amuse::Compile::Indexer;
 use Types::Standard qw/Str Bool Object Maybe CodeRef HashRef InstanceOf/;
 use Moo;
 
@@ -1270,6 +1271,11 @@ sub _prepare_tex_tokens {
         $parsed{fontsize} = $fonts->size;
 
     my $latex_body = $self->_interpolate_magic_comments($template_options->format_id, $doc);
+
+    my @indexes = $self->document_indexes;
+    $latex_body = Text::Amuse::Compile::Indexer->new(latex_body => $latex_body,
+                                                     index_specs => \@indexes)->indexed_tex_body;
+
     my $enable_secondary_footnotes = $latex_body =~ m/\\footnoteB\{/;
 
     # check if the template body support this conditional, which is new. If not,
@@ -1425,5 +1431,16 @@ sub _format_epub_fragment {
     my ($self, $index) = @_;
     return sprintf('piece%06d.xhtml', $index || 0);
 }
+
+sub document_indexes {
+    my ($self) = @_;
+    my @docs = ($self->virtual ? ($self->document->docs) : ( $self->document ));
+    my @comments = grep { /^INDEX/ }
+      map { $_->string }
+      grep { $_->type eq 'comment' }
+      map { $_->document->elements } @docs;
+    return @comments;
+}
+
 
 1;

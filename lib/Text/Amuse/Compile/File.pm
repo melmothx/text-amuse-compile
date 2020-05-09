@@ -1435,7 +1435,7 @@ sub _format_epub_fragment {
 sub document_indexes {
     my ($self) = @_;
     my @docs = ($self->virtual ? ($self->document->docs) : ( $self->document ));
-    my @comments = grep { /^INDEX/ }
+    my @comments = grep { /\AINDEX +([a-z]+): (.+)/ }
       map { $_->string }
       grep { $_->type eq 'comment' }
       map { $_->document->elements } @docs;

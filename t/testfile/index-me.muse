@@ -3,14 +3,14 @@
 #lang it
 
 <comment>
-INDEX-1: Indice dei nomi
+INDEX nomi: Indice dei nomi
 Kublai-Kan: Kublai-Kan
 Kublai: Kublai-Kan
 Maffio: Polo, Maffio
 </comment>
 
 <comment>
-INDEX-2: Indice dei luoghi
+INDEX luoghi: Indice dei luoghi
 # commento
 Dalmazia
 Sebenico

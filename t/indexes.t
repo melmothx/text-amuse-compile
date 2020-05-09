@@ -2,7 +2,7 @@
 use utf8;
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More tests => 4;
 use Text::Amuse::Compile;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Indexer;
@@ -27,6 +27,13 @@ use Path::Tiny;
     diag Dumper($cfile->document_indexes);
     my $indexer = Text::Amuse::Compile::Indexer->new(latex_body => $doc->as_latex,
                                                      index_specs => [ $cfile->document_indexes ]);
-    diag $indexer->interpolate_indexes;
+    diag Dumper($indexer->specifications);
+    foreach my $spec (@{ $indexer->specifications }) {
+        diag Dumper($spec->matches);
+    }
+    ok scalar(grep { /\\index/ } split(/\n/, $indexer->interpolate_indexes)), "Found indexes";
+    foreach my $spec (@{ $indexer->specifications }) {
+        ok $spec->total_found, "Found " . $spec->index_label . ':' . $spec->total_found;
+    }
 }
 

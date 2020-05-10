@@ -1272,10 +1272,6 @@ sub _prepare_tex_tokens {
 
     my $latex_body = $self->_interpolate_magic_comments($template_options->format_id, $doc);
 
-    my @indexes = $self->document_indexes;
-    $latex_body = Text::Amuse::Compile::Indexer->new(latex_body => $latex_body,
-                                                     index_specs => \@indexes)->indexed_tex_body;
-
     my $enable_secondary_footnotes = $latex_body =~ m/\\footnoteB\{/;
 
     # check if the template body support this conditional, which is new. If not,
@@ -1293,6 +1289,19 @@ sub _prepare_tex_tokens {
                                             bidi => $doc->is_bidi,
                                             is_slide => $is_slide,
                                            );
+
+    my @indexes;
+    if (my @raw_indexes = $self->document_indexes) {
+        my $indexer = Text::Amuse::Compile::Indexer->new(latex_body => $latex_body,
+                                                         index_specs => \@raw_indexes);
+        $latex_body = $indexer->indexed_tex_body;
+        @indexes = map { +{
+                           name => $_->index_name,
+                           title => $_->index_label,
+                          } }
+          @{ $indexer->specifications };
+    }
+
     # no cover page if header or compiler says so, or
     # if coverpage_only_if_toc is set and doc doesn't have a toc.
     if ($self->nocoverpage or
@@ -1317,6 +1326,7 @@ sub _prepare_tex_tokens {
             latex_body => $latex_body,
             enable_secondary_footnotes => $enable_secondary_footnotes,
             tex_metadata => $self->file_header->tex_metadata,
+            tex_indexes => \@indexes,
            };
 }
 

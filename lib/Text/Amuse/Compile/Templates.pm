@@ -884,6 +884,11 @@ sub latex {
 [% END %]
 \deffootnote[3em]{0em}{4em}{\textsuperscript{\thefootnotemark}~}
 
+\usepackage[noautomatic]{imakeidx}
+[% FOREACH idx IN tex_indexes %]
+\makeindex[name=[% idx.name %],title={[% idx.title %]}]
+[% END %]
+
 [% UNLESS safe_options.sansfontsections %]
 \addtokomafont{disposition}{\rmfamily}
 \addtokomafont{descriptionlabel}{\rmfamily}
@@ -1053,6 +1058,11 @@ pdfkeywords={[% tex_metadata.keywords %]}%
 [% END %]
 
 [% latex_body %]
+
+[% FOREACH idx IN tex_indexes %]
+\printindex[[% idx.name %]]
+[% END %]
+
 
 [% UNLESS safe_options.nofinalpage %]
 % begin final page

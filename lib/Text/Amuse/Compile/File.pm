@@ -30,7 +30,7 @@ use Text::Amuse::Compile::Templates;
 use Text::Amuse::Compile::TemplateOptions;
 use Text::Amuse::Compile::MuseHeader;
 use Text::Amuse::Compile::Indexer;
-use Types::Standard qw/Str Bool Object Maybe CodeRef HashRef InstanceOf/;
+use Types::Standard qw/Str Bool Object Maybe CodeRef HashRef InstanceOf ArrayRef/;
 use Moo;
 
 =encoding utf8
@@ -162,6 +162,7 @@ has file_header => (is => 'lazy', isa => Object);
 has coverpage_only_if_toc => (is => 'ro', isa => Bool, default => sub { 0 });
 has fonts => (is => 'ro', required => 1, isa => InstanceOf['Text::Amuse::Compile::Fonts::Selected']);
 has epub_embed_fonts => (is => 'ro', isa => Bool, default => sub { 1 });
+has indexes => (is => 'rwp', isa => Maybe[ArrayRef]);
 
 sub _build_file_header {
     my $self = shift;
@@ -681,11 +682,31 @@ sub _compile_pdf {
         die "Source must be a tex source file\n";
     }
     $self->log_info("Compiling $source to $output\n") if DEBUG;
+    my $max = 3;
+    my @run_xindy;
     # maybe a check on the toc if more runs are needed?
     # 1. create the toc
     # 2. insert the toc
     # 3. adjust the toc. Should be ok, right?
-    foreach my $i (1..3) {
+    foreach my $idx (@{ $self->indexes || [] }) {
+        push @run_xindy, [
+                          texindy => '--quiet',
+                          -L => $idx->{language},
+                          -I => 'xelatex',
+                          -C => 'utf8',
+                          $idx->{name} . '.idx',
+                         ];
+    }
+    if (@run_xindy) {
+        $max++;
+    }
+    foreach my $i (1..$max) {
+        if ($i > 2 and @run_xindy) {
+            foreach my $exec (@run_xindy) {
+                $self->log_info("Executing " . join(" ", @$exec) . "\n");
+                system(@$exec) == 0 or $self->log_error("Errors running " . join(" ", @$exec) ."\n");
+            }
+        }
         my $pipe = IO::Pipe->new;
         # parent swallows the output
         my $latexname = $self->luatex ? 'LuaLaTeX' : 'XeLaTeX';
@@ -1295,13 +1316,47 @@ sub _prepare_tex_tokens {
         my $indexer = Text::Amuse::Compile::Indexer->new(latex_body => $latex_body,
                                                          index_specs => \@raw_indexes);
         $latex_body = $indexer->indexed_tex_body;
+        my %xindy_langs = (
+                           bg => 'bulgarian',
+                           cs => 'czech',
+                           da => 'danish',
+                           de => 'german-din', # ae is sorted like ae. alternative -duden
+                           el => 'greek',
+                           en => 'english',
+                           es => 'spanish-modern',
+                           et => 'estonian',
+                           fi => 'finnish',
+                           fr => 'french',
+                           hr => 'croatian',
+                           hu => 'hungarian',
+                           is => 'icelandic',
+                           it => 'italian',
+                           lv => 'latvian',
+                           lt => 'lithuanian',
+                           mk => 'macedonian',
+                           # nl => 'dutch', # unclear why missing
+                           no => 'norwegian',
+                           sr => 'croatian', # serbian is cyrillic
+                           ro => 'romanian',
+                           ru => 'russian',
+                           sk => 'slovak-small', # exists also slovak-large
+                           sl => 'slovenian',
+                           pl => 'polish',
+                           pt => 'portuguese',
+                           sq => 'albanian',
+                           sv => 'swedish',
+                           tr => 'turkish',
+                           uk => 'ukrainian',
+                           vi => 'vietnamese',
+                          );
         @indexes = map { +{
                            name => $_->index_name,
                            title => $_->index_label,
+                           language => $xindy_langs{$doc->language_code} || 'general',
                           } }
           @{ $indexer->specifications };
     }
-
+    $self->_set_indexes(@indexes ? \@indexes : undef);
     # no cover page if header or compiler says so, or
     # if coverpage_only_if_toc is set and doc doesn't have a toc.
     if ($self->nocoverpage or

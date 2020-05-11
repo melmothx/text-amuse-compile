@@ -7,6 +7,7 @@ INDEX nomi: Indice dei nomi
 Kublai-Kan: Kublai-Kan
 Kublai: Kublai-Kan
 Maffio: Polo, Maffio
+Gran Cane: Gran Khan
 </comment>
 
 <comment>
@@ -16,6 +17,7 @@ Dalmazia
 Sebenico
 Venezia
 Bassora
+Vinegia: Venezia
 </comment>
 
 

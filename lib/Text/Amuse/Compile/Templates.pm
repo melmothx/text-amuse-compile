@@ -746,6 +746,13 @@ sub latex {
 [% END %]
 [% END %]
 
+[% IF tex_indexes %]
+\usepackage[noautomatic]{imakeidx}
+[% FOREACH idx IN tex_indexes %]
+\makeindex[name=[% idx.name %],title={[% idx.title %]}]
+[% END %]
+[% END %]
+
 [% tex_setup_langs %]
 
 [% IF safe_options.nocoverpage %]
@@ -883,11 +890,6 @@ sub latex {
 [% END %]
 [% END %]
 \deffootnote[3em]{0em}{4em}{\textsuperscript{\thefootnotemark}~}
-
-\usepackage[noautomatic]{imakeidx}
-[% FOREACH idx IN tex_indexes %]
-\makeindex[name=[% idx.name %],title={[% idx.title %]}]
-[% END %]
 
 [% UNLESS safe_options.sansfontsections %]
 \addtokomafont{disposition}{\rmfamily}

@@ -6,29 +6,34 @@ use Moo;
 use Types::Standard qw/Str ArrayRef Object/;
 use Data::Dumper;
 use Text::Amuse::Compile::Indexer::Specification;
+use Text::Amuse::Functions qw/muse_format_line/;
 
 has latex_body => (is => 'ro', required => 1, isa => Str);
 has index_specs => (is => 'ro', required => 1, isa => ArrayRef[Str]);
 has specifications => (is => 'lazy', isa => ArrayRef[Object]);
+has language_code => (is => 'ro');
 
 sub _build_specifications {
     my $self = shift;
     my @specs;
+    my $lang = $self->language_code;
+    my $escape = sub {
+        return muse_format_line(ltx => $_[0], $lang);
+    };
     foreach my $str (@{$self->index_specs}) {
         my ($first, @lines) = split(/\n+/, $str);
         if ($first =~ m/^INDEX ([a-z]+): (.+)/) {
+            my ($name, $label) = ($1, $2);
             my @patterns;
             # remove the comments and the white space
             foreach my $str (@lines) {
                 $str =~ s/\A\s*//g;
                 $str =~ s/\s*\z//g;
-                if ($str and $str !~ m/^#/) {
-                    push @patterns, $str;
-                }
+                push @patterns, $escape->($str) if $str;
             }
             push @specs, Text::Amuse::Compile::Indexer::Specification->new(
-                                                                           index_name => $1,
-                                                                           index_label => $2,
+                                                                           index_name => $escape->($name),
+                                                                           index_label => $escape->($label),
                                                                            patterns => \@patterns,
                                                                           );
         }

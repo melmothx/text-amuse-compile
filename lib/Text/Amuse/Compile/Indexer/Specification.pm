@@ -35,11 +35,16 @@ sub _build_matches {
         $label ||= $match;
         push @pairs, {
                       match => $match,
-                      tokens => [ split(/\b/, $match) ],
+                      tokens => [ explode_line($match) ],
                       label => $label,
                      };
     }
     return [ sort { @{$b->{tokens}} <=> @{$a->{tokens}} or $a->{match} cmp $b->{match} } @pairs ];
+}
+
+sub explode_line {
+    my $l = shift;
+    return grep { length($_) } map { split(/(\s+)/, $_) } split(/\b/, $l);
 }
 
 1;

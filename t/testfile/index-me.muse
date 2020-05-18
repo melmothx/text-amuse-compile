@@ -12,7 +12,6 @@ Gran Cane: Gran Khan
 
 <comment>
 INDEX luoghi: Indice dei luoghi
-# commento
 Dalmazia
 Sebenico
 Venezia

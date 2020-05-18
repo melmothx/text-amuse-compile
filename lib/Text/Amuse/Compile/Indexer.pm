@@ -73,9 +73,12 @@ sub interpolate_indexes {
         my $is_comment = $l =~ m/^%/;
         my @prepend;
         my @out;
-        my @words = split(/\b/, $l);
+        my @words = Text::Amuse::Compile::Indexer::Specification::explode_line($l);
         my $last_word = $#words;
         my $i = 0;
+        # print Dumper(\@words);
+        # print "Last is $last_word\n";
+
       WORD:
         while ($i <= $last_word) {
           SPEC:
@@ -83,7 +86,7 @@ sub interpolate_indexes {
                 my $index_name = $spec->index_name;
               MATCH:
                 foreach my $m (@{ $spec->matches }) {
-                    # print Dumper([\@words, $m]);
+                    # print Dumper([$i, \@words, $m]);
                     my @search = @{$m->{tokens}};
                     my $add_to_index = $#search;
                     next MATCH unless @search;

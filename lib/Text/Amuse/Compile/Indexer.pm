@@ -21,7 +21,7 @@ sub _build_specifications {
         return muse_format_line(ltx => $_[0], $lang);
     };
     foreach my $str (@{$self->index_specs}) {
-        my ($first, @lines) = split(/\n+/, $str);
+        my ($first, @lines) = grep { length($_) } split(/\n+/, $str);
         if ($first =~ m/^INDEX ([a-z]+): (.+)/) {
             my ($name, $label) = ($1, $2);
             my @patterns;
@@ -57,10 +57,10 @@ sub indexed_tex_body {
 sub interpolate_indexes {
     my $self = shift;
     my $full_body = $self->latex_body;
-    # remove the index themself
+    # remove the indexes
     $full_body =~ s/\\begin\{comment\}
                     \s*
-                    INDEX
+                    INDEX\x{20}+[a-z]+:
                     .*?
                     \\end\{comment\}//gsx;
 

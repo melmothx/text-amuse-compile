@@ -2,7 +2,7 @@
 use utf8;
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 15;
 use Text::Amuse::Compile;
 use Text::Amuse::Compile::File;
 use Text::Amuse::Compile::Indexer;
@@ -71,6 +71,12 @@ my $c = Text::Amuse::Compile->new(
     }
     ok $tex->exists, "$tex exists";
     my $tex_body = $tex->slurp_utf8;
+
+    like $tex_body, qr/\\begin\{comment\}\s+INDEX testć: Kazalo imena/,
+      "non index comment is in place";
+    like $tex_body, qr/\\makeindex\[name=imena,title=\{\\textbackslash\{\}crash\\\{Žćđ\\\}\}\]/;
+    like $tex_body, qr/\\makeindex\[name=mjesta,title=\{Kazalo mjesta\}\]/;
+
     my $tex_indexed;
 
     if ($tex_body =~ m/STARTHERE(.*)ENDHERE/s) {
@@ -79,8 +85,6 @@ my $c = Text::Amuse::Compile->new(
 
     eq_or_diff([ split(/\n/, $tex_indexed) ],
                [ split(/\n/, path(qw/t testfile index-me-1.expected/)->slurp_utf8) ]);
-
-    # now test \index and label
 
     # now we create a same file, but without the magic comment, so
     # indexes are not triggered

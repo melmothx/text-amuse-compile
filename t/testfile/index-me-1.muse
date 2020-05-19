@@ -12,8 +12,8 @@ Krleža: Krleža, Miroslav
 Miroslav Krleža: Krleža, Miroslav
 Andrić: Andrić, Ivo
 *em*: % test me %&_ without characters with curly because it breaks the test
-{^legittest^}: Legit test
-{"legittest"}: Legit test
+{^legittest^}: Legit test$
+{"legittest"}: Legit test$
 \test: another & test
 Prova~~prova: Prova
 </comment>

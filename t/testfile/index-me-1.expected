@@ -4,7 +4,7 @@
 \clearpage
 
 
-\index[imena]{Legit test}\{\^{}legittest\^{}\}
+\index[imena]{Legit test\$}\{\^{}legittest\^{}\}
 
 
 \clearpage
@@ -40,13 +40,13 @@ Ivo \index[imena]{Andrić, Ivo}Andrić\dots{}
 \clearpage
 
 
-\index[imena]{Legit test}\{"legittest"\}
+\index[imena]{Legit test\$}\{"legittest"\}
 
 
 \clearpage
 
 
-\index[imena]{Prova}Prova~prova \index[imena]{Prova}Prova~prova \index[mjesta]{Ci}Ci \index[mjesta]{Dubrovnik}Dubrovnik \index[imena]{Legit test}\{"legittest"\}
+\index[imena]{Prova}Prova~prova \index[imena]{Prova}Prova~prova \index[mjesta]{Ci}Ci \index[mjesta]{Dubrovnik}Dubrovnik \index[imena]{Legit test\$}\{"legittest"\}
 
 
 \clearpage

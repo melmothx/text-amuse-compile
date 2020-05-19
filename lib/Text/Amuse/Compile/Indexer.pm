@@ -8,6 +8,52 @@ use Data::Dumper;
 use Text::Amuse::Compile::Indexer::Specification;
 use Text::Amuse::Functions qw/muse_format_line/;
 
+
+=encoding utf8
+
+=head1 NAME
+
+Text::Amuse::Compile::Indexer - Class for LaTeX indexes
+
+=head1 SYNOPSIS
+
+Everything here is pretty much private and used by L<Text::Amuse::Compile::File>
+
+=head1 ACCESSORS AND METHODS
+
+=over 4
+
+=item latex_body
+
+The body provided to the constructor
+
+=item index_specs
+
+The raw indexes
+
+=item specifications
+
+Lazy built, the L<Text::Amuse::Compile::Indexer::Specification>
+objects
+
+=item language_code
+
+The language ISO code. To be passed to C<muse_format_line>
+
+=item indexed_tex_body
+
+Method meant to be called from the L<Text::Amuse::Compile::File>
+object.
+
+=item interpolate_indexes
+
+Main method to get the job done.
+
+=back
+
+=cut
+
+
 has latex_body => (is => 'ro', required => 1, isa => Str);
 has index_specs => (is => 'ro', required => 1, isa => ArrayRef[Str]);
 has specifications => (is => 'lazy', isa => ArrayRef[Object]);

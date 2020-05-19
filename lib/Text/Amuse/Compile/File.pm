@@ -128,6 +128,14 @@ Boolean (default to true) which triggers the epub font embedding.
 
 Boolean (default to false). Activates the conditional article output.
 
+=item document_indexes
+
+The raw, unparsed indexes found in the muse comments
+
+=item indexes
+
+If present, the parsed indexes are stored here
+
 =back
 
 =cut

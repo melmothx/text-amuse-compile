@@ -1,6 +1,8 @@
 #!/usr/bin/make -f
 PACKAGE = $(shell dh_listpackages)
 TMP     = $(CURDIR)/debian/$(PACKAGE)
+export PATH := /opt/amusewiki-texlive/current/bin/arch:$(PATH)
+export TEST_WITH_LATEX := 1
 
 %:
 	dh $@

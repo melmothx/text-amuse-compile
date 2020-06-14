@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+1.44 2020-06-14
+
+ - Extend the range of permitted commands in the magic comments
+
 1.43 2020-06-12
 
  - Fix bug in handling xindy failure

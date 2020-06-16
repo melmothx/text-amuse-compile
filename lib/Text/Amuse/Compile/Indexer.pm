@@ -110,62 +110,78 @@ sub interpolate_indexes {
                     .*?
                     \\end\{comment\}//gsx;
 
-    my @lines = split(/\n/, $full_body);
-    my @outlines;
+    my @paragraphs = split(/\n\n/, $full_body);
+
+    # build a huge regexp with the matches
+    my %belongs_to;
+    my %labels;
+    my @matches;
+    foreach my $spec (@{$self->specifications}) {
+      MATCH:
+        foreach my $match (@{$spec->matches}) {
+            my $str = $match->{match};
+            if (exists $labels{$str}) {
+                warn "$str already has a label $labels{$str} " . $belongs_to{$str}->index_name;
+                next MATCH;
+            }
+            $labels{$str} = $match->{label};
+            $belongs_to{$str} = $spec;
+
+            my @pieces;
+            if ($match->{match} =~ m/\A\w/) {
+                push @pieces, "\\b";
+            }
+            push @pieces, quotemeta($match->{match});
+            if ($match->{match} =~ m/\w\z/) {
+                push @pieces, "\\b";
+            }
+            push @matches, join('', @pieces);
+        }
+    }
+    my $re_string = join('|', @matches);
+    my $re = qr{$re_string};
+    # print "Regex is $re\n";
+    my @out;
+
+    my $add_index = sub {
+        my ($match) = @_;
+        my $spec = $belongs_to{$match};
+        die "Cannot find belonging specification for $match. Bug?" unless $spec;
+        my $index_name = $spec->index_name;
+        my $label = $labels{$match};
+        $spec->increment;
+        return "\\index[$index_name]{$label}";
+    };
+
   LINE:
-    foreach my $l (@lines) {
+    foreach my $p (@paragraphs) {
         # we index the inline comments as well, so we can index
         # what we want, where we want.
-        my $is_comment = $l =~ m/^%/;
-        my @prepend;
-        my @out;
-        my @words = Text::Amuse::Compile::Indexer::Specification::explode_line($l);
-        my $last_word = $#words;
-        my $i = 0;
-        # print Dumper(\@words);
-        # print "Last is $last_word\n";
-
-      WORD:
-        while ($i <= $last_word) {
-          SPEC:
-            foreach my $spec (@{$self->specifications}) {
-                my $index_name = $spec->index_name;
-              MATCH:
-                foreach my $m (@{ $spec->matches }) {
-                    # print Dumper([$i, \@words, $m]);
-                    my @search = @{$m->{tokens}};
-                    my $add_to_index = $#search;
-                    next MATCH unless @search;
-                    my $last_i = $i + $add_to_index;
-                    if ($last_word >= $last_i) {
-                        if (join('', @search) eq
-                            join('', @words[$i..$last_i])) {
-                            $spec->total_found($spec->total_found + 1);
-                            # print join("", @search) . " at " . join("", @words[$i..$last_i]) . "\n";
-                            my $index_str = "\\index[$index_name]{$m->{label}}";
-                            if ($is_comment) {
-                                push @prepend, $index_str;
-                            }
-                            else {
-                                push @out, $index_str;
-                            }
-                            push @out, @words[ $i .. $last_i];
-                            # advance
-                            $i = $last_i + 1;
-                            next WORD;
-                        }
-                    }
-                }
+        if ($p =~ m/^%/) {
+            my @prepend;
+            while ($p =~ m/($re)/g) {
+                push @prepend, $add_index->($1);
             }
-            push @out, $words[$i];
-            $i++;
+            if (@prepend) {
+                $p = join("\n", @prepend) . "\n" . $p;
+            }
         }
-        if (@prepend) {
-            push @prepend, "\n";
+        elsif ($p =~ m/^\\(part|chapter|section|subsection|subsubsection)/) {
+            my @append;
+            while ($p =~ m/($re)/g) {
+                push @append, $add_index->($1);
+            }
+            if (@append) {
+                $p .= join("\n", @append);
+            }
+
         }
-        push @outlines, join('', @prepend, @out);
+        else {
+            $p =~ s/($re)/$add_index->($1) . $1/ge;
+        }
+        push @out, $p;
     }
-    return join("\n", @outlines);
+    return join("\n\n", @out);
 }
 
 1;

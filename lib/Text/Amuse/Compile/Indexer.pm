@@ -186,7 +186,7 @@ sub interpolate_indexes {
     }
     # collect the stats
     my %stats;
-    foreach my $regex (keys %labels) {
+    foreach my $regex (sort keys %labels) {
         my $stat = $labels{$regex};
         $stats{$stat->{spec_index}} ||= 0;
         if ($stat->{matches} > 0) {
@@ -196,7 +196,7 @@ sub interpolate_indexes {
             $self->logger->("No matches found for $regex\n");
         }
     }
-    foreach my $k (keys %stats) {
+    foreach my $k (sort keys %stats) {
         $self->specifications->[$k]->total_found($stats{$k});
     }
     return join("\n\n", @out);

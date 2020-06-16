@@ -3,7 +3,7 @@ package Text::Amuse::Compile::Indexer;
 use strict;
 use warnings;
 use Moo;
-use Types::Standard qw/Str ArrayRef Object/;
+use Types::Standard qw/Str ArrayRef Object CodeRef/;
 use Data::Dumper;
 use Text::Amuse::Compile::Indexer::Specification;
 use Text::Amuse::Functions qw/muse_format_line/;
@@ -58,6 +58,7 @@ has latex_body => (is => 'ro', required => 1, isa => Str);
 has index_specs => (is => 'ro', required => 1, isa => ArrayRef[Str]);
 has specifications => (is => 'lazy', isa => ArrayRef[Object]);
 has language_code => (is => 'ro');
+has logger => (is => 'ro', isa => CodeRef, required => 1);
 
 sub _build_specifications {
     my $self = shift;
@@ -121,7 +122,7 @@ sub interpolate_indexes {
         foreach my $match (@{$spec->matches}) {
             my $str = $match->{match};
             if (my $exists = $labels{$str}) {
-                warn "$str already has a label $exists->{label} " . $exists->{spec}->index_name;
+                $self->logger->("$str already has a label $exists->{label} " . $exists->{spec}->index_name . "\n");
                 next MATCH;
             }
             $labels{$str} = {
@@ -192,7 +193,7 @@ sub interpolate_indexes {
             $stats{$stat->{spec_index}} += $stat->{matches};
         }
         else {
-            warn "No matches found for $regex";
+            $self->logger->("No matches found for $regex\n");
         }
     }
     foreach my $k (keys %stats) {

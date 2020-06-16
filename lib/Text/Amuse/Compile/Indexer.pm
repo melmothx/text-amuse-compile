@@ -113,20 +113,23 @@ sub interpolate_indexes {
     my @paragraphs = split(/\n\n/, $full_body);
 
     # build a huge regexp with the matches
-    my %belongs_to;
     my %labels;
     my @matches;
-    foreach my $spec (@{$self->specifications}) {
+    for (my $i = 0; $i < @{$self->specifications}; $i++) {
+        my $spec = $self->specifications->[$i];
       MATCH:
         foreach my $match (@{$spec->matches}) {
             my $str = $match->{match};
-            if (exists $labels{$str}) {
-                warn "$str already has a label $labels{$str} " . $belongs_to{$str}->index_name;
+            if (my $exists = $labels{$str}) {
+                warn "$str already has a label $exists->{label} " . $exists->{spec}->index_name;
                 next MATCH;
             }
-            $labels{$str} = $match->{label};
-            $belongs_to{$str} = $spec;
-
+            $labels{$str} = {
+                             label => $match->{label},
+                             matches => 0,
+                             spec => $spec,
+                             spec_index => $i,
+                            };
             my @pieces;
             if ($match->{match} =~ m/\A\w/) {
                 push @pieces, "\\b";
@@ -145,11 +148,10 @@ sub interpolate_indexes {
 
     my $add_index = sub {
         my ($match) = @_;
-        my $spec = $belongs_to{$match};
-        die "Cannot find belonging specification for $match. Bug?" unless $spec;
-        my $index_name = $spec->index_name;
-        my $label = $labels{$match};
-        $spec->increment;
+        die "Cannot find belonging specification for $match. Bug?" unless $labels{$match};
+        my $index_name = $labels{$match}{spec}->index_name;
+        my $label = $labels{$match}{label};
+        $labels{$match}{matches}++;
         return "\\index[$index_name]{$label}";
     };
 
@@ -180,6 +182,21 @@ sub interpolate_indexes {
             $p =~ s/($re)/$add_index->($1) . $1/ge;
         }
         push @out, $p;
+    }
+    # collect the stats
+    my %stats;
+    foreach my $regex (keys %labels) {
+        my $stat = $labels{$regex};
+        $stats{$stat->{spec_index}} ||= 0;
+        if ($stat->{matches} > 0) {
+            $stats{$stat->{spec_index}} += $stat->{matches};
+        }
+        else {
+            warn "No matches found for $regex";
+        }
+    }
+    foreach my $k (keys %stats) {
+        $self->specifications->[$k]->total_found($stats{$k});
     }
     return join("\n\n", @out);
 }

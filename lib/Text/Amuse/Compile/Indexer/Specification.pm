@@ -84,9 +84,4 @@ sub _build_matches {
     return \@pairs;
 }
 
-sub increment {
-    my $self = shift;
-    $self->total_found($self->total_found + 1);
-}
-
 1;

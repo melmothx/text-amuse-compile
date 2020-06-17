@@ -124,6 +124,8 @@ t/testfile/html-title.muse
 t/testfile/index-me-1.expected
 t/testfile/index-me-1.muse
 t/testfile/index-me-2.muse
+t/testfile/index-me-3.expected
+t/testfile/index-me-3.muse
 t/testfile/index-me.muse
 t/testfile/invalid.muse
 t/testfile/options-2.muse

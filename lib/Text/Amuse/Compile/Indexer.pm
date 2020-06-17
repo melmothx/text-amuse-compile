@@ -175,7 +175,7 @@ sub interpolate_indexes {
                 push @append, $add_index->($1);
             }
             if (@append) {
-                $p .= join("\n", @append);
+                $p .= "\n" . join("\n", @append);
             }
 
         }

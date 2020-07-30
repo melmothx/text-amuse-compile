@@ -856,6 +856,12 @@ format), luatexbase, luaotfload.
 The luatex option could give better microtypography results but is
 slower (x4) and requires more memory (x2).
 
+=head1 INTERNAL CONSTANTS
+
+=head2 DEBUG
+
+Set from AMW_DEBUG environment.
+
 =head1 AUTHOR
 
 Marco Pessotto, C<< <melmothx at gmail.com> >>

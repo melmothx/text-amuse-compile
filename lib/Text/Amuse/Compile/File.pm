@@ -1174,7 +1174,15 @@ Calls C<log_info>, remove the lock and dies.
 
 =back
 
+=head1 INTERNAL CONSTANTS
+
+=head2 DEBUG
+
+Set from AMW_DEBUG environment.
+
 =cut
+
+
 
 sub log_info {
     my ($self, @info) = @_;

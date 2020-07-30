@@ -49,6 +49,10 @@ object.
 
 Main method to get the job done.
 
+=item logger
+
+Required coderef for logging.
+
 =back
 
 =cut

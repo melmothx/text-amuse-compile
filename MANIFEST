@@ -57,6 +57,11 @@ t/header.t
 t/headings.t
 t/html-title.t
 t/html.t
+t/includes.t
+t/includes/file.conf
+t/includes/file.muse
+t/includes/main-2.muse
+t/includes/main.muse
 t/indexes.t
 t/langs.t
 t/leaks.t

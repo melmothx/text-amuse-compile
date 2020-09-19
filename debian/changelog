@@ -1,3 +1,9 @@
+libtext-amuse-compile-perl (1.51-1+amw1) unstable; urgency=medium
+
+  * New release
+
+ -- Marco Pessotto <melmothx@gmail.com>  Sat, 19 Sep 2020 13:03:58 +0200
+
 libtext-amuse-compile-perl (1.50-1+amw1) unstable; urgency=medium
 
   * New release

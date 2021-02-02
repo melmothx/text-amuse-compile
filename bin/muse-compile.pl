@@ -287,7 +287,10 @@ if ($output_templates and exists $options{ttdir}) {
 # passed. However, epub will not be able to embed the fonts, as their
 # location is unknown and for that you do need a fontspec file.
 
-unless ($args{fontspec}) {
+if ($args{fontspec}) {
+    $args{fontspec} = path($args{fontspec})->absolute->stringify;
+}
+else {
     my @list = @{Text::Amuse::Compile::Fonts->default_font_list};
     my %map = (
                mainfont => 'serif',

@@ -374,6 +374,14 @@ div#page {
 }
 [% END %]
 
+.muse-sc {
+   font-variant: small-caps;
+}
+
+.muse-sf {
+   font-family: [% IF fonts %]"[% fonts.sans.name %]",[% END %]Helvetica,Arial, sans-serif;
+}
+
 pre, code {
     font-family: [% IF fonts %]"[% fonts.mono.name %]",[% END %]Consolas, courier, monospace;
 }

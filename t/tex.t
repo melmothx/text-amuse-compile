@@ -18,7 +18,7 @@ binmode STDOUT, ':encoding(utf-8)';
 binmode STDERR, ':encoding(utf-8)';
 
 if ($ENV{TEST_WITH_LATEX}) {
-    plan tests => 158;
+    plan tests => 171;
 }
 else {
     plan tests => 152;

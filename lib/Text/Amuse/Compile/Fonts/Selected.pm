@@ -116,12 +116,25 @@ STANDARD
 \usepackage{bookmark}
 HYPERREF
     }
+    # main language
+    my $orig_lang = $args{lang} || 'english';
+
+    if ($orig_lang eq 'chinese') {
+        push @out, "\\usepackage[chinese, provide=*]{babel}";
+        my %map = (
+                   main => 'rm',
+                   mono => 'tt',
+                   sans => 'sf',
+                  );
+        foreach my $slot (keys %map) {
+            push @out, "\\babelfont{$map{$slot}}{" . $self->$slot->name . "}";
+        }
+        push @out, "";
+        return join("\n", @out);
+    }
 
     push @out, "\\usepackage{fontspec}";
     push @out, "\\usepackage{polyglossia}";
-
-    # main language
-    my $orig_lang = $args{lang} || 'english';
 
     my %aliases = (
                    # pre texlive-2020

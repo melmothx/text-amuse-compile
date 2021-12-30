@@ -122,10 +122,10 @@ HYPERREF
     if ($orig_lang eq 'chinese') {
         push @out, "\\usepackage[chinese, provide=*]{babel}";
         push @out, "\\usepackage[heading=true]{ctex}";
-        foreach my $slot (qw/main mono sans/) {
-            # original lang
-            push @out, "\\setCJK${slot}font{" . $self->$slot->name . "}";
-        }
+        # foreach my $slot (qw/main mono sans/) {
+        #     # original lang
+        #     push @out, "\\setCJK${slot}font{" . $self->$slot->name . "}";
+        # }
         return join("\n", @out);
     }
 

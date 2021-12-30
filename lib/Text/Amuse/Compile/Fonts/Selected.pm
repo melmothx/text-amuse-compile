@@ -129,6 +129,8 @@ HYPERREF
         foreach my $slot (keys %map) {
             push @out, "\\babelfont{$map{$slot}}{" . $self->$slot->name . "}";
         }
+        # for italics, switch to sans serif
+        push @out, "\\let\\emph\\textsf";
         push @out, "";
         return join("\n", @out);
     }

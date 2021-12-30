@@ -121,17 +121,11 @@ HYPERREF
 
     if ($orig_lang eq 'chinese') {
         push @out, "\\usepackage[chinese, provide=*]{babel}";
-        my %map = (
-                   main => 'rm',
-                   mono => 'tt',
-                   sans => 'sf',
-                  );
-        foreach my $slot (keys %map) {
-            push @out, "\\babelfont{$map{$slot}}{" . $self->$slot->name . "}";
+        push @out, "\\usepackage[heading=true]{ctex}";
+        foreach my $slot (qw/main mono sans/) {
+            # original lang
+            push @out, "\\setCJK${slot}font{" . $self->$slot->name . "}";
         }
-        # for italics, switch to sans serif
-        push @out, "\\let\\emph\\textsf";
-        push @out, "";
         return join("\n", @out);
     }
 

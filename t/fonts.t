@@ -9,6 +9,7 @@ use File::Temp;
 use File::Spec;
 use Text::Amuse::Compile::Utils qw/write_file/;
 use JSON::MaybeXS;
+use Data::Dumper;
 
 my $wd = File::Temp->newdir;
 
@@ -17,7 +18,7 @@ my %files = ('file.ttf' => 'truetype',
              'fileuc.OTF' => 'opentype',
              'file.otf' => 'opentype');
 
-plan tests => scalar(keys %files) * 17 + 38;
+plan tests => scalar(keys %files) * 17 + 43;
 
 foreach my $file (sort keys %files) {
     my $path = File::Spec->catfile($wd, $file);
@@ -208,4 +209,13 @@ foreach my $file (sort keys %files) {
         my $name = ($fonts->$method)[0]->name;
         ok $name, "$method return $name";
     }
+    my ($first) = $fonts->serif_fonts;
+    is $first->babel_font_name, 'regular.otf';
+    diag Dumper($first->babel_font_args);
+    my $opts =  $first->babel_font_options(Scale => 'MatchLowercase');
+    like $opts, qr{Scale=MatchLowercase};
+    foreach my $type (qw/Bold Italic BoldItalic/) {
+        like $opts, qr{${type}font=$type\.otf}i;
+    }
+    diag $opts;
 }

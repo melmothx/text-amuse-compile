@@ -2,7 +2,7 @@ package Text::Amuse::Compile::Fonts::Family;
 use utf8;
 use strict;
 use warnings;
-use Types::Standard qw/Str Enum StrMatch InstanceOf/;
+use Types::Standard qw/Str Enum StrMatch InstanceOf Bool HashRef/;
 use Moo;
 
 =head1 NAME
@@ -80,7 +80,9 @@ has italic     => (is => 'ro', isa => InstanceOf[qw/Text::Amuse::Compile::Fonts:
 has bold       => (is => 'ro', isa => InstanceOf[qw/Text::Amuse::Compile::Fonts::File/]);
 has bolditalic => (is => 'ro', isa => InstanceOf[qw/Text::Amuse::Compile::Fonts::File/]);
 
-sub has_files {
+has has_files => (is => 'lazy', isa => Bool);
+
+sub _build_has_files {
     my $self = shift;
     if ($self->regular &&
         $self->italic &&
@@ -89,6 +91,56 @@ sub has_files {
         return 1;
     }
     return 0;
+}
+
+has babel_font_args => (is => 'lazy', isa => HashRef);
+
+sub _build_babel_font_args {
+    my $self = shift;
+    my $name = $self->name;
+    my @args;
+    if ($self->has_files) {
+        my $regular;
+        if ($self->regular->dirname  =~ m/\A([A-Za-z0-9\.\/_-]+)\z/) {
+            push @args, Path => $1;
+            $name = $regular = $self->regular->basename_and_ext;
+        }
+        else {
+            warn $self->regular->dirname . " does not look like a path which can be embedded." .
+              " Please make sure the fonts are installed in a standard TeX location\n";
+        }
+        if ($regular) {
+            my %shapes = (
+                          bold => 'BoldFont',
+                          italic => 'ItalicFont',
+                          bolditalic => 'BoldItalicFont',
+                         );
+            foreach my $shape (keys %shapes) {
+                if (my $file = $self->$shape->basename_and_ext) {
+                    push @args, $shapes{$shape}, $file;
+                }
+            }
+        }
+    }
+    return {
+            name => $name,
+            opts => \@args,
+           };
+}
+
+sub babel_font_name {
+    shift->babel_font_args->{name};
+}
+
+sub babel_font_options {
+    my ($self, @args) = @_;
+    die "args must come in pairs" if @args % 2;
+    push @args, @{$self->babel_font_args->{opts} || [] };
+    my @list;
+    while (my @pair = splice @args, 0, 2) {
+        push @list, join('=', @pair);
+    }
+    return join(",%\n ", @list)
 }
 
 sub is_serif {

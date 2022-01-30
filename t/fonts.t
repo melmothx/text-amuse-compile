@@ -18,7 +18,7 @@ my %files = ('file.ttf' => 'truetype',
              'fileuc.OTF' => 'opentype',
              'file.otf' => 'opentype');
 
-plan tests => scalar(keys %files) * 17 + 43;
+plan tests => 120;
 
 foreach my $file (sort keys %files) {
     my $path = File::Spec->catfile($wd, $file);
@@ -181,6 +181,7 @@ foreach my $file (sort keys %files) {
                                                    italic => $fontfiles{italic},
                                                    bold => $fontfiles{bold},
                                                    bolditalic => $fontfiles{bolditalic},
+                                                   languages => [qw/hr it/]
                                                   },
                                                   {
                                                    name => 'Example Sans',
@@ -218,4 +219,15 @@ foreach my $file (sort keys %files) {
         like $opts, qr{${type}font=$type\.otf}i;
     }
     diag $opts;
+    diag "Testing languages";
+    ok $first->has_languages;
+    ok $first->for_language_code('hr');
+    ok $first->for_babel_language('croatian');
+    ok !$first->for_language_code('en');
+    ok !$first->for_babel_language('english');
+    ok !$first->for_babel_language('pippo');
+    my ($mono) = $fonts->mono_fonts;
+    ok !$mono->has_languages;
+    ok !$mono->for_language_code('hr');
+    ok !$mono->for_babel_language('croatian');
 }

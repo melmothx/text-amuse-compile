@@ -18,7 +18,7 @@ my %files = ('file.ttf' => 'truetype',
              'fileuc.OTF' => 'opentype',
              'file.otf' => 'opentype');
 
-plan tests => 120;
+plan tests => 123;
 
 foreach my $file (sort keys %files) {
     my $path = File::Spec->catfile($wd, $file);
@@ -230,4 +230,7 @@ foreach my $file (sort keys %files) {
     ok !$mono->has_languages;
     ok !$mono->for_language_code('hr');
     ok !$mono->for_babel_language('croatian');
+    ok scalar($fonts->fonts_for_language(serif => 'croatian'));
+    ok !scalar($fonts->fonts_for_language(mono => 'croatian'));
+    ok !scalar($fonts->fonts_for_language(sans => 'croatian'));
 }

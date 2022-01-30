@@ -194,6 +194,19 @@ sub mono_fonts_with_files {
     return grep { $_->is_mono && $_->has_files } @{$self->list};
 }
 
+sub fonts_for_language {
+    my ($self, $slot, $babel_lang) = @_;
+    die "Missing arguments" unless $slot && $babel_lang;
+    if ($slot eq 'main') {
+        $slot = 'serif';
+    }
+    # print Dumper([$self->all_fonts]);
+    return grep {
+        $_->type eq $slot and $_->has_languages and $_->for_babel_language($babel_lang)
+    } $self->all_fonts;
+}
+
+
 sub BUILDARGS {
     my ($class, $arg) = @_;
     my $list;

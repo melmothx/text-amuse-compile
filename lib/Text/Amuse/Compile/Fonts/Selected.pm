@@ -60,6 +60,8 @@ has mono => (is => 'ro', required => 1, isa => InstanceOf['Text::Amuse::Compile:
 has sans => (is => 'ro', required => 1, isa => InstanceOf['Text::Amuse::Compile::Fonts::Family']);
 has main => (is => 'ro', required => 1, isa => InstanceOf['Text::Amuse::Compile::Fonts::Family']);
 has size => (is => 'ro', default => sub { 10 }, isa => Enum[9..14]);
+has all_fonts => (is => 'ro', required => 1, isa => InstanceOf['Text::Amuse::Compile::Fonts']);
+
 
 sub compose_polyglossia_fontspec_stanza {
     my ($self, %args) = @_;
@@ -116,38 +118,11 @@ STANDARD
 \usepackage{bookmark}
 HYPERREF
     }
-    my %cjk = (
-               japanese => 1,
-               korean => 1,
-               chinese => 1,
-              );
     my $main_lang = $args{lang} || 'english';
     my @langs = (@{ $args{others} || [] }, $main_lang);
     my $babel_langs = join(',', @langs);
 
-    if ($cjk{$main_lang}) {
-        # these will die with luatex. Too bad.
-        #  right now we’re using Song for sans and Kai for sf
-        # https://github.com/adobe-fonts/source-han-serif/releases/download/2.000R/SourceHanSerifCN.zip
-        # https://github.com/adobe-fonts/source-han-sans/releases/download/2.004R/SourceHanSansCN.zip
-        # load all languages with ini files
-        push @out, "\\usepackage[$babel_langs,provide*=*]{babel}";
-        push @out, "\\usepackage{xeCJK}";
-        foreach my $slot (qw/main mono sans/) {
-            # original lang
-            my $font = $self->$slot;
-            push @out, sprintf("\\setCJK${slot}font{%s}[%s]",
-                               $font->babel_font_name,
-                               $font->babel_font_options,
-
-                              );
-            push @out, sprintf("\\set${slot}font{%s}[%s]",
-                               $font->babel_font_name,
-                               $font->babel_font_options);
-        }
-    }
-    else {
-        # main is missing the ldf, all langs will use the ini
+    BABELFONTS: {
         if (Text::Amuse::Utils::has_babel_ldf($main_lang)) {
             # one or more is missing, load the main from ldf, others from ini
             if (grep { !Text::Amuse::Utils::has_babel_ldf($_) } @{ $args{others} || []}) {
@@ -165,12 +140,46 @@ HYPERREF
                         mono tt
                         sans sf/);
         foreach my $slot (sort keys %slots) {
-            my $font = $self->$slot;
-            push @out, sprintf("\\babelfont{%s}[%s]{%s}",
-                               $slots{$slot},
-                               $font->babel_font_options,
-                               $font->babel_font_name);
+            # check all the available fonts if there are language specific
+            for (my $i = 0; $i < @langs; $i++) {
+                my $lang = $langs[$i];
+                my $font = $self->_font_for_slot_and_lang($slot, $lang);
+                if ($i == $#langs) {
+                    push @out, sprintf("\\babelfont{%s}[%s]{%s}",
+                                       $slots{$slot},
+                                       $font->babel_font_options,
+                                       $font->babel_font_name);
+                }
+                else {
+                    push @out, sprintf("\\babelfont[%s]{%s}[%s]{%s}",
+                                       $lang,
+                                       $slots{$slot},
+                                       $font->babel_font_options,
+                                       $font->babel_font_name);
+                }
+            }
+        }
+    }
+    my %cjk = (
+               japanese => 1,
+               korean => 1,
+               chinese => 1,
+              );
 
+    if ($cjk{$main_lang}) {
+        # these will die with luatex. Too bad.
+        #  right now we’re using Song for sans and Kai for sf
+        # https://github.com/adobe-fonts/source-han-serif/releases/download/2.000R/SourceHanSerifCN.zip
+        # https://github.com/adobe-fonts/source-han-sans/releases/download/2.004R/SourceHanSansCN.zip
+        # load all languages with ini files
+        push @out, "\\usepackage{xeCJK}";
+        foreach my $slot (qw/main mono sans/) {
+            # original lang
+            my $font = $self->_font_for_slot_and_lang($slot, $main_lang);
+            push @out, sprintf("\\setCJK${slot}font{%s}[%s]",
+                               $font->babel_font_name,
+                               $font->babel_font_options,
+                              );
         }
     }
     push @out, '';
@@ -234,7 +243,7 @@ sub _fontspec_args {
                   );
     my $def = $self->definitions->{$slot} or die "bad usage, can't find $slot";
     my $script = $scripts{$language} || 'Latin';
-    my @list = ("Script=$script", "Ligatures=TeX");
+    my @list = ("Ligatures=TeX");
     my @shapes = sort values %{ $self->_shape_mapping };
     foreach my $att (qw/Scale Path/, @shapes) {
         if (my $v = $def->{attr}->{$att}) {
@@ -248,5 +257,18 @@ sub families {
     my $self = shift;
     return [ $self->main, $self->mono, $self->sans ];
 }
+
+sub _font_for_slot_and_lang {
+    my ($self, $slot, $lang) = @_;
+    my $font = $self->$slot;
+    if (my @language_specific = $self->all_fonts->fonts_for_language($slot, $lang)) {
+        # there are other fonts setting the lang
+        unless ($font->for_babel_language($lang)) {
+            $font = $language_specific[0];
+        }
+    }
+    return $font;
+}
+
 
 1;

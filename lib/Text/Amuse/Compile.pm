@@ -245,6 +245,7 @@ sub _build_fonts {
     my $fonts = Text::Amuse::Compile::Fonts->new($specs);
     my %args = (
                 size => $self->selected_font_size || 10,
+                all_fonts => $fonts,
                );
     my @all_fonts = $fonts->all_fonts;
     foreach my $type (qw/sans mono serif/) {

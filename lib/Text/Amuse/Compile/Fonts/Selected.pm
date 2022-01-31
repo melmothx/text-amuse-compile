@@ -121,20 +121,20 @@ HYPERREF
     my $main_lang = $args{lang} || 'english';
     my @langs = (@{ $args{others} || [] }, $main_lang);
     my $babel_langs = join(',', @langs);
-
+    my $bidi = $args{bidi} ? ", bidi=default" : "";
     BABELFONTS: {
         if (Text::Amuse::Utils::has_babel_ldf($main_lang)) {
             # one or more is missing, load the main from ldf, others from ini
             if (grep { !Text::Amuse::Utils::has_babel_ldf($_) } @{ $args{others} || []}) {
-                push @out, "\\usepackage[$babel_langs,provide+=*]{babel}";
+                push @out, "\\usepackage[$babel_langs,provide+=*${bidi}]{babel}";
             }
             else {
                 # load everything with the standard ldf
-                push @out, "\\usepackage[$babel_langs]{babel}";
+                push @out, "\\usepackage[${babel_langs}${bidi}]{babel}";
             }
         }
         else {
-            push @out, "\\usepackage[$babel_langs,provide*=*]{babel}";
+            push @out, "\\usepackage[$babel_langs,provide*=*${bidi}]{babel}";
         }
         my %slots = (qw/main rm
                         mono tt

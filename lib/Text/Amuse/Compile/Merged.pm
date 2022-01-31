@@ -85,6 +85,16 @@ sub new {
             $languages{$current_lang}++;
             $language_codes{$current_lang_code}++;
         }
+        foreach my $other (@{ $doc->other_languages || [] }) {
+            if ($main_lang ne $other) {
+                $languages{$other}++;
+            }
+        }
+        foreach my $other (@{ $doc->other_language_codes || [] }) {
+            if ($main_lang_code ne $other) {
+                $language_codes{$other}++;
+            }
+        }
     }
     my (%html_headers, %latex_headers);
     foreach my $k (keys %args) {

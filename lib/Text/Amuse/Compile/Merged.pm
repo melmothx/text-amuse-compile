@@ -364,11 +364,6 @@ sub as_latex {
     my $self = shift;
     my @out;
     my $current_language = $self->language;
-    my %lang_aliases = (
-                        # pre-texlive 2020
-                        # macedonian => 'russian',
-                        serbian    => 'croatian',
-                       );
     my $counter = 0;
     foreach my $doc ($self->docs) {
         $counter++;
@@ -376,13 +371,6 @@ sub as_latex {
         my $output = "\n\n";
 
         my $doc_language = $doc->language;
-        if (my $alias = $lang_aliases{$doc_language}) {
-            $doc_language = $alias;
-        }
-
-        if (my $alias = $lang_aliases{$current_language}) {
-            $current_language = $alias;
-        }
 
         if ($doc_language ne $current_language) {
             $output .= sprintf('\selectlanguage{%s}', $doc_language) . "\n\n";

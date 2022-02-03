@@ -145,7 +145,7 @@ sub _build_babel_font_args {
                           italic => 'ItalicFont',
                           bolditalic => 'BoldItalicFont',
                          );
-            foreach my $shape (keys %shapes) {
+            foreach my $shape (sort keys %shapes) {
                 if (my $file = $self->$shape->basename_and_ext) {
                     push @args, $shapes{$shape}, $file;
                 }

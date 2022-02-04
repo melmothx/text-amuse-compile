@@ -188,7 +188,7 @@ sub other_language_codes {
     my $self = shift;
     my %langs = %{ $self->{other_language_codes} };
     if (%langs) {
-        return [ keys %langs ];
+        return [ sort keys %langs ];
     }
     else {
         return;
@@ -199,7 +199,7 @@ sub other_languages {
     my $self = shift;
     my %langs = %{ $self->{other_languages} };
     if (%langs) {
-        return [ keys %langs ];
+        return [ sort keys %langs ];
     }
     else {
         return;

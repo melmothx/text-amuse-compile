@@ -21,6 +21,11 @@ All are read-only instances of L<Text::Amuse::Compile::Fonts::Family>.
 
 =head2 size
 
+=head2 all_fonts
+
+The instance of L<Text::Amuse::Compile::Fonts> carrying all available
+fonts.
+
 =head1 METHODS
 
 =head2 compose_polyglossia_fontspec_stanza(lang => 'english', others => [qw/russian farsi/], bidi => 1)

@@ -148,7 +148,7 @@ my %extra = (
         ok (-f $pdf, "PDF generated");
     }
     my $content = read_file($tex);
-    like $content, qr/(sansfont|babelfont{sf}\[.*?\])\{CMU Sans/, "Sans font as default";
+    like $content, qr/(sansfont|babelfont\{sf\}\[.*?\])\{CMU Sans/, "Sans font as default";
     like $content, qr/colortheme\{dove/, "colortheme is dove";
     like $content, qr/usetheme\{default/, "theme is default";
     unlike $content, qr/ignored/, "Ignored sections are skipped";

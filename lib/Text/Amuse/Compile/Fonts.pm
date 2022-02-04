@@ -143,6 +143,10 @@ As above, but only the sans fonts
 
 Return an arrayref with the default font definitions
 
+=head2 fonts_for_language($babel_lang)
+
+Return the list of language-specific fonts.
+
 =head1 INTERNALS
 
 =head2 BUILDARGS

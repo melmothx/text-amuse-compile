@@ -79,6 +79,10 @@ Return true if the font family has languages set.
 
 Return true if the family has the given language set (babel and iso version)
 
+=head2 babel_font_name
+
+=head2 babel_font_options
+
 =cut
 
 
@@ -120,8 +124,6 @@ sub _build_language_names {
     my $self = shift;
     return [ map { Text::Amuse::Utils::get_latex_lang($_) } @{ $self->languages } ];
 }
-
-
 
 has babel_font_args => (is => 'lazy', isa => HashRef);
 

@@ -53,6 +53,10 @@ Boolean if bidirectional
 
 Boolean if for beamer
 
+=item captions
+
+Custom locale strings. See L<Text::Amuse::Utils::language_code_locale_captions>
+
 =back
 
 =head2 families
@@ -185,6 +189,13 @@ HYPERREF
                                $font->babel_font_name,
                                $font->babel_font_options,
                               );
+        }
+    }
+    if (my $custom = $args{captions}) {
+        if (my $base = delete $custom->{_base_}) {
+            foreach my $k (sort keys %$custom) {
+                push @out, "\\setlocalecaption{$base}{$k}{$custom->{$k}}";
+            }
         }
     }
     push @out, '';

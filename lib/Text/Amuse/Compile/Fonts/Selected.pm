@@ -150,20 +150,20 @@ HYPERREF
                         sans sf/);
         foreach my $slot (sort keys %slots) {
             # check all the available fonts if there are language specific
-            for (my $i = 0; $i < @langs; $i++) {
-                my $lang = $langs[$i];
+            foreach my $lang (reverse @langs) {
                 my $font = $self->_font_for_slot_and_lang($slot, $lang);
-                if ($i == $#langs) {
+                my @font_opts = $slot eq 'main' ? () : (qw/Scale MatchLowercase/);
+                if ($lang eq $main_lang) {
                     push @out, sprintf("\\babelfont{%s}[%s]{%s}",
                                        $slots{$slot},
-                                       $font->babel_font_options,
+                                       $font->babel_font_options(@font_opts),
                                        $font->babel_font_name);
                 }
                 else {
                     push @out, sprintf("\\babelfont[%s]{%s}[%s]{%s}",
                                        $lang,
                                        $slots{$slot},
-                                       $font->babel_font_options,
+                                       $font->babel_font_options(@font_opts),
                                        $font->babel_font_name);
                 }
             }

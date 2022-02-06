@@ -41,8 +41,8 @@ WriteMakefile(
         resources => {
             repository => 'https://github.com/melmothx/text-amuse-compile',
             homepage => 'http://amusewiki.org',
-            x_IRC => 'irc://chat.freenode.net/#amusewiki',
-            x_WebIRC => 'https://webchat.freenode.net/?channels=#amusewiki',
+            x_IRC => 'irc://irc.libera.chat/#amusewiki',
+            x_WebIRC => 'https://web.libera.chat/#amusewiki',
            },
     },
 

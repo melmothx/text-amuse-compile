@@ -53,6 +53,10 @@ constructor, otherwise print the JSON on the standard output.
 
 =item as_json
 
+=item full_font_list
+
+Holds a reference to L<Text::Amuse::Compile::Fonts>
+
 =back
 
 

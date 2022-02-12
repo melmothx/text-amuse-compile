@@ -403,6 +403,54 @@ sub default_font_list {
             },
             { name => 'Anonymous Pro', desc => 'Anonymous Pro', type => 'mono' },
             { name => 'Space Mono',    desc => 'Space Mono',    type => 'mono' },
+            {
+             "languages" =>  [ "zh" ],
+             "name" =>  "FandolSong",
+             "desc" =>  "FandolSong",
+             "type" =>  "sans"
+            },
+            {
+             "languages" =>  [ "zh" ],
+             "desc" =>  "FandolHei",
+             "name" =>  "FandolHei",
+             "type" =>  "serif"
+            },
+            {
+             "languages" =>  [ "zh" ],
+             "name" =>  "Source Han Serif SC",
+             "desc" =>  "Source Han Serif SC (Simplified Chinese)",
+             "type" =>  "serif"
+            },
+            {
+             "languages" =>  [ "ja" ],
+             "name" =>  "Source Han Serif",
+             "desc" =>  "Source Han Serif (Japanese)",
+             "type" =>  "serif"
+            },
+            {
+             "languages" =>  [ "ko" ],
+             "name" =>  "Source Han Serif K",
+             "desc" =>  "Source Han Serif K (Korean)",
+             "type" =>  "serif"
+            },
+            {
+             "languages" =>  [ "zh" ],
+             "name" =>  "Source Han Sans SC",
+             "desc" =>  "Source Han Sans SC (Simplified Chinese)",
+             "type" =>  "sans"
+            },
+            {
+             "languages" =>  [ "ja" ],
+             "name" =>  "Source Han Sans",
+             "desc" =>  "Source Han Sans (Japanese)",
+             "type" =>  "sans"
+            },
+            {
+             "languages" =>  [ "ko" ],
+             "name" =>  "Source Han Sans K",
+             "desc" =>  "Source Han Sans K (Korean)",
+             "type" =>  "sans"
+            }
            ];
 }
 

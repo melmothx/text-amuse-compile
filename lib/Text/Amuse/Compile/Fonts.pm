@@ -405,18 +405,6 @@ sub default_font_list {
             { name => 'Space Mono',    desc => 'Space Mono',    type => 'mono' },
             {
              "languages" =>  [ "zh" ],
-             "name" =>  "FandolSong",
-             "desc" =>  "FandolSong",
-             "type" =>  "sans"
-            },
-            {
-             "languages" =>  [ "zh" ],
-             "desc" =>  "FandolHei",
-             "name" =>  "FandolHei",
-             "type" =>  "serif"
-            },
-            {
-             "languages" =>  [ "zh" ],
              "name" =>  "Source Han Serif SC",
              "desc" =>  "Source Han Serif SC (Simplified Chinese)",
              "type" =>  "serif"
@@ -450,7 +438,19 @@ sub default_font_list {
              "name" =>  "Source Han Sans K",
              "desc" =>  "Source Han Sans K (Korean)",
              "type" =>  "sans"
-            }
+            },
+            {
+             "languages" =>  [ "zh" ],
+             "name" =>  "FandolSong",
+             "desc" =>  "FandolSong",
+             "type" =>  "sans"
+            },
+            {
+             "languages" =>  [ "zh" ],
+             "desc" =>  "FandolHei",
+             "name" =>  "FandolHei",
+             "type" =>  "serif"
+            },
            ];
 }
 

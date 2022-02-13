@@ -1,5 +1,9 @@
 Revision history for perl module Text::Amuse::Compile
 
+1.81 2022-02-13
+
+ - Fix failing tests for Windows
+
 1.80 2022-02-12
 
  - Extend support for languages with language-specific fonts

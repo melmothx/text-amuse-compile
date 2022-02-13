@@ -69,7 +69,7 @@ like $outtex, qr/\\title\{My new shiny test}/, "Doc title found";
 
 like $outtex, qr/\\selectlanguage\{russian\}/, "Found language selection";
 like $outtex, qr/\\selectlanguage\{english\}/, "Found language selection";
-like $outtex, qr/\\setmainlanguage\{french\}|\\usepackage\[.*french,provide.*\]\{babel\}/, "Found language selection" or die;
+like $outtex, qr/\\setmainlanguage\{french\}|\\usepackage\[.*french,shorthands=off,provide.*\]\{babel\}/, "Found language selection" or die;
 like $outtex, qr/\\setotherlanguages\{.*russian.*\}|\\usepackage\[.*russian.*\]\{babel\}/, "Found russian lang";
 like $outtex, qr/\\setotherlanguages\{.*english.*\}|\\usepackage\[.*russian.*\]\{babel\}/, "Found english lang";
 like $outtex, qr/\\russianfont|\\babelfont\[russian\]/, "Found russian font";

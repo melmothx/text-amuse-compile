@@ -129,7 +129,7 @@ HYPERREF
     }
     my $main_lang = $args{lang} || 'english';
     my @langs = (@{ $args{others} || [] }, $main_lang);
-    my $babel_langs = join(',', @langs);
+    my $babel_langs = join(',', @langs) . ",shorthands=off";
     my $bidi = $args{bidi} ? ", bidi=default" : "";
     BABELFONTS: {
         if (Text::Amuse::Utils::has_babel_ldf($main_lang)) {

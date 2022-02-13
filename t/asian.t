@@ -26,6 +26,7 @@ foreach my $file ($testdir->children(qr{\.muse$})) {
     $file->copy($target);
     $c->compile("$target");
     my $body = $wd->child($basename . '.tex')->slurp_utf8;
+    $body =~ s/\r//g; # windows
     my $exp = $testdir->child($basename . '.tex')->slurp_utf8;
     like $body, qr{\Q$exp\E};
   SKIP: {

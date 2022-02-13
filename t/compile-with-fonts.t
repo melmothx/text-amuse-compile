@@ -18,10 +18,6 @@ my $inopt_re =  qr{[^]]*?};
 
 my $pathre = qr{$inopt_re Path= \Q$wd\E $inopt_re}xs;
 
-unless ($wd =~ m/\A([A-Za-z0-9\.\/_-]+)\z/) {
-    $pathre = $inopt_re;
-}
-
 my $font_re = qr{(?:\{(serif|sans|mono)-regular\.otf\}\[
                  $pathre
                  BoldFont=(serif|sans|mono)-bold\.otf $inopt_re
@@ -38,6 +34,10 @@ my $font_re = qr{(?:\{(serif|sans|mono)-regular\.otf\}\[
                  \{(serif|sans|mono)-regular\.otf\}
                  )
             }sx;
+
+unless ($wd =~ m/\A([A-Za-z0-9\.\/_-]+)\z/) {
+    $font_re = qr{\[$inopt_re\]\{DejaVu(?:Serif|Sans|SansMono)\}};
+}
 
 my $font_size_in_pt = qr{font-size:.*pt};
 

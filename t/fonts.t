@@ -211,15 +211,18 @@ foreach my $file (sort keys %files) {
         ok $name, "$method return $name";
     }
     my ($first) = $fonts->serif_fonts;
-    is $first->babel_font_name, 'regular.otf';
-    diag Dumper($first->babel_font_args);
-    my $opts =  $first->babel_font_options(Scale => 'MatchLowercase');
-    like $opts, qr{Scale=MatchLowercase};
-    foreach my $type (qw/Bold Italic BoldItalic/) {
-        like $opts, qr{${type}font=$type\.otf}i;
+  SKIP: {
+        skip "Fonts cannot be embedded", 5 unless $wd =~ m/\A([A-Za-z0-9\.\/_-]+)\z/;
+        is $first->babel_font_name, 'regular.otf';
+        diag Dumper($first->babel_font_args);
+        my $opts =  $first->babel_font_options(Scale => 'MatchLowercase');
+        like $opts, qr{Scale=MatchLowercase};
+        foreach my $type (qw/Bold Italic BoldItalic/) {
+            like $opts, qr{${type}font=$type\.otf}i;
+        }
+        diag $opts;
+        diag "Testing languages";
     }
-    diag $opts;
-    diag "Testing languages";
     ok $first->has_languages;
     ok $first->for_language_code('hr');
     ok $first->for_babel_language('croatian');

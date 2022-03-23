@@ -1,0 +1,38 @@
+#author Pippo
+
+#title My Title
+
+#lang en
+Test me 
+
+prova
+
+; ;;;#subtitle First Part
+
+x
+
+; ;;;#lang it
+
+
+** Bla bla
+
+x y z
+
+*** Bla Bla
+
+xxx yy zz
+
+; ;;;#subtitle Second Part
+
+; ;;;#notes blabla
+
+** Second
+
+test me
+
+*** Second Section
+
+1, 2, 3, test
+
+
+

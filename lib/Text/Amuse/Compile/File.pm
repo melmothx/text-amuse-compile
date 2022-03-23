@@ -25,6 +25,7 @@ use Path::Tiny ();
 use PDF::Imposition;
 use Text::Amuse;
 use Text::Amuse::Functions qw/muse_fast_scan_header
+                              muse_to_object
                               muse_format_line/;
 use Text::Amuse::Utils;
 
@@ -287,7 +288,7 @@ sub _build_volumes {
             if (@current) {
                 push @volumes, [ @current_meta, @original_meta, @current ];
             }
-            print Dumper(\@original_meta, \@volumes);
+            # print Dumper(\@original_meta, \@volumes);
         }
     }
     return \@volumes;
@@ -669,25 +670,55 @@ sub tex {
     }
     $self->purge('.tex');
     my $template_body = $self->templates->latex;
+    my $tokens = $self->_prepare_tex_tokens(%arguments, template_body => $template_body);
+
+    # if there's the ; ;;;#title magic cookie, split the volume.
+    # - process the template normally. X
+    # - split the body between PREAMBLE \begin{document} BODY \end{document} END X
+    # - determine if the indexes and the toc go at the end or at the beginning, looking at the template
+    # - split the muse body and create temporary files, adding the headers in the magic comments. X
+    # - process them, but override the wants_toc / wants_indexes depending on previous steps
+    # - discard everything outside the \begin{document} and \end{document} X
+    # - concatenate the initial preamble, these bodies, and the end, and return it. X
 
     my $volumes = $self->volumes;
     if ($volumes and @$volumes > 1) {
+        my $tex_parse = qr{\A(.*\\begin\{document\})(.*)(\\end\{document\}.*)}s;
+        my $full;
+        $self->tt->process($template_body, $tokens, \$full);
+        # print $full;
+        if ($full =~ m/$tex_parse/s) {
+            my ($preamble, $body, $end) = ($1, $2, $3);
+            # print Dumper([$preamble, $body, $end ]);
+            my @pieces = ($preamble);
 
+            for (my $i = 0; $i < @$volumes; $i++) {
+                my $vol = $volumes->[$i];
+                my $doc = muse_to_object(join('', @$vol));
+                my $latex = $self->_interpolate_magic_comments($tokens->{format_id}, $doc);
+                my %partial_tokens = (
+                                      options => {  %{ $tokens->{options} } },
+                                      safe_options => {  %{ $tokens->{safe_options} } },
+                                      tex_setup_langs => 'DUMMY', # irrelevant
+                                      doc => $doc,
+                                      latex_body => $latex,
+                                      tex_indexes => [ @{ $tokens->{tex_indexes} } ],
+                                     );
+                # print Dumper(\%partial_tokens);
+                # here clear wants_toc / indexes
+
+                my $out;
+                $self->tt->process($template_body, \%partial_tokens, \$out);
+                if ($out =~ m/$tex_parse/s) {
+                    push @pieces, $2;
+                }
+            }
+            push @pieces, $end;
+            Path::Tiny::path($texfile)->spew_utf8(@pieces);
+            return $texfile;
+        }
     }
-    # if there's the ; ;;#title magic cookie, split the volume.
-    # - process the template normally.
-    # - split the body between PREAMBLE \begin{document} BODY \end{document} END
-    # - determine if the indexes and the toc go at the end or at the beginning, looking at the template
-    # - split the muse body and create temporary files, adding the headers in the magic comments.
-    # - process them, but override the wants_toc / wants_indexes depending on previous steps
-    # - discard the everything outside the \begin{document} and \end{document}
-    # - concatenate the initial preamble, these bodies, and the end, and return it.
-
-    $self->_process_template($template_body,
-                             $self->_prepare_tex_tokens(%arguments,
-                                                        template_body => $template_body,
-                                                       ),
-                             $texfile);
+    $self->_process_template($template_body, $tokens, $texfile);
 }
 
 =item sl_tex
@@ -1462,6 +1493,8 @@ sub _prepare_tex_tokens {
             enable_secondary_footnotes => $enable_secondary_footnotes,
             tex_metadata => $self->file_header->tex_metadata,
             tex_indexes => \@indexes,
+            # in case we need it for volumes
+            format_id => $template_options->format_id,
            };
 }
 

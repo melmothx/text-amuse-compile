@@ -19,6 +19,7 @@ use File::Copy;
 use File::Spec;
 use IPC::Run qw(run);
 use File::Basename ();
+use Path::Tiny ();
 
 # ours
 use PDF::Imposition;
@@ -172,6 +173,7 @@ has fonts => (is => 'ro', required => 1, isa => InstanceOf['Text::Amuse::Compile
 has epub_embed_fonts => (is => 'ro', isa => Bool, default => sub { 1 });
 has indexes => (is => 'rwp', isa => Maybe[ArrayRef]);
 has include_paths => (is => 'ro', isa => ArrayRef, default => sub { [] });
+has volumes => (is => 'lazy', isa => ArrayRef);
 
 sub _build_file_header {
     my $self = shift;
@@ -234,6 +236,61 @@ sub _build_full_options {
         $options{$override} = $self->$override;
     }
     return \%options;
+}
+
+sub _build_volumes {
+    my $self = shift;
+    my @volumes;
+    if (!$self->virtual and -f $self->muse_file) {
+        my @lines = Path::Tiny::path($self->muse_file)->lines_utf8;
+
+        if (grep { /^; +;;;#\w+/ } @lines) {
+            my @current;
+            my @current_meta;
+            my @original_meta;
+
+            # muse starts with the directives
+            my $in_meta = 1;
+            my $in_volume_meta = 0;
+          LINE:
+            while (@lines) {
+                my $line = shift @lines;
+                # accumulate in the current pile until there's a blank line
+                my $blank = $line =~ m/\A\s*\z/;
+
+                if ($line =~ m/\A; +;;;(#[A-Za-z0-9_-]+\w+.*)\z/s) {
+                    my $directive = $1;
+                    $in_meta = 0;
+                    if (!$in_volume_meta) {
+                        # entered a new volume
+                        $in_volume_meta = 1;
+                        if (@current) {
+                            push @volumes, [ @current_meta, @original_meta, @current ];
+                        }
+                        @current = @current_meta = ();
+                    }
+                    push @current_meta, $directive;
+                    next LINE;
+                }
+                elsif (!$blank) {
+                    $in_volume_meta = 0;
+                }
+
+                if ($in_meta) {
+                    push @original_meta, $line;
+                }
+                else {
+                    push @current, $line;
+                }
+            }
+            # end of loop, flush the stack
+            if (@current) {
+                push @volumes, [ @current_meta, @original_meta, @current ];
+            }
+            print Dumper(\@original_meta, \@volumes);
+        }
+    }
+    return \@volumes;
 }
 
 sub cover {
@@ -612,6 +669,20 @@ sub tex {
     }
     $self->purge('.tex');
     my $template_body = $self->templates->latex;
+
+    my $volumes = $self->volumes;
+    if ($volumes and @$volumes > 1) {
+
+    }
+    # if there's the ; ;;#title magic cookie, split the volume.
+    # - process the template normally.
+    # - split the body between PREAMBLE \begin{document} BODY \end{document} END
+    # - determine if the indexes and the toc go at the end or at the beginning, looking at the template
+    # - split the muse body and create temporary files, adding the headers in the magic comments.
+    # - process them, but override the wants_toc / wants_indexes depending on previous steps
+    # - discard the everything outside the \begin{document} and \end{document}
+    # - concatenate the initial preamble, these bodies, and the end, and return it.
+
     $self->_process_template($template_body,
                              $self->_prepare_tex_tokens(%arguments,
                                                         template_body => $template_body,

@@ -119,6 +119,7 @@ sub new {
                 html_direction => $docs[0]->html_direction,
                 is_rtl => $docs[0]->is_rtl,
                 is_bidi => scalar(grep { $_->is_rtl || $_->is_bidi } @docs),
+                has_ruby => scalar(grep { $_->has_ruby } @docs),
                 include_paths => $include_paths || [],
                };
     bless $self, $class;

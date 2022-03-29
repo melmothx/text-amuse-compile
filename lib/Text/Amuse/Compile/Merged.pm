@@ -167,7 +167,15 @@ Return true if any of the text is RTL or bidirectional.
 
 Return the include paths set in the object.
 
+=head2 has_ruby
+
+Return true if any of the pieces needs ruby
+
 =cut
+
+sub has_ruby {
+    shift->{has_ruby};
+}
 
 sub include_paths {
     return @{shift->{include_paths}}

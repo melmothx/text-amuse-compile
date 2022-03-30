@@ -149,6 +149,7 @@ t/testfile/index-me.muse
 t/testfile/invalid.muse
 t/testfile/options-2.muse
 t/testfile/slides.muse
+t/testfile/split-volumes-2.muse
 t/testfile/split-volumes.muse
 t/testfile/strike.muse
 t/testfile/test.muse

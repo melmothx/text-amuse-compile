@@ -691,8 +691,13 @@ sub tex {
             my ($preamble, $body, $end) = ($1, $2, $3);
             # print Dumper([$preamble, $body, $end ]);
             my @pieces = ($preamble);
+            my $last = scalar $#$volumes;
 
-            for (my $i = 0; $i < @$volumes; $i++) {
+            # check if the template is custom
+            my $toc_i = $$template_body =~ m/latex_body.*tableofcontents/ ? $last : 0;
+            my $idx_i = $$template_body =~ m/printindex.*latex_body/ ? 0 : $last;
+
+            for (my $i = 0; $i <= $last; $i++) {
                 my $vol = $volumes->[$i];
                 my $doc = muse_to_object(join('', @$vol));
                 my $latex = $self->_interpolate_magic_comments($tokens->{format_id}, $doc);
@@ -704,7 +709,16 @@ sub tex {
                                       latex_body => $latex,
                                       tex_indexes => [ @{ $tokens->{tex_indexes} } ],
                                      );
+                if ($i != $toc_i) {
+                    $partial_tokens{safe_options}{wants_toc} = 0;
+                }
+                if ($i != $idx_i) {
+                    $partial_tokens{tex_indexes} = [];
+                }
+
                 # print Dumper(\%partial_tokens);
+
+
                 # here clear wants_toc / indexes
 
                 my $out;

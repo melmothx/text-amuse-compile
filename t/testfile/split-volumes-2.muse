@@ -1,0 +1,24 @@
+#author Pippo
+#title Title
+
+; ;;;#subtitle First Part
+
+** First
+
+Index me again.
+
+*** Second
+
+; ;;;#subtitle Second Part
+
+** Third
+
+Here again.
+
+*** Fourth
+
+<comment>
+INDEX names: *Index*
+again
+</comment>
+

@@ -1,6 +1,8 @@
 #!perl
-
-use Test::More;
+use utf8;
+use strict;
+use warnings;
+use Test::More tests => 10;
 use Text::Amuse;
 use Text::Amuse::Compile;
 use Data::Dumper;
@@ -26,8 +28,63 @@ my $c = Text::Amuse::Compile->new(tex => 1,
                                             papersize => 'a5',
                                            });
 
-diag "Try to compile";
+{
+    my $src = path(qw/t testfile split-volumes.muse/);
+    $c->compile("$src");
+    my $tex = $src->parent->child('split-volumes.tex');
+    ok $tex->exists;
+    my $body = $tex->slurp_utf8;
+    like $body, qr{tableofcontents}s;
+    unlike $body, qr{tableofcontents.*tableofcontents}s, "only one toc found";
+    like $body, qr{
+                      \{titlepage\}
+                      .*
+                      \{subtitle\}\{First\sPart
+                      .*
+                      prova
+                      .*
+                      aftersubtitle
+                      .*
+                      \{titlepage\}
+                      .*
+                      prova
+                      .*
+                      afterlang
+                      .*
+                      \{titlepage\}
+                      .*
+                      prova
+                      .*
+                      insecondpart
+              }xs;
+}
 
-my $src = path(qw/t testfile split-volumes.muse/);
-$c->compile("$src");
+{
+    my $src = path(qw/t testfile split-volumes-2.muse/);
+    $c->compile("$src");
+    my $tex = $src->parent->child('split-volumes-2.tex');
+    ok $tex->exists;
+    my $body = $tex->slurp_utf8;
+    like $body, qr{tableofcontents}s;
+    unlike $body, qr{tableofcontents.*tableofcontents}s, "only one toc found";
+    like $body, qr{printindex}s;
+    unlike $body, qr{printindex.*printindex}s, "only one index found";
+    like $body, qr{
+                      \{subtitle\}\{First\sPart
+                      .*
+                      tableofcontents
+                      .*
+                      First
+                      .*
+                      Second
+                      .*
+                      \{subtitle\}\{Second\sPart
+                      .*
+                      Third
+                      .*
+                      Fourth
+                      .*
+                      printindex
+              }sx;
+}
 

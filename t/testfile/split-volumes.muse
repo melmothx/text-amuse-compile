@@ -9,10 +9,11 @@ prova
 
 ; ;;;#subtitle First Part
 
-x
+aftersubtitle
 
 ; ;;;#lang it
 
+afterlang
 
 ** Bla bla
 
@@ -28,7 +29,7 @@ xxx yy zz
 
 ** Second
 
-test me
+insecondpart
 
 *** Second Section
 

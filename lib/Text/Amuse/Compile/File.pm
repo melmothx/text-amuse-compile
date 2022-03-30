@@ -672,12 +672,12 @@ sub tex {
     my $template_body = $self->templates->latex;
     my $tokens = $self->_prepare_tex_tokens(%arguments, template_body => $template_body);
 
-    # if there's the ; ;;;#title magic cookie, split the volume.
+    # - if there's the ; ;;;#title magic cookie, split the volume. X
     # - process the template normally. X
     # - split the body between PREAMBLE \begin{document} BODY \end{document} END X
-    # - determine if the indexes and the toc go at the end or at the beginning, looking at the template
+    # - determine if the indexes and the toc go at the end or at the beginning, looking at the template X
     # - split the muse body and create temporary files, adding the headers in the magic comments. X
-    # - process them, but override the wants_toc / wants_indexes depending on previous steps
+    # - process them, but override the wants_toc / wants_indexes depending on previous steps X
     # - discard everything outside the \begin{document} and \end{document} X
     # - concatenate the initial preamble, these bodies, and the end, and return it. X
 
@@ -701,6 +701,15 @@ sub tex {
                 my $vol = $volumes->[$i];
                 my $doc = muse_to_object(join('', @$vol));
                 my $latex = $self->_interpolate_magic_comments($tokens->{format_id}, $doc);
+
+                if (my @raw_indexes = $self->document_indexes) {
+                    my $indexer = Text::Amuse::Compile::Indexer->new(latex_body => $latex,
+                                                                     language_code => $doc->language_code,
+                                                                     logger => sub {}, # silence here
+                                                                     index_specs => \@raw_indexes);
+                    $latex = $indexer->indexed_tex_body;
+                }
+
                 my %partial_tokens = (
                                       options => {  %{ $tokens->{options} } },
                                       safe_options => {  %{ $tokens->{safe_options} } },

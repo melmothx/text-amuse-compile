@@ -20,5 +20,7 @@ Here again.
 <comment>
 INDEX names: *Index*
 again
+Here
+Index
 </comment>
 

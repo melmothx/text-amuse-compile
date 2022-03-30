@@ -69,6 +69,10 @@ my $c = Text::Amuse::Compile->new(tex => 1,
     unlike $body, qr{tableofcontents.*tableofcontents}s, "only one toc found";
     like $body, qr{printindex}s;
     unlike $body, qr{printindex.*printindex}s, "only one index found";
+
+    like $body, qr{\\index\[names\]\{again\}again.*\\index\[names\]\{again\}again},
+      "found the index call";
+
     like $body, qr{
                       \{subtitle\}\{First\sPart
                       .*

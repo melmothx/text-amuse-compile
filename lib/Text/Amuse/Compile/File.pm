@@ -694,8 +694,8 @@ sub tex {
             my $last = scalar $#$volumes;
 
             # check if the template is custom
-            my $toc_i = $$template_body =~ m/latex_body.*tableofcontents/ ? $last : 0;
-            my $idx_i = $$template_body =~ m/printindex.*latex_body/ ? 0 : $last;
+            my $toc_i = $$template_body =~ m/latex_body.*tableofcontents/s ? $last : 0;
+            my $idx_i = $$template_body =~ m/printindex.*latex_body/s ? 0 : $last;
 
             for (my $i = 0; $i <= $last; $i++) {
                 my $vol = $volumes->[$i];

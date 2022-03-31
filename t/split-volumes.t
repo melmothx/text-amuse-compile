@@ -2,7 +2,7 @@
 use utf8;
 use strict;
 use warnings;
-use Test::More tests => 10;
+use Test::More tests => 11;
 use Text::Amuse;
 use Text::Amuse::Compile;
 use Data::Dumper;
@@ -70,7 +70,7 @@ my $c = Text::Amuse::Compile->new(tex => 1,
     like $body, qr{printindex}s;
     unlike $body, qr{printindex.*printindex}s, "only one index found";
 
-    like $body, qr{\\index\[names\]\{again\}again.*\\index\[names\]\{again\}again},
+    like $body, qr{\\index\[names\]\{again\}again.*\\index\[names\]\{again\}again}s,
       "found the index call";
 
     like $body, qr{
@@ -78,11 +78,15 @@ my $c = Text::Amuse::Compile->new(tex => 1,
                       .*
                       tableofcontents
                       .*
+                      \\addcontentsline\{toc\}\{part\}\{Volume\sPrimo\}
+                      .*
                       First
                       .*
                       Second
                       .*
                       \{subtitle\}\{Second\sPart
+                      .*
+                      \\addcontentsline\{toc\}\{part\}\{Volume\sSecondo\}
                       .*
                       Third
                       .*

@@ -1610,6 +1610,24 @@ sub _interpolate_magic_comments {
                 $
                 \s*
                /\\looseness=$1\n/gmx;
+
+    # add to toc
+    $latex =~ s/^
+                $prefix
+                addcontentsline
+                \\\{
+                (toc|lof|lot)
+                \\\}
+                \\\{
+                (part|chapter|section|subsection)
+                \\\}
+                \\\{
+                ($regular)
+                \\\}
+                \x{20}*
+                $
+               /\\addcontentsline{$1}{$2}{$3}/gmx;
+
     return $latex;
 }
 

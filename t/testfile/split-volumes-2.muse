@@ -3,6 +3,9 @@
 
 ; ;;;#subtitle First Part
 
+; :ALL: \addcontentsline{toc}{part}{Volume Primo}
+
+
 ** First
 
 Index me again.
@@ -10,6 +13,8 @@ Index me again.
 *** Second
 
 ; ;;;#subtitle Second Part
+
+; :ALL: \addcontentsline{toc}{part}{Volume Secondo}
 
 ** Third
 

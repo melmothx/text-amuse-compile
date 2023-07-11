@@ -21,6 +21,10 @@ All are read-only instances of L<Text::Amuse::Compile::Fonts::Family>.
 
 =head2 size
 
+=head2 luatex
+
+Boolean if running under luatex
+
 =head2 all_fonts
 
 The instance of L<Text::Amuse::Compile::Fonts> carrying all available
@@ -48,6 +52,10 @@ The other languages as arrayref
 =item bidi
 
 Boolean if bidirectional
+
+=item main_is_rtl
+
+Boolean if main language is RTL
 
 =item is_slide
 

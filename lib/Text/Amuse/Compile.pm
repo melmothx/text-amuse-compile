@@ -246,6 +246,7 @@ sub _build_fonts {
     my %args = (
                 size => $self->selected_font_size || 10,
                 all_fonts => $fonts,
+                luatex => $self->luatex,
                );
     my @all_fonts = $fonts->all_fonts;
     foreach my $type (qw/sans mono serif/) {

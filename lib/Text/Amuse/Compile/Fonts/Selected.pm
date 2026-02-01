@@ -181,28 +181,6 @@ HYPERREF
             }
         }
     }
-    my %cjk = (
-               japanese => 1,
-               korean => 1,
-               chinese => 1,
-              );
-
-    if ($cjk{$main_lang}) {
-        # these will die with luatex. Too bad.
-        #  right now we’re using Song for sans and Kai for sf
-        # https://github.com/adobe-fonts/source-han-serif/releases/download/2.000R/SourceHanSerifCN.zip
-        # https://github.com/adobe-fonts/source-han-sans/releases/download/2.004R/SourceHanSansCN.zip
-        # load all languages with ini files
-        push @out, "\\usepackage{xeCJK}";
-        foreach my $slot (qw/main mono sans/) {
-            # original lang
-            my $font = $self->_font_for_slot_and_lang($slot, $main_lang);
-            push @out, sprintf("\\setCJK${slot}font{%s}[%s]",
-                               $font->babel_font_name,
-                               $font->babel_font_options,
-                              );
-        }
-    }
     if (my $custom = $args{captions}) {
         if (my $base = delete $custom->{_base_}) {
             foreach my $k (sort keys %$custom) {

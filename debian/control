@@ -21,6 +21,12 @@ Build-Depends-Indep: libarchive-zip-perl,
  fonts-antykwa-poltawskiego, fonts-antykwa-torunska, fonts-nowacki,
  fonts-dejavu, fonts-linuxlibertine, fonts-sil-charis, fonts-hosny-amiri,
  fonts-paratype, lmodern, fonts-lmodern, fonts-sil-scheherazade,
+ fonts-source-han-sans-ja,
+ fonts-source-han-sans-ko,
+ fonts-source-han-sans-sc,
+ fonts-source-han-serif-ja,
+ fonts-source-han-serif-ko,
+ fonts-source-han-serif-sc,
  amusewiki-texlive
 Standards-Version: 4.5.1
 Homepage: https://metacpan.org/release/Text-Amuse-Compile

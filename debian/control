@@ -27,6 +27,7 @@ Build-Depends-Indep: libarchive-zip-perl,
  fonts-source-han-serif-ja,
  fonts-source-han-serif-ko,
  fonts-source-han-serif-sc,
+ fonts-freefont-otf,
  amusewiki-texlive
 Standards-Version: 4.5.1
 Homepage: https://metacpan.org/release/Text-Amuse-Compile

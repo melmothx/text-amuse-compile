@@ -28,6 +28,6 @@ jobs:
       - name: set PATH
         run: |
           echo "PATH=/opt/amusewiki-texlive/current/bin/arch:$PATH" >> $GITHUB_ENV
-      - name: prove ${{ matrix.test_file }}
+      - name: "Run tests"
         run: |
           ./fulltest.sh

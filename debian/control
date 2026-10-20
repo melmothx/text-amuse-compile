@@ -28,6 +28,7 @@ Build-Depends-Indep: libarchive-zip-perl,
  fonts-source-han-serif-ko,
  fonts-source-han-serif-sc,
  fonts-freefont-otf,
+ fonts-sil-annapurna,
  amusewiki-texlive
 Standards-Version: 4.5.1
 Homepage: https://metacpan.org/release/Text-Amuse-Compile
@@ -50,6 +51,7 @@ Depends: ${misc:Depends}, ${perl:Depends},
  fonts-antykwa-poltawskiego, fonts-antykwa-torunska, fonts-nowacki,
  fonts-dejavu, fonts-linuxlibertine, fonts-sil-charis, fonts-hosny-amiri,
  fonts-paratype, lmodern, fonts-lmodern, fonts-sil-scheherazade,
+ fonts-sil-annapurna,
  amusewiki-texlive | texlive-full
 Description: Compiler for Text::Amuse
  This module provides the libraries and the executable muse-compile.pl

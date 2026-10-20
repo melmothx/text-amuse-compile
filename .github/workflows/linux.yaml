@@ -19,8 +19,28 @@ jobs:
       - name: check package content
         run: |
           cd ..; for i in *.deb; do dpkg --contents $i; done; true
-  test:
+  testlist:
     runs-on: ubuntu-latest
+    outputs:
+      tests: ${{ steps.tests.outputs.files }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: tests
+        run: |
+          find t/ -type f -name '*.t' | \
+          perl -MJSON::PP -nlE '
+            push @files, $_
+            }{
+            print "files=" . encode_json(\@files)
+          ' >> "$GITHUB_OUTPUT"
+  test:
+    needs: [ testlist, builddeb ]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test_file: ${{ fromJson(needs.testlist.outputs.tests) }}
+
     container:
       image: ghcr.io/melmothx/amusewiki-ci:trixie
     steps:
@@ -28,6 +48,11 @@ jobs:
       - name: set PATH
         run: |
           echo "PATH=/opt/amusewiki-texlive/current/bin/arch:$PATH" >> $GITHUB_ENV
-      - name: "Run tests"
+
+      - name: prove ${{ matrix.test_file }}
         run: |
-          ./fulltest.sh
+          TEST_WITH_LATEX=0 RELEASE_TESTING=1 prove -lv ${{ matrix.test_file }}
+
+      - name: prove ${{ matrix.test_file }} (with latex)
+        run: |
+          TEST_WITH_LATEX=1 RELEASE_TESTING=1 prove -lv ${{ matrix.test_file }}

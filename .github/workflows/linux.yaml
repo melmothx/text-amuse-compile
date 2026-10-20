@@ -1,0 +1,33 @@
+name: linux
+
+on:
+  push:
+    branches: ['*']
+    tags-ignore: ['*']
+  pull_request:
+  
+jobs:
+  builddeb:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/melmothx/amusewiki-ci:trixie
+    steps:
+      - uses: actions/checkout@v5
+      - name: build package
+        run: |
+          debuild -i -us -uc --pre-clean --post-clean -b
+      - name: check package content
+        run: |
+          cd ..; for i in *.deb; do dpkg --contents $i; done; true
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/melmothx/amusewiki-ci:trixie
+    steps:
+      - uses: actions/checkout@v5
+      - name: set PATH
+        run: |
+          echo "PATH=/opt/amusewiki-texlive/current/bin/arch:$PATH" >> $GITHUB_ENV
+      - name: prove ${{ matrix.test_file }}
+        run: |
+          ./fulltest.sh
